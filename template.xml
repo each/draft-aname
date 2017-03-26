@@ -1,0 +1,80 @@
+<?xml version="1.0" ?>
+<!DOCTYPE rfc SYSTEM 'rfc2629.dtd' [
+<!ENTITY pandocMiddle PUBLIC '' 'middle.xml'>
+<!ENTITY pandocBack   PUBLIC '' 'back.xml'>
+<!ENTITY pandocRef2119  PUBLIC '' '../bib/reference.RFC.2119.xml'>
+]>
+<rfc ipr="trust200902" category="std" docName="draft-hunt-dnsop-aname-00">
+<?rfc toc="yes"?>         <!-- generate a table of contents -->
+<?rfc symrefs="yes"?>     <!-- use anchors instead of numbers for references -->
+<?rfc sortrefs="yes" ?>   <!-- alphabetize the references -->
+<?rfc compact="yes" ?>    <!-- conserve vertical whitespace -->
+<?rfc subcompact="no" ?>  <!-- but keep a blank line between list items -->
+<front>
+  <title abbrev="aname">Address-specific DNS Name Redirection (ANAME)</title>
+
+  <author initials="E." surname="Hunt" fullname="Evan Hunt">
+    <organization>ISC</organization> 
+    <address>
+      <postal>
+        <street>950 Charter St</street>
+        <street></street>
+        <city>Redwood City</city> <region>CA</region>
+        <code>94063</code>
+        <country>USA</country>
+      </postal>
+      <email>each@isc.org</email>
+    </address>
+  </author>
+  <author initials="P.D." surname="van Dijk" fullname="Peter van Dijk">
+    <organization>PowerDNS.co B.V.</organization>
+    <address>
+      <postal>
+        <street>Seinstraat 76</street>
+        <city>Hilversum</city>
+        <code>1223 DB</code>
+        <country>The Netherlands</country>
+      </postal>
+      <email>peter.van.dijk@powerdns.com</email>
+    </address>
+  </author>
+
+
+  <date month="Mar" year="2017"/>
+
+  <area>General</area>
+  <keyword>DNS</keyword>
+  <keyword>RR</keyword>
+  <keyword>aname</keyword>
+  <keyword>apex</keyword>
+  <keyword>cname</keyword>
+  <abstract>
+    <t>
+      This document proposes a new DNS RR type ANAME, which provides
+      similar functionality to CNAME but is specific to address queries
+      (type A and AAAA), and can coexist with other record types at a zone
+      apex. This allows zone owners to redirect queries for apex domain
+      names without violating specifications that require CNAME not
+      to coexist with other RR types such as NS and SOA.
+    </t>
+  </abstract>
+</front>
+
+<middle>
+&pandocMiddle;
+</middle>
+
+<back>
+  <references title="Normative References">
+    <?rfc include="bib/reference.RFC.1033.xml"?>
+    <?rfc include="bib/reference.RFC.1034.xml"?>
+    <?rfc include="bib/reference.RFC.3597.xml"?>
+    <?rfc include="bib/reference.RFC.4034.xml"?>
+  </references>
+  <references title="Informative References">
+    <?rfc include="bib/reference.RFC.2119.xml"?>
+    <?rfc include="bib/reference.RFC.6672.xml"?>
+    <?rfc include="bib/reference.RFC.7871.xml"?>
+  </references>
+</back>
+</rfc>

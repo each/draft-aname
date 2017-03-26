@@ -1,0 +1,7 @@
+# draft-aname
+work on a draft to standardize ANAME/ALIAS records to allow CNAME-like records at the zone apex
+
+The draft text should be edited in "middle.mkd". The abstract and author
+info can also be edited in "template.xml". I'll periodically rebuild
+and update the txt and xml versions of the draft using pandoc2rfc; those
+should not be edited here.

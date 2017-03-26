@@ -1,0 +1,153 @@
+# Introduction
+  
+Websites hosted by content distribution networks are often served by
+multiple IP addresses handling different geographic areas. In some cases,
+the initial query for a domain name returns a CNAME record whose \<target\>
+is a name served by the CDN, which ultimately resolves to a different
+answer depending on the client's address.
+
+This method works with ordinary DNS nodes (for example, "www.example.com")
+but fails at zone apex nodes (such as "example.com"), because CNAME
+records are forbidden by [](#RFC1033) and [](#RFC1034) to coexist with
+other RR types such as SOA, NS, DNSKEY, MX, TXT/SPF, etc. ([](#RFC4034)
+specifies exceptions for some RR types such as NSEC and RRSIG, which are
+automatically returned alongside CNAME responses and are not generally
+queried for directly.  Such exceptions are not realistic for most other
+query types; if a recursive resolver with a cached CNAME received a query
+for MX or DNSKEY, it would follow the CNAME, and would not find the correct
+answer.)
+
+This document proposes a new RR type "ANAME", which provides similar
+functionality to CNAME but only for address queries (type A and AAAA).
+The ANAME record can be present at any DNS node, and can coexist with
+other RR types at a zone apex.
+
+## Reserved Words
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+document are to be interpreted as described in [](#RFC2119).
+    
+# The ANAME RR Type
+
+This document specifies a new DNS resource record type ANAME, with RR
+code point [TBD].  The presentation format is identical to that of CNAME
+[](#RFC1033).  The wire format is also identical to CNAME, except that name
+compression is not permitted in ANAME RDATA per [](#RFC3597).
+
+No more than one ANAME resource record can be present at any DNS node.
+
+# Authoritative Server Behavior
+
+When an ANAME record is present at a DNS node and a query is received by an
+authoritative server for type A or AAAA, the authoritative server returns
+the ANAME RRset in the answer section. For the benefit of querying resolvers
+that do not implement ANAME, the authoritative server also returns address
+records as described below.  (This is similar to the synthesized CNAME
+record included with DNAME [](#RFC6672).)
+
+## Address records returned with ANAME
+
+If the original query is for type A, and an A RRset exists at the
+ANAME \<target\>, then that A RRset (with \<owner\> changed to match that
+of the ANAME RR), MUST be appended to the answer section after the ANAME
+RRset.  If an AAAA RRset eixsts at the ANAME \<target\>, then it MAY be
+appended to the additional section (again, with \<owner\> changed to match
+that of the ANAME RR).
+
+Similarly, if the original query was for type AAAA, and an AAAA RRset
+exists at the ANAME \<target\>, then it is appended to the answer section,
+and if an A RRset also exists at the ANAME \<target\> then it MAY be appended
+to the additional section.
+
+How and when an authoritative server resolves the A and AAAA responses from
+the ANAME \<target\> (when it is not itself authoritative for \<target\>) is
+unspecified. If an authoritative server is capable of recursion, then it
+MAY perform recursion itself, or it MAY send A and AAAA queries to an
+external resolver.  It MAY resolve A and AAAA when loading the zone and
+cache the responses (in which case it MUST periodically refresh them when
+their TTLs expire), or it MAY delay resolution of the A and AAAA at the
+ANAME \<target\> until an address query is received for the ANAME
+\<owner\>. (In either case, for peformance reasons, it is RECOMMENDED
+that the authoritative server cache the A and AAAA responses.)
+
+If the original query is for type ANAME, A and AAAA records MAY be returned
+in the additional section.
+
+The TTL for the A and/or AAAA RRsets MUST be set to the lesser of the
+ANAME TTL and the TTL of the A and/or AAAA RRsets at the ANAME \<target\>.
+The TTL of cached A and/or AAAA RRsets MUST count down, just as they do
+in a resolver cache.
+
+If an A or AAAA RRset is included in the answer section which was 
+resolved from a source for which the server is not authoritative, then
+the AA ("authoritative answer") bit in the DNS response header MUST be
+clear.
+
+## Coexistence with other types
+
+If the zone is configured with an A RRset at the same node as ANAME,
+then the ANAME MUST NOT be returned for queries of type A.  Similarly,
+if ANAME coexists with AAAA, then ANAME MUST NOT be returned for queries
+of type AAAA. If ANAME coexists with both A and AAAA RRsets, then ANAME
+is never returned. If a zone is configured with all three of ANAME, A, and
+AAAA at the same node, the server MAY treat this as an error condition
+and reject the zone.
+
+ANAME can freely coexist with all other RR types.
+
+## DNSSEC signing
+
+If the zone is DNSSEC signed, and if the server has access to the private
+key, then the A and AAAA RRsets SHOULD be signed. Note that validating
+resolvers which do not yet implement ANAME will be unable to validate A and
+AAAA responses included with an ANAME response. Consequently, deployment of
+ANAME in signed zones when the private key is not accessible to the server
+is not recommended.
+
+# Recursive Server Behavior
+
+When a recursive resolver sends a query of type A or AAAA and receives a
+response with an ANAME RRset in the answer section, it MUST re-query for
+the ANAME \<target\>, disregarding any addresses that were included with the
+response.  This is necessary because, in some cases, the final address will
+be dependent on network topology and other considerations, and the resolver
+will find a different answer than the authoritative server did. If
+configured to do so, the resolver MAY include an EDNS CLIENT-SUBNET option
+when re-querying for the ANAME \<target\> and cache the response accordingly
+(see [](#RFC7871)).
+
+# Operational Considerations
+
+When a zone containing ANAME records is transferred to a secondary
+server, the ANAME records are transferred but the A or AAAA records
+retrieved from the ANAME \<target\> are not. If the primary server implements
+ANAME but the secondary server does not, then the two will return different
+answers for address queries. It is therefore recommended that ANAME not be
+deployed in a zone unless all of the authoritative servers for that zone
+implement ANAME.
+
+# Security Considerations
+
+An authoritative server which implements ANAME must resolve address
+queries on behalf its clients, either internally or by querying an
+external resolver. Resolution takes place regardless of whether
+the client would ordinaily be permitted by local policy to send
+recursive queries.
+
+When a resolver that does not understand ANAME receives a response
+containing A or AAAA records with \<owner\> rewritten to match that of the
+ANAME RR, this may bypass security based on local policy limiting access to
+the original ANAME \<target\>.
+ 
+A validating resolver that does not understand ANAME will not be able to
+validate A and AAAA records unless they are signed.
+
+# IANA Considerations
+
+IANA is requested to allocate a DNS RR type number for the ANAME RR type.
+
+# Acknowledgments
+
+Thanks to Mukund Sivaraman, Ray Bellis, and Mark Andrews for discussion
+and feedback.
