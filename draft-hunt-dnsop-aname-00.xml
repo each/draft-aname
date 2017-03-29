@@ -18,7 +18,6 @@
     <address>
       <postal>
         <street>950 Charter St</street>
-        <street></street>
         <city>Redwood City</city> <region>CA</region>
         <code>94063</code>
         <country>USA</country>
@@ -27,7 +26,7 @@
     </address>
   </author>
   <author initials="P.D." surname="van Dijk" fullname="Peter van Dijk">
-    <organization>PowerDNS.co B.V.</organization>
+    <organization>PowerDNS.COM B.V.</organization>
     <address>
       <postal>
         <street>Seinstraat 76</street>
@@ -38,7 +37,18 @@
       <email>peter.van.dijk@powerdns.com</email>
     </address>
   </author>
-
+  <author initials="A." surname="Eden" fullname="Anthony Eden">
+    <organization>DNSimple</organization>
+    <address>
+      <postal>
+	<street></street>
+	<city>Boston</city> <region>MA</region>
+	<country>USA</country>
+      </postal>
+      <email>anthony.eden@dnsimple.com</email>
+      <uri>https://dnsimple.com/</uri>
+    </address>
+  </author>
 
   <date month="Mar" year="2017"/>
 
