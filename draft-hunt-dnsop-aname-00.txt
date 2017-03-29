@@ -5,8 +5,8 @@
 Network Working Group                                            E. Hunt
 Internet-Draft                                                       ISC
 Intended status: Standards Track                             P. van Dijk
-Expires: September 26, 2017                             PowerDNS.co B.V.
-                                                          March 25, 2017
+Expires: September 30, 2017                             PowerDNS.co B.V.
+                                                          March 29, 2017
 
 
              Address-specific DNS Name Redirection (ANAME)
@@ -36,7 +36,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on September 26, 2017.
+   This Internet-Draft will expire on September 30, 2017.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Hunt & van Dijk        Expires September 26, 2017               [Page 1]
+Hunt & van Dijk        Expires September 30, 2017               [Page 1]
 
 Internet-Draft                    aname                       March 2017
 
@@ -70,13 +70,13 @@ Table of Contents
      3.1.  Address records returned with ANAME . . . . . . . . . . .   3
      3.2.  Coexistence with other types  . . . . . . . . . . . . . .   4
      3.3.  DNSSEC signing  . . . . . . . . . . . . . . . . . . . . .   4
-   4.  Recursive Server Behavior . . . . . . . . . . . . . . . . . .   4
+   4.  Recursive Server Behavior . . . . . . . . . . . . . . . . . .   5
    5.  Operational Considerations  . . . . . . . . . . . . . . . . .   5
    6.  Security Considerations . . . . . . . . . . . . . . . . . . .   5
-   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   5
-   8.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .   5
-   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   5
-     9.1.  Normative References  . . . . . . . . . . . . . . . . . .   5
+   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   6
+   8.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .   6
+   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   6
+     9.1.  Normative References  . . . . . . . . . . . . . . . . . .   6
      9.2.  Informative References  . . . . . . . . . . . . . . . . .   6
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   6
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Hunt & van Dijk        Expires September 26, 2017               [Page 2]
+Hunt & van Dijk        Expires September 30, 2017               [Page 2]
 
 Internet-Draft                    aname                       March 2017
 
@@ -165,7 +165,7 @@ Internet-Draft                    aname                       March 2017
 
 
 
-Hunt & van Dijk        Expires September 26, 2017               [Page 3]
+Hunt & van Dijk        Expires September 30, 2017               [Page 3]
 
 Internet-Draft                    aname                       March 2017
 
@@ -189,24 +189,52 @@ Internet-Draft                    aname                       March 2017
 
 3.2.  Coexistence with other types
 
-   If the zone is configured with an A RRset at the same node as ANAME,
-   then the ANAME MUST NOT be returned for queries of type A.
-   Similarly, if ANAME coexists with AAAA, then ANAME MUST NOT be
-   returned for queries of type AAAA.  If ANAME coexists with both A and
-   AAAA RRsets, then ANAME is never returned.  If a zone is configured
-   with all three of ANAME, A, and AAAA at the same node, the server MAY
-   treat this as an error condition and reject the zone.
+   If the zone is configured with an A RRset with the same owner as
+   ANAME, then the ANAME MUST NOT be returned for queries of type A.
 
-   ANAME can freely coexist with all other RR types.
+   Similarly, if ANAME coexists with AAAA, then ANAME MUST NOT be
+   returned for queries of type AAAA.
+
+   If ANAME coexists with both A and AAAA RRsets, then ANAME MUST NOT be
+   returned under any circumstances.  If a zone is configured with all
+   three of ANAME, A, and AAAA at the same node, the server MAY treat
+   this as an error condition and reject the zone.
+
+   ANAME MUST NOT coexist with CNAME, or any other RR type that
+   restricts the types with which it can itself coexist.
+
+   ANAME can freely coexist at the same owner name with any other RR
+   type.
 
 3.3.  DNSSEC signing
 
    If the zone is DNSSEC signed, and if the server has access to the
-   private key, then the A and AAAA RRsets SHOULD be signed.  Note that
-   validating resolvers which do not yet implement ANAME will be unable
-   to validate A and AAAA responses included with an ANAME response.
-   Consequently, deployment of ANAME in signed zones when the private
-   key is not accessible to the server is not recommended.
+   private key, then the A and AAAA RRsets SHOULD be signed, either in
+   advance when populating the A/AAAA answers for ANAME records, or "on
+   the fly" when responding to a query.
+
+   Note that validating resolvers which do not yet implement ANAME will
+   not be able to validate the A and AAAA responses included with an
+   ANAME response, unless those responses are validly signed by a DNSKEY
+   at the apex of the zone in which the ANAME resides.  Passing along
+
+
+
+
+Hunt & van Dijk        Expires September 30, 2017               [Page 4]
+
+Internet-Draft                    aname                       March 2017
+
+
+   the RRSIGs associated with the original A and AAAA RRsets from the
+   ANAME <target> will not be sufficient for DNSSEC validation.
+
+   This implies that any authoritative server providing ANAME responses
+   in a signed zone MUST have access to the zone signing key for that
+   zone.
+
+   Deployment of ANAME in signed zones where the private key is not
+   accessible to the server is therefore NOT RECOMMENDED.
 
 4.  Recursive Server Behavior
 
@@ -218,14 +246,6 @@ Internet-Draft                    aname                       March 2017
    other considerations, and the resolver will find a different answer
    than the authoritative server did.  If configured to do so, the
    resolver MAY include an EDNS CLIENT-SUBNET option when re-querying
-
-
-
-Hunt & van Dijk        Expires September 26, 2017               [Page 4]
-
-Internet-Draft                    aname                       March 2017
-
-
    for the ANAME <target> and cache the response accordingly (see
    [RFC7871]).
 
@@ -255,6 +275,13 @@ Internet-Draft                    aname                       March 2017
    A validating resolver that does not understand ANAME will not be able
    to validate A and AAAA records unless they are signed.
 
+
+
+Hunt & van Dijk        Expires September 30, 2017               [Page 5]
+
+Internet-Draft                    aname                       March 2017
+
+
 7.  IANA Considerations
 
    IANA is requested to allocate a DNS RR type number for the ANAME RR
@@ -274,13 +301,6 @@ Internet-Draft                    aname                       March 2017
 
    [RFC1034]  Mockapetris, P., "Domain names - concepts and facilities",
               STD 13, RFC 1034, November 1987.
-
-
-
-Hunt & van Dijk        Expires September 26, 2017               [Page 5]
-
-Internet-Draft                    aname                       March 2017
-
 
    [RFC3597]  Gustafsson, A., "Handling of Unknown DNS Resource Record
               (RR) Types", RFC 3597, September 2003.
@@ -303,6 +323,20 @@ Internet-Draft                    aname                       March 2017
               <http://www.rfc-editor.org/info/rfc7871>.
 
 Authors' Addresses
+
+
+
+
+
+
+
+
+
+
+Hunt & van Dijk        Expires September 30, 2017               [Page 6]
+
+Internet-Draft                    aname                       March 2017
+
 
    Evan Hunt
    ISC
@@ -333,4 +367,26 @@ Authors' Addresses
 
 
 
-Hunt & van Dijk        Expires September 26, 2017               [Page 6]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt & van Dijk        Expires September 30, 2017               [Page 7]
