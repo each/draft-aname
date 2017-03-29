@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <!DOCTYPE rfc SYSTEM 'rfc2629.dtd' [
+<!ENTITY pandocAbstract PUBLIC '' 'abstract.xml'>
 <!ENTITY pandocMiddle PUBLIC '' 'middle.xml'>
 <!ENTITY pandocBack   PUBLIC '' 'back.xml'>
-<!ENTITY pandocRef2119  PUBLIC '' '../bib/reference.RFC.2119.xml'>
 ]>
 <rfc ipr="trust200902" category="std" docName="draft-hunt-dnsop-aname-00">
 <?rfc toc="yes"?>         <!-- generate a table of contents -->
@@ -59,14 +59,7 @@
   <keyword>apex</keyword>
   <keyword>cname</keyword>
   <abstract>
-    <t>
-      This document proposes a new DNS RR type ANAME, which provides
-      similar functionality to CNAME but is specific to address queries
-      (type A and AAAA), and can coexist with other record types at a zone
-      apex. This allows zone owners to redirect queries for apex domain
-      names without violating specifications that require CNAME not
-      to coexist with other RR types such as NS and SOA.
-    </t>
+    &pandocAbstract;
   </abstract>
 </front>
 
