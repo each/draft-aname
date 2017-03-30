@@ -34,9 +34,21 @@ way to publish content at a zone apex is to to place A and/or AAAA records
 at that node.  THe flexibility afforded by CNAME is not available.
 
 This document proposes a new RR type "ANAME", which provides similar
-functionality to CNAME, but only for address queries (type A and AAAA).
-The ANAME record can be present at any DNS node, and can coexist with
-most other RR types, enabling it to be present at a zone apex.
+functionality to CNAME, but only for address queries (i.e., for type A or
+AAAA).  The ANAME record can be present at any DNS node, and can coexist
+with most other RR types, enabling it to be present at a zone apex.
+Authoritative servers configured with ANAME records will answer address
+queries for the ANAME owner with addresses found at the ANAME's target, and
+also with the ANAME itself. Recursive resolvers which understand ANAME can
+re-query for the ANAME target, just as if they had received a CNAME
+response.
+
+## Terminology
+
+"Address type" refers to a DNS RR type that encodes a network address.
+Currently the set of address types consists of A and AAAA.
+
+"Address query" refers to a DNS query for any address type.
 
 ## Reserved Words
 
@@ -62,46 +74,70 @@ No more than one ANAME resource record can be present at any DNS node.
 
 When an ANAME record is present at a DNS node and a query is received by an
 authoritative server for type A or AAAA, the authoritative server returns
-the ANAME RRset in the answer section. For the benefit of querying resolvers
-that do not implement ANAME, the authoritative server also returns address
-records as described below.  (This is similar to the synthesized CNAME
-record included with DNAME [](#RFC6672).)
+the ANAME RRset in the answer section.
+
+For the benefit of querying resolvers that do not implement ANAME, the
+authoritative server also returns address records as described below.
+(This is similar to the synthesized CNAME record included with DNAME
+[](#RFC6672).)
+
+Authoritative servers implementing ANAME MUST be equipped resolve the ANAME
+\<target\> on the querying resolver's behalf, either by sending queries to
+an external recursive resolver, or by implementing recursive resolution
+logic internally.
+
+If the ANAME \<target\> returns a chaining response (i.e., CNAME or DNAME),
+then the authoritative server MUST follow it until it is able to resolve an
+address response.
 
 ## Address records returned with ANAME
 
-[TODO: Add a note on the need for flattening.]
-
-If the original query is for type A, and an A RRset exists at the
+If the original query is for type A, and an RRset of type A exists at the
 ANAME \<target\>, then that A RRset (with \<owner\> changed to match that
 of the ANAME RR), MUST be appended to the answer section after the ANAME
-RRset.  If an AAAA RRset eixsts at the ANAME \<target\>, then it MAY be
-appended to the additional section (again, with \<owner\> changed to match
-that of the ANAME RR).
+RRset.  If an AAAA RRset is also known to exist at the ANAME \<target\>,
+then the AAAA RRset MAY be appended to the additional section (again, with
+\<owner\> changed to match that of the ANAME RR).
 
 Similarly, if the original query was for type AAAA, and an AAAA RRset
 exists at the ANAME \<target\>, then it is appended to the answer section,
 and if an A RRset also exists at the ANAME \<target\> then it MAY be appended
 to the additional section.
 
-How and when an authoritative server resolves the A and AAAA responses from
-the ANAME \<target\> (when it is not itself authoritative for \<target\>) is
-unspecified. If an authoritative server is capable of recursion, then it
-MAY perform recursion itself, or it MAY send A and AAAA queries to an
-external resolver.  It MAY resolve A and AAAA when loading the zone and
-cache the responses (in which case it MUST periodically refresh them when
-their TTLs expire), or it MAY delay resolution of the A and AAAA at the
-ANAME \<target\> until an address query is received for the ANAME
-\<owner\>. (In either case, for peformance reasons, it is RECOMMENDED
-that the authoritative server cache the A and AAAA responses.)
-[TODO: Add a sentence about ECS.]
-
 If the original query is for type ANAME, A and AAAA records MAY be returned
 in the additional section.
 
-The TTL for the A and/or AAAA RRsets MUST be set to the lesser of the
-ANAME TTL and the TTL of the A and/or AAAA RRsets at the ANAME \<target\>.
-The TTL of cached A and/or AAAA RRsets MUST count down, just as they would
-do in a resolver cache.
+How and when an authoritative server resolves the A and AAAA responses from
+the ANAME \<target\> (when it is not itself authoritative for \<target\>) is
+unspecified. If the authoritative server is capable of performing recursive
+resolution, then it MAY resolve the query itself, or it MAY send address
+queries to an external resolver.  It MAY send address queries to the ANAME
+\<target\> when loading the zone and store the responses locally, or it MAY
+delay resolution of the address records until a query is received for the
+ANAME \<owner\>. In either case, for performance reasons, it is RECOMMENDED
+that address records be cached locally by the authoritative server.
+
+Address records cached locally MUST have a limited TTL.  The initial TTL
+for locally-cached address records MUST be set to the lesser of the ANAME
+TTL and the TTL of the address records retrieved from the ANAME \<target\>.
+The local TTL MUST count down, just as it would in a conventional resolver
+cache.  Records with an expired TTL MUST NOT be returned until refreshed
+with a new query to the ANAME \<target\>.
+
+If configured to do so, then the authoritative server MAY, when sending
+queries to the ANAME \<target\>, include an EDNS CLIENT-SUBNET (ECS)
+option [](#RFC7871), either forwarding an ECS option that was sent
+to it by the querying resolver, or generating a new ECS option from the
+querying resolver's address.  If a response from the ANAME \<target\>
+includes an ECS option with a SCOPE PREFIX-LENGTH greater than zero, the
+response SHOULD be cached with the ECS data and should only be used in
+response to queries from the same client subnet.
+
+[REMOVE BEFORE PUBLICATION: Some suggestions have been made about signaling
+ANAME capability via an EDNS option. If a query indicated that the client
+understood ANAME, then the authority could respond differently. This may
+turn out to be necessary, but I want to hold off on specifying it until
+we're sure that it is. - each]
 
 ## Coexistence with other types
 
@@ -145,11 +181,16 @@ for DNSSEC validation.
 
 This implies that every authoritative server providing ANAME responses
 in a signed zone MUST have access to the zone signing key for that zone.
-
 Deployment of ANAME in signed zones where the private key is not
 accessible to all authoritative servers is NOT RECOMMENDED.
 
-[TODO: Add a paragraph on NSEC/NSEC3]
+When ANAME is present in a signed DNS node, the type bit map in the NSEC
+[](#RFC4034) or NSEC3 [](#RFC5155) record for that node MUST include at
+least one of A and AAAA as well as ANAME. This is for the benefit of
+validating resolvers not implementing ANAME which may use a signed proof
+of nonexistence for type A and AAAA to prevent address queries from being
+resolved. The type bit map SHOULD only include address types which are
+known to exist at the ANAME \<target\>.
 
 # Recursive Server Behavior
 
