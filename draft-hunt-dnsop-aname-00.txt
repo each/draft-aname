@@ -353,11 +353,15 @@ Internet-Draft                    aname                       March 2017
 
    When a recursive resolver sends a query of type A or AAAA and
    receives a response with an ANAME RRset in the answer section, it
-   MUST re-query for the ANAME <target>, disregarding any addresses that
-   were included with the response.  This is necessary because, in some
-   cases, the address received will be dependent on network topology and
-   other considerations, and the resolver will find a different answer
-   than the authoritative server did.
+   MUST re-query for the ANAME <target>.  This is necessary because, in
+   some cases, the address received will be dependent on network
+   topology and other considerations, and the resolver will find a
+   different answer than the authoritative server did.
+
+   If resolution fails -- for example, due to the local resolver being
+   nonfunctional or the ANAME <target> zone being unreachable -- then
+   the resolver MAY use the address records that were included in the
+   authoritative response as a fallback.
 
    If configured to do so, the resolver MAY include an EDNS CLIENT-
    SUBNET option when re-querying for the ANAME <target> and cache the
@@ -381,10 +385,6 @@ Internet-Draft                    aname                       March 2017
    regardless of whether the client would ordinaily have been permitted
    by local policy to send recursive queries.
 
-   When a resolver that does not understand ANAME receives a response
-   containing A or AAAA records with <owner> rewritten to match that of
-   the ANAME RR, this may bypass security mechanisms based on local
-   policy limiting access to the original ANAME <target>.
 
 
 
@@ -393,6 +393,11 @@ Hunt, et al.             Expires October 1, 2017                [Page 7]
 
 Internet-Draft                    aname                       March 2017
 
+
+   When a resolver that does not understand ANAME receives a response
+   containing A or AAAA records with <owner> rewritten to match that of
+   the ANAME RR, this may bypass security mechanisms based on local
+   policy limiting access to the original ANAME <target>.
 
    A validating resolver that does not understand ANAME will not be able
    to validate A and AAAA records unless they are signed.
@@ -437,11 +442,6 @@ Internet-Draft                    aname                       March 2017
               Kumari, "Client Subnet in DNS Queries", RFC 7871,
               DOI 10.17487/RFC7871, May 2016,
               <http://www.rfc-editor.org/info/rfc7871>.
-
-
-
-
-
 
 
 

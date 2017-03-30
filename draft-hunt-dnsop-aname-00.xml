@@ -375,11 +375,16 @@
   <t>
     When a recursive resolver sends a query of type A or AAAA and
     receives a response with an ANAME RRset in the answer section, it
-    MUST re-query for the ANAME &lt;target&gt;, disregarding any
-    addresses that were included with the response. This is necessary
+    MUST re-query for the ANAME &lt;target&gt;. This is necessary
     because, in some cases, the address received will be dependent on
     network topology and other considerations, and the resolver will
     find a different answer than the authoritative server did.
+  </t>
+  <t>
+    If resolution fails -- for example, due to the local resolver being
+    nonfunctional or the ANAME &lt;target&gt; zone being unreachable --
+    then the resolver MAY use the address records that were included in
+    the authoritative response as a fallback.
   </t>
   <t>
     If configured to do so, the resolver MAY include an EDNS
