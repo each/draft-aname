@@ -172,10 +172,16 @@ ANAME can freely coexist at the same owner name with any other RR type.
 
 ## DNSSEC signing
 
-If the zone is DNSSEC signed, and if the server has access to the private
-key, then the A and AAAA RRsets MUST be signed, either in advance when
-populating the A/AAAA answers for ANAME records, or "on the fly" when
-responding to a query.
+If the zone in which the ANAME resides is DNSSEC signed, and if the server
+has access to the private zone-signing key, then the A and AAAA RRsets MUST
+be signed, either in advance when populating the A/AAAA answers for the
+ANAME records, or "on the fly" when responding to a query.
+
+If the server does not have access to the private zone-signing key then it
+MAY return unsigned address records, but this is NOT RECOMMENDED unless
+every resolver with access to the zone is known to support ANAME (as might
+be the case in a split-horizon deployment where ANAME records are only
+served to an internal network with its own resolvers).
 
 Validating resolvers which do not yet implement ANAME will not be able to
 validate the A and AAAA responses included with an ANAME response unless
@@ -184,15 +190,21 @@ which the ANAME resides.  Passing along the RRSIGs associated with the
 original A and AAAA RRsets from the ANAME \<target\> will not be sufficient
 for DNSSEC validation.
 
-[REMOVE BEFORE PUBLICATION: Allowing expansion of ANAME records on \*XFR
-would also allow signing to take place on the master server only, or in a
-"bump-in-the-wire" signer.  If we add that as an optional feature, this
-text will need to be updated.]
+Implementers MAY allow address records associated with the ANAME to be
+populated and signed by the primary server, then sent along with their
+RRSIGs to secondaries via zone transfer. In this case, the master server
+MUST refresh the address records when their TTLs expire and MUST inform
+secondary servers via DNS NOTIFY that they need to refresh the zone. The
+secondary MUST store address information and associated RRSIGs supplied via
+zone transfer in cache such that its TTL will count down and force a
+refresh query.
 
-This implies that every authoritative server providing ANAME responses
-in a signed zone MUST have access to the zone signing key for that zone.
-Deployment of ANAME in signed zones where the private key is not
-accessible to all authoritative servers is NOT RECOMMENDED.
+If this address record expansion and signing during zone transfer is not
+supported, then every authoritative server providing ANAME responses
+in a signed zone SHOULD have access to the private zone-signing key for
+that zone.  Deployment of ANAME in signed zones where address records
+cannot be signed due to lack of access to the private zone-signing key is
+NOT RECOMMENDED.
 
 When ANAME is present in a signed DNS node, the type bit map in the NSEC
 [](#RFC4034) or NSEC3 [](#RFC5155) record for that node MUST include at
