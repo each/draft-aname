@@ -72,16 +72,16 @@ Table of Contents
    3.  Authoritative Server Behavior . . . . . . . . . . . . . . . .   4
      3.1.  Address records returned with ANAME . . . . . . . . . . .   4
      3.2.  Coexistence with other types  . . . . . . . . . . . . . .   5
-     3.3.  DNSSEC signing  . . . . . . . . . . . . . . . . . . . . .   6
-   4.  Recursive Server Behavior . . . . . . . . . . . . . . . . . .   7
+     3.3.  DNSSEC signing  . . . . . . . . . . . . . . . . . . . . .   5
+   4.  Recursive Server Behavior . . . . . . . . . . . . . . . . . .   6
    5.  Operational Considerations  . . . . . . . . . . . . . . . . .   7
    6.  Security Considerations . . . . . . . . . . . . . . . . . . .   7
-   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   8
+   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   7
    8.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .   8
    9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   8
      9.1.  Normative References  . . . . . . . . . . . . . . . . . .   8
      9.2.  Informative References  . . . . . . . . . . . . . . . . .   8
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   9
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   8
 
 1.  Introduction
 
@@ -254,36 +254,16 @@ Internet-Draft                    aname                       March 2017
 
 3.2.  Coexistence with other types
 
-   If the zone is configured with an A RRset with the same owner as
-   ANAME, then the ANAME MUST NOT be returned for queries of type A.
+   ANAME MUST NOT coexist with CNAME or any other RR type that restricts
+   the types with which it can itself coexist.
 
-   Similarly, if ANAME coexists with AAAA, then ANAME MUST NOT be
-   returned for queries of type AAAA.
-
-   If ANAME coexists with both A and AAAA RRsets, then the ANAME MUST
-   NOT be returned under any circumstances.  If a zone is configured
-   with all three of ANAME, A, and AAAA at the same node, the server MAY
-   treat this as an error condition and reject the zone.
-
-   [REMOVE BEFORE PUBLICATION: I wrote the above thinking that someone
-   might want to use ANAME for A or AAAA but not both.  Existing
-   implementations apparently handle coexistence with A and AAAA
-   differently.  Some simply add the locally defined A/AAAA to the
-   expanded ANAME response.  A suggestion has been made that this could
-   be used as a fallback in the event of resolution failure, or a
-   suggestion about address preference.  We'll need to settle this.  -
-   each]
-
-
-
-
-Hunt, et al.             Expires October 1, 2017                [Page 5]
-
-Internet-Draft                    aname                       March 2017
-
-
-   ANAME MUST NOT coexist with CNAME, or any other RR type that
-   restricts the types with which it can itself coexist.
+   If the zone is configured with an A or AAAA RRset at the same DNS
+   node as ANAME, then the server MAY use that RRset as a pre-configured
+   fallback in the event that resolving the ANAME <target> fails or if
+   the address type is not present at the ANAME <target>.  (For example,
+   if the ANAME <target> returns NOERROR/NODATA for a query of type
+   AAAA, but the ANAME <owner> contains an AAAA RRset, then that RRset
+   MAY be returned to the querying resolver.)
 
    ANAME can freely coexist at the same owner name with any other RR
    type.
@@ -293,6 +273,15 @@ Internet-Draft                    aname                       March 2017
    If the zone in which the ANAME resides is DNSSEC signed, and if the
    server has access to the private zone-signing key, then the A and
    AAAA RRsets MUST be signed, either in advance when populating the A/
+
+
+
+
+Hunt, et al.             Expires October 1, 2017                [Page 5]
+
+Internet-Draft                    aname                       March 2017
+
+
    AAAA answers for the ANAME records, or "on the fly" when responding
    to a query.
 
@@ -330,14 +319,6 @@ Internet-Draft                    aname                       March 2017
    NSEC [RFC4034] or NSEC3 [RFC5155] record for that node MUST include
    at least one of A and AAAA as well as ANAME.  This is for the benefit
    of validating resolvers not implementing ANAME which may use a signed
-
-
-
-Hunt, et al.             Expires October 1, 2017                [Page 6]
-
-Internet-Draft                    aname                       March 2017
-
-
    proof of nonexistence for type A and AAAA to prevent address queries
    from being resolved.  The type bit map SHOULD only include address
    types which are known to exist at the ANAME <target>.
@@ -348,6 +329,15 @@ Internet-Draft                    aname                       March 2017
    receives a response with an ANAME RRset in the answer section, it
    MUST re-query for the ANAME <target>.  This is necessary because, in
    some cases, the address received will be dependent on network
+
+
+
+
+Hunt, et al.             Expires October 1, 2017                [Page 6]
+
+Internet-Draft                    aname                       March 2017
+
+
    topology and other considerations, and the resolver will find a
    different answer than the authoritative server did.
 
@@ -386,14 +376,6 @@ Internet-Draft                    aname                       March 2017
    the ANAME RR, this may bypass security mechanisms based on local
    policy limiting access to the original ANAME <target>.
 
-
-
-
-Hunt, et al.             Expires October 1, 2017                [Page 7]
-
-Internet-Draft                    aname                       March 2017
-
-
    A validating resolver that does not understand ANAME will not be able
    to validate A and AAAA records unless they are signed.
 
@@ -401,6 +383,16 @@ Internet-Draft                    aname                       March 2017
 
    IANA is requested to allocate a DNS RR type code for the ANAME RR
    type.
+
+
+
+
+
+
+Hunt, et al.             Expires October 1, 2017                [Page 7]
+
+Internet-Draft                    aname                       March 2017
+
 
 8.  Acknowledgments
 
@@ -438,18 +430,6 @@ Internet-Draft                    aname                       March 2017
               DOI 10.17487/RFC7871, May 2016,
               <http://www.rfc-editor.org/info/rfc7871>.
 
-
-
-
-
-
-
-
-Hunt, et al.             Expires October 1, 2017                [Page 8]
-
-Internet-Draft                    aname                       March 2017
-
-
 Authors' Addresses
 
    Evan Hunt
@@ -459,6 +439,15 @@ Authors' Addresses
    USA
 
    Email: each@isc.org
+
+
+
+
+
+
+Hunt, et al.             Expires October 1, 2017                [Page 8]
+
+Internet-Draft                    aname                       March 2017
 
 
    Peter van Dijk
@@ -477,6 +466,17 @@ Authors' Addresses
 
    Email: anthony.eden@dnsimple.com
    URI:   https://dnsimple.com/
+
+
+
+
+
+
+
+
+
+
+
 
 
 

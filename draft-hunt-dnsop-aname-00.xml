@@ -275,32 +275,18 @@
   <section title="Coexistence with other types" anchor="coexistence-with-other-types">
     
     <t>
-      If the zone is configured with an A RRset with the same owner as
-      ANAME, then the ANAME MUST NOT be returned for queries of type A.
-    </t>
-    <t>
-      Similarly, if ANAME coexists with AAAA, then ANAME MUST NOT be
-      returned for queries of type AAAA.
-    </t>
-    <t>
-      If ANAME coexists with both A and AAAA RRsets, then the ANAME MUST
-      NOT be returned under any circumstances. If a zone is configured
-      with all three of ANAME, A, and AAAA at the same node, the server
-      MAY treat this as an error condition and reject the zone.
-    </t>
-    <t>
-      [REMOVE BEFORE PUBLICATION: I wrote the above thinking that
-      someone might want to use ANAME for A or AAAA but not both.
-      Existing implementations apparently handle coexistence with A and
-      AAAA differently. Some simply add the locally defined A/AAAA to
-      the expanded ANAME response. A suggestion has been made that this
-      could be used as a fallback in the event of resolution failure, or
-      a suggestion about address preference. We'll need to settle this.
-      - each]
-    </t>
-    <t>
-      ANAME MUST NOT coexist with CNAME, or any other RR type that
+      ANAME MUST NOT coexist with CNAME or any other RR type that
       restricts the types with which it can itself coexist.
+    </t>
+    <t>
+      If the zone is configured with an A or AAAA RRset at the same DNS
+      node as ANAME, then the server MAY use that RRset as a
+      pre-configured fallback in the event that resolving the ANAME
+      &lt;target&gt; fails or if the address type is not present at the
+      ANAME &lt;target&gt;. (For example, if the ANAME &lt;target&gt;
+      returns NOERROR/NODATA for a query of type AAAA, but the ANAME
+      &lt;owner&gt; contains an AAAA RRset, then that RRset MAY be
+      returned to the querying resolver.)
     </t>
     <t>
       ANAME can freely coexist at the same owner name with any other RR
