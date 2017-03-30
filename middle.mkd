@@ -229,8 +229,11 @@ resolver MAY use the address records that were included in the
 authoritative response as a fallback.
 
 If configured to do so, the resolver MAY include an EDNS CLIENT-SUBNET
-option when re-querying for the ANAME \<target\> and cache the response
-accordingly (see [](#RFC7871)).
+option [](#RFC7871) both when sending the initial query to the ANAME
+\<owner\> and when re-querying for the ANAME \<target\>. If the response
+includes a SCOPE PREFIX-LENGTH greater than zero, the response SHOULD be
+cached with the ECS data and should only be used in response to queries
+from the same client subnet.
 
 # Operational Considerations
 

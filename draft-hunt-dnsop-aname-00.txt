@@ -364,8 +364,11 @@ Internet-Draft                    aname                       March 2017
    authoritative response as a fallback.
 
    If configured to do so, the resolver MAY include an EDNS CLIENT-
-   SUBNET option when re-querying for the ANAME <target> and cache the
-   response accordingly (see [RFC7871]).
+   SUBNET option [RFC7871] both when sending the initial query to the
+   ANAME <owner> and when re-querying for the ANAME <target>.  If the
+   response includes a SCOPE PREFIX-LENGTH greater than zero, the
+   response SHOULD be cached with the ECS data and should only be used
+   in response to queries from the same client subnet.
 
 5.  Operational Considerations
 
@@ -382,9 +385,6 @@ Internet-Draft                    aname                       March 2017
    An authoritative server which implements ANAME must resolve address
    queries on behalf its clients, either internally or by querying an
    external resolver.  This resolution must be allowed to take place
-   regardless of whether the client would ordinaily have been permitted
-   by local policy to send recursive queries.
-
 
 
 
@@ -393,6 +393,9 @@ Hunt, et al.             Expires October 1, 2017                [Page 7]
 
 Internet-Draft                    aname                       March 2017
 
+
+   regardless of whether the client would ordinaily have been permitted
+   by local policy to send recursive queries.
 
    When a resolver that does not understand ANAME receives a response
    containing A or AAAA records with <owner> rewritten to match that of
@@ -438,10 +441,7 @@ Internet-Draft                    aname                       March 2017
    [RFC6672]  Rose, S. and W. Wijngaards, "DNAME Redirection in the
               DNS", RFC 6672, June 2012.
 
-   [RFC7871]  Contavalli, C., van der Gaast, W., Lawrence, D., and W.
-              Kumari, "Client Subnet in DNS Queries", RFC 7871,
-              DOI 10.17487/RFC7871, May 2016,
-              <http://www.rfc-editor.org/info/rfc7871>.
+
 
 
 
@@ -449,6 +449,11 @@ Hunt, et al.             Expires October 1, 2017                [Page 8]
 
 Internet-Draft                    aname                       March 2017
 
+
+   [RFC7871]  Contavalli, C., van der Gaast, W., Lawrence, D., and W.
+              Kumari, "Client Subnet in DNS Queries", RFC 7871,
+              DOI 10.17487/RFC7871, May 2016,
+              <http://www.rfc-editor.org/info/rfc7871>.
 
 Authors' Addresses
 
@@ -477,11 +482,6 @@ Authors' Addresses
 
    Email: anthony.eden@dnsimple.com
    URI:   https://dnsimple.com/
-
-
-
-
-
 
 
 

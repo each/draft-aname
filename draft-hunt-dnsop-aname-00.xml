@@ -388,9 +388,12 @@
   </t>
   <t>
     If configured to do so, the resolver MAY include an EDNS
-    CLIENT-SUBNET option when re-querying for the ANAME &lt;target&gt;
-    and cache the response accordingly (see
-    <xref target="RFC7871"/>).
+    CLIENT-SUBNET option <xref target="RFC7871"/> both when
+    sending the initial query to the ANAME &lt;owner&gt; and when
+    re-querying for the ANAME &lt;target&gt;. If the response includes a
+    SCOPE PREFIX-LENGTH greater than zero, the response SHOULD be cached
+    with the ECS data and should only be used in response to queries
+    from the same client subnet.
   </t>
 </section>
 <section title="Operational Considerations" anchor="operational-considerations">
