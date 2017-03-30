@@ -73,13 +73,13 @@ Table of Contents
      3.1.  Address records returned with ANAME . . . . . . . . . . .   4
      3.2.  Coexistence with other types  . . . . . . . . . . . . . .   5
      3.3.  DNSSEC signing  . . . . . . . . . . . . . . . . . . . . .   6
-   4.  Recursive Server Behavior . . . . . . . . . . . . . . . . . .   6
+   4.  Recursive Server Behavior . . . . . . . . . . . . . . . . . .   7
    5.  Operational Considerations  . . . . . . . . . . . . . . . . .   7
    6.  Security Considerations . . . . . . . . . . . . . . . . . . .   7
    7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   7
-   8.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .   7
-   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   7
-     9.1.  Normative References  . . . . . . . . . . . . . . . . . .   7
+   8.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .   8
+   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   8
+     9.1.  Normative References  . . . . . . . . . . . . . . . . . .   8
      9.2.  Informative References  . . . . . . . . . . . . . . . . .   8
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   8
 
@@ -230,6 +230,12 @@ Internet-Draft                    aname                       March 2017
    RECOMMENDED that address records be cached locally by the
    authoritative server.
 
+   [REMOVE BEFORE PUBLICATION: Peter has suggested we allow the address
+   records for an ANAME to be populated during *XFR.  This adds
+   complexity in some ways, as the transfered A and AAAA could not be
+   treated as zone data but as cache, but it simplifies other things
+   such as signing. - each]
+
    Address records cached locally MUST have a limited TTL.  The initial
    TTL for locally-cached address records MUST be set to the lesser of
    the ANAME TTL and the TTL of the address records retrieved from the
@@ -268,12 +274,6 @@ Internet-Draft                    aname                       March 2017
    [REMOVE BEFORE PUBLICATION: I wrote the above thinking that someone
    might want to use ANAME for A or AAAA but not both.  Existing
    implementations apparently handle coexistence with A and AAAA
-   differently.  Some simply add the locally defined A/AAAA to the
-   expanded ANAME response.  A suggestion has been made that this could
-   be used as a fallback in the event of resolution failure, or a
-   suggestion about address preference.  We'll need to settle this.  -
-   each]
-
 
 
 
@@ -281,6 +281,12 @@ Hunt, et al.             Expires October 1, 2017                [Page 5]
 
 Internet-Draft                    aname                       March 2017
 
+
+   differently.  Some simply add the locally defined A/AAAA to the
+   expanded ANAME response.  A suggestion has been made that this could
+   be used as a fallback in the event of resolution failure, or a
+   suggestion about address preference.  We'll need to settle this.  -
+   each]
 
    ANAME MUST NOT coexist with CNAME, or any other RR type that
    restricts the types with which it can itself coexist.
@@ -291,16 +297,21 @@ Internet-Draft                    aname                       March 2017
 3.3.  DNSSEC signing
 
    If the zone is DNSSEC signed, and if the server has access to the
-   private key, then the A and AAAA RRsets SHOULD be signed, either in
+   private key, then the A and AAAA RRsets MUST be signed, either in
    advance when populating the A/AAAA answers for ANAME records, or "on
    the fly" when responding to a query.
 
    Validating resolvers which do not yet implement ANAME will not be
    able to validate the A and AAAA responses included with an ANAME
-   response, unless those responses are validly signed by a DNSKEY at
-   the apex of the zone in which the ANAME resides.  Passing along the
+   response unless those responses are validly signed by a DNSKEY at the
+   apex of the zone in which the ANAME resides.  Passing along the
    RRSIGs associated with the original A and AAAA RRsets from the ANAME
    <target> will not be sufficient for DNSSEC validation.
+
+   [REMOVE BEFORE PUBLICATION: Allowing expansion of ANAME records on
+   *XFR would also allow signing to take place on the master server
+   only, or in a "bump-in-the-wire" signer.  If we add that as an
+   optional feature, this text will need to be updated.]
 
    This implies that every authoritative server providing ANAME
    responses in a signed zone MUST have access to the zone signing key
@@ -316,6 +327,17 @@ Internet-Draft                    aname                       March 2017
    from being resolved.  The type bit map SHOULD only include address
    types which are known to exist at the ANAME <target>.
 
+
+
+
+
+
+
+Hunt, et al.             Expires October 1, 2017                [Page 6]
+
+Internet-Draft                    aname                       March 2017
+
+
 4.  Recursive Server Behavior
 
    When a recursive resolver sends a query of type A or AAAA and
@@ -329,14 +351,6 @@ Internet-Draft                    aname                       March 2017
    If configured to do so, the resolver MAY include an EDNS CLIENT-
    SUBNET option when re-querying for the ANAME <target> and cache the
    response accordingly (see [RFC7871]).
-
-
-
-
-Hunt, et al.             Expires October 1, 2017                [Page 6]
-
-Internet-Draft                    aname                       March 2017
-
 
 5.  Operational Considerations
 
@@ -369,6 +383,17 @@ Internet-Draft                    aname                       March 2017
    IANA is requested to allocate a DNS RR type code for the ANAME RR
    type.
 
+
+
+
+
+
+
+Hunt, et al.             Expires October 1, 2017                [Page 7]
+
+Internet-Draft                    aname                       March 2017
+
+
 8.  Acknowledgments
 
    Thanks to Mukund Sivaraman, Stephen Morris, Ray Bellis, and Mark
@@ -383,16 +408,6 @@ Internet-Draft                    aname                       March 2017
 
    [RFC3597]  Gustafsson, A., "Handling of Unknown DNS Resource Record
               (RR) Types", RFC 3597, September 2003.
-
-
-
-
-
-
-Hunt, et al.             Expires October 1, 2017                [Page 7]
-
-Internet-Draft                    aname                       March 2017
-
 
    [RFC4034]  Arends, R., Austein, R., Larson, M., Massey, D., and S.
               Rose, "Resource Records for the DNS Security Extensions",
@@ -426,6 +441,15 @@ Authors' Addresses
    Email: each@isc.org
 
 
+
+
+
+
+Hunt, et al.             Expires October 1, 2017                [Page 8]
+
+Internet-Draft                    aname                       March 2017
+
+
    Peter van Dijk
    PowerDNS.COM B.V.
    Seinstraat 76
@@ -445,4 +469,36 @@ Authors' Addresses
 
 
 
-Hunt, et al.             Expires October 1, 2017                [Page 8]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.             Expires October 1, 2017                [Page 9]

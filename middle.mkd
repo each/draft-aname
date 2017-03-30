@@ -117,6 +117,11 @@ delay resolution of the address records until a query is received for the
 ANAME \<owner\>. In either case, for performance reasons, it is RECOMMENDED
 that address records be cached locally by the authoritative server.
 
+[REMOVE BEFORE PUBLICATION: Peter has suggested we allow the address records
+for an ANAME to be populated during \*XFR. This adds complexity in some
+ways, as the transfered A and AAAA could not be treated as zone data but
+as cache, but it simplifies other things such as signing. - each]
+
 Address records cached locally MUST have a limited TTL.  The initial TTL
 for locally-cached address records MUST be set to the lesser of the ANAME
 TTL and the TTL of the address records retrieved from the ANAME \<target\>.
@@ -168,16 +173,21 @@ ANAME can freely coexist at the same owner name with any other RR type.
 ## DNSSEC signing
 
 If the zone is DNSSEC signed, and if the server has access to the private
-key, then the A and AAAA RRsets SHOULD be signed, either in advance when
+key, then the A and AAAA RRsets MUST be signed, either in advance when
 populating the A/AAAA answers for ANAME records, or "on the fly" when
 responding to a query.
 
 Validating resolvers which do not yet implement ANAME will not be able to
-validate the A and AAAA responses included with an ANAME response, unless
+validate the A and AAAA responses included with an ANAME response unless
 those responses are validly signed by a DNSKEY at the apex of the zone in
 which the ANAME resides.  Passing along the RRSIGs associated with the
 original A and AAAA RRsets from the ANAME \<target\> will not be sufficient
 for DNSSEC validation.
+
+[REMOVE BEFORE PUBLICATION: Allowing expansion of ANAME records on \*XFR
+would also allow signing to take place on the master server only, or in a
+"bump-in-the-wire" signer.  If we add that as an optional feature, this
+text will need to be updated.]
 
 This implies that every authoritative server providing ANAME responses
 in a signed zone MUST have access to the zone signing key for that zone.
