@@ -21,14 +21,22 @@ are not realistic for other query types.  If, for example, a recursive
 resolver with a cached CNAME received a query for MX or DNSKEY, it would
 follow the CNAME, and would not find the correct answer.)
 
-As a result of the above, the only standards-compliant way to publish
-content there is to to use A and AAAA records in the apex node, limiting
-the flexibility afforded by CNAME.
+DNAME [](##RFC6672) is also not a solution, as its function is to redirect
+all names in the namespace below the DNAME \<owner\>, not the DNAME
+\<owner\> itself. 
+
+Redirecting website lookups to an alternate domain name via SRV or URI
+resource records would be an effective solution, but this approach has
+not been accepted by browser implementers.
+
+As a result of the above, the only widely supported and standards-compliant
+way to publish content at a zone apex is to to place A and/or AAAA records
+at that node.  THe flexibility afforded by CNAME is not available.
 
 This document proposes a new RR type "ANAME", which provides similar
 functionality to CNAME, but only for address queries (type A and AAAA).
 The ANAME record can be present at any DNS node, and can coexist with
-other RR types at a zone apex.
+most other RR types, enabling it to be present at a zone apex.
 
 ## Reserved Words
 
