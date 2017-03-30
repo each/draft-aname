@@ -87,10 +87,10 @@ Authoritative servers implementing ANAME MUST be equipped to resolve the ANAME
 an external recursive resolver, or by implementing recursive resolution
 logic internally.
 
-If the ANAME \<target\> returns a chaining response (i.e., CNAME or DNAME),
-then the authoritative server MUST follow it until it is able to resolve an
-address response. Intermediate CNAMEs and/or DNAMEs MUST be omitted from
-the response.
+If the ANAME \<target\> returns a chaining response (i.e., CNAME, DNAME, or
+another ANAME), then the authoritative server MUST follow it until it is
+able to resolve an address response. Intermediate ANAMEs, CNAMEs, and
+DNAMEs MUST be omitted from the response.
 
 ## Address records returned with ANAME
 

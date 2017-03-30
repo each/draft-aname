@@ -192,10 +192,10 @@ Internet-Draft                    aname                       March 2017
    sending queries to an external recursive resolver, or by implementing
    recursive resolution logic internally.
 
-   If the ANAME <target> returns a chaining response (i.e., CNAME or
-   DNAME), then the authoritative server MUST follow it until it is able
-   to resolve an address response.  Intermediate CNAMEs and/or DNAMEs
-   MUST be omitted from the response.
+   If the ANAME <target> returns a chaining response (i.e., CNAME,
+   DNAME, or another ANAME), then the authoritative server MUST follow
+   it until it is able to resolve an address response.  Intermediate
+   ANAMEs, CNAMEs, and DNAMEs MUST be omitted from the response.
 
 3.1.  Address records returned with ANAME
 

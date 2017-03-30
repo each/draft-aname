@@ -206,10 +206,11 @@
     implementing recursive resolution logic internally.
   </t>
   <t>
-    If the ANAME &lt;target&gt; returns a chaining response (i.e., CNAME
-    or DNAME), then the authoritative server MUST follow it until it is
-    able to resolve an address response. Intermediate CNAMEs and/or
-    DNAMEs MUST be omitted from the response.
+    If the ANAME &lt;target&gt; returns a chaining response (i.e.,
+    CNAME, DNAME, or another ANAME), then the authoritative server MUST
+    follow it until it is able to resolve an address response.
+    Intermediate ANAMEs, CNAMEs, and DNAMEs MUST be omitted from the
+    response.
   </t>
   <section title="Address records returned with ANAME" anchor="address-records-returned-with-aname">
     
