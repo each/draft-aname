@@ -117,11 +117,6 @@ delay resolution of the address records until a query is received for the
 ANAME \<owner\>. In either case, for performance reasons, it is RECOMMENDED
 that address records be cached locally by the authoritative server.
 
-[REMOVE BEFORE PUBLICATION: Peter has suggested we allow the address records
-for an ANAME to be populated during \*XFR. This adds complexity in some
-ways, as the transfered A and AAAA could not be treated as zone data but
-as cache, but it simplifies other things such as signing. - each]
-
 Address records cached locally MUST have a limited TTL.  The initial TTL
 for locally-cached address records MUST be set to the lesser of the ANAME
 TTL and the TTL of the address records retrieved from the ANAME \<target\>.

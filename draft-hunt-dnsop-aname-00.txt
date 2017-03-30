@@ -230,12 +230,6 @@ Internet-Draft                    aname                       March 2017
    RECOMMENDED that address records be cached locally by the
    authoritative server.
 
-   [REMOVE BEFORE PUBLICATION: Peter has suggested we allow the address
-   records for an ANAME to be populated during *XFR.  This adds
-   complexity in some ways, as the transfered A and AAAA could not be
-   treated as zone data but as cache, but it simplifies other things
-   such as signing. - each]
-
    Address records cached locally MUST have a limited TTL.  The initial
    TTL for locally-cached address records MUST be set to the lesser of
    the ANAME TTL and the TTL of the address records retrieved from the
@@ -274,6 +268,12 @@ Internet-Draft                    aname                       March 2017
    [REMOVE BEFORE PUBLICATION: I wrote the above thinking that someone
    might want to use ANAME for A or AAAA but not both.  Existing
    implementations apparently handle coexistence with A and AAAA
+   differently.  Some simply add the locally defined A/AAAA to the
+   expanded ANAME response.  A suggestion has been made that this could
+   be used as a fallback in the event of resolution failure, or a
+   suggestion about address preference.  We'll need to settle this.  -
+   each]
+
 
 
 
@@ -281,12 +281,6 @@ Hunt, et al.             Expires October 1, 2017                [Page 5]
 
 Internet-Draft                    aname                       March 2017
 
-
-   differently.  Some simply add the locally defined A/AAAA to the
-   expanded ANAME response.  A suggestion has been made that this could
-   be used as a fallback in the event of resolution failure, or a
-   suggestion about address preference.  We'll need to settle this.  -
-   each]
 
    ANAME MUST NOT coexist with CNAME, or any other RR type that
    restricts the types with which it can itself coexist.
@@ -329,7 +323,13 @@ Internet-Draft                    aname                       March 2017
    not supported, then every authoritative server providing ANAME
    responses in a signed zone SHOULD have access to the private zone-
    signing key for that zone.  Deployment of ANAME in signed zones where
+   address records cannot be signed due to lack of access to the private
+   zone-signing key is NOT RECOMMENDED.
 
+   When ANAME is present in a signed DNS node, the type bit map in the
+   NSEC [RFC4034] or NSEC3 [RFC5155] record for that node MUST include
+   at least one of A and AAAA as well as ANAME.  This is for the benefit
+   of validating resolvers not implementing ANAME which may use a signed
 
 
 
@@ -338,13 +338,6 @@ Hunt, et al.             Expires October 1, 2017                [Page 6]
 Internet-Draft                    aname                       March 2017
 
 
-   address records cannot be signed due to lack of access to the private
-   zone-signing key is NOT RECOMMENDED.
-
-   When ANAME is present in a signed DNS node, the type bit map in the
-   NSEC [RFC4034] or NSEC3 [RFC5155] record for that node MUST include
-   at least one of A and AAAA as well as ANAME.  This is for the benefit
-   of validating resolvers not implementing ANAME which may use a signed
    proof of nonexistence for type A and AAAA to prevent address queries
    from being resolved.  The type bit map SHOULD only include address
    types which are known to exist at the ANAME <target>.
@@ -385,6 +378,13 @@ Internet-Draft                    aname                       March 2017
    An authoritative server which implements ANAME must resolve address
    queries on behalf its clients, either internally or by querying an
    external resolver.  This resolution must be allowed to take place
+   regardless of whether the client would ordinaily have been permitted
+   by local policy to send recursive queries.
+
+   When a resolver that does not understand ANAME receives a response
+   containing A or AAAA records with <owner> rewritten to match that of
+   the ANAME RR, this may bypass security mechanisms based on local
+   policy limiting access to the original ANAME <target>.
 
 
 
@@ -393,14 +393,6 @@ Hunt, et al.             Expires October 1, 2017                [Page 7]
 
 Internet-Draft                    aname                       March 2017
 
-
-   regardless of whether the client would ordinaily have been permitted
-   by local policy to send recursive queries.
-
-   When a resolver that does not understand ANAME receives a response
-   containing A or AAAA records with <owner> rewritten to match that of
-   the ANAME RR, this may bypass security mechanisms based on local
-   policy limiting access to the original ANAME <target>.
 
    A validating resolver that does not understand ANAME will not be able
    to validate A and AAAA records unless they are signed.
@@ -441,6 +433,14 @@ Internet-Draft                    aname                       March 2017
    [RFC6672]  Rose, S. and W. Wijngaards, "DNAME Redirection in the
               DNS", RFC 6672, June 2012.
 
+   [RFC7871]  Contavalli, C., van der Gaast, W., Lawrence, D., and W.
+              Kumari, "Client Subnet in DNS Queries", RFC 7871,
+              DOI 10.17487/RFC7871, May 2016,
+              <http://www.rfc-editor.org/info/rfc7871>.
+
+
+
+
 
 
 
@@ -449,11 +449,6 @@ Hunt, et al.             Expires October 1, 2017                [Page 8]
 
 Internet-Draft                    aname                       March 2017
 
-
-   [RFC7871]  Contavalli, C., van der Gaast, W., Lawrence, D., and W.
-              Kumari, "Client Subnet in DNS Queries", RFC 7871,
-              DOI 10.17487/RFC7871, May 2016,
-              <http://www.rfc-editor.org/info/rfc7871>.
 
 Authors' Addresses
 
@@ -482,6 +477,11 @@ Authors' Addresses
 
    Email: anthony.eden@dnsimple.com
    URI:   https://dnsimple.com/
+
+
+
+
+
 
 
 
