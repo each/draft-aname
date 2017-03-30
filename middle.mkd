@@ -21,7 +21,7 @@ are not realistic for other query types.  If, for example, a recursive
 resolver with a cached CNAME received a query for MX or DNSKEY, it would
 follow the CNAME, and would not find the correct answer.)
 
-DNAME [](##RFC6672) is also not a solution, as its function is to redirect
+DNAME [](#RFC6672) is also not a solution, as its function is to redirect
 all names in the namespace below the DNAME \<owner\>, not the DNAME
 \<owner\> itself. 
 
