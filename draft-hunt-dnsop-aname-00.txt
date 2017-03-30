@@ -101,11 +101,11 @@ Table of Contents
    MX, TXT/SPF, etc.  Consequently, CNAME is impermissible at apex
    nodes.
 
-   (It should be noted that [RFC4034] relaxed this restriction by
+   It should be noted that [RFC4034] relaxed this restriction by
    allowing coexistence between CNAME and RRSIG and NSEC records, but
-   such exceptions are not realistic for other query types.  If, for
-   example, a recursive resolver with a cached CNAME received a query
-
+   such exceptions are not applicable to other resource records.  RRSIG
+   and NSEC exist to prove the integrity of the CNAME record; they are
+   not intended to associate arbitrary data with the domain name.
 
 
 
@@ -114,16 +114,13 @@ Hunt, et al.             Expires October 1, 2017                [Page 2]
 Internet-Draft                    aname                       March 2017
 
 
-   for MX or DNSKEY, it would follow the CNAME, and would not find the
-   correct answer.)
-
    DNAME [RFC6672] is also not a solution, as its function is to
    redirect all names in the namespace below the DNAME <owner>, not the
    DNAME <owner> itself.
 
    Redirecting website lookups to an alternate domain name via SRV or
-   URI resource records would be an effective solution, but this
-   approach has not been accepted by browser implementers.
+   URI resource records would be an effective solution, but to date this
+   approach has not been accepted by browser implementations.
 
    As a result of the above, the only widely supported and standards-
    compliant way to publish content at a zone apex is to to place A and/
@@ -163,15 +160,15 @@ Internet-Draft                    aname                       March 2017
 
        owner ttl class ANAME target
 
+   The wire format is also identical to CNAME, except that name
+   compression is not permitted in ANAME RDATA, per [RFC3597].
+
 
 
 Hunt, et al.             Expires October 1, 2017                [Page 3]
 
 Internet-Draft                    aname                       March 2017
 
-
-   The wire format is also identical to CNAME, except that name
-   compression is not permitted in ANAME RDATA, per [RFC3597].
 
    No more than one ANAME resource record can be present at any DNS
    node.
@@ -218,6 +215,9 @@ Internet-Draft                    aname                       March 2017
    authoritative for <target>) is unspecified.  If the authoritative
    server is capable of performing recursive resolution, then it MAY
    resolve the query itself, or it MAY send address queries to an
+   external resolver.  It MAY send address queries to the ANAME <target>
+   when loading the zone and store the responses locally, or it MAY
+   delay resolution of the address records until a query is received for
 
 
 
@@ -226,9 +226,6 @@ Hunt, et al.             Expires October 1, 2017                [Page 4]
 Internet-Draft                    aname                       March 2017
 
 
-   external resolver.  It MAY send address queries to the ANAME <target>
-   when loading the zone and store the responses locally, or it MAY
-   delay resolution of the address records until a query is received for
    the ANAME <owner>.  In either case, for performance reasons, it is
    RECOMMENDED that address records be cached locally by the
    authoritative server.
@@ -274,6 +271,9 @@ Internet-Draft                    aname                       March 2017
    differently.  Some simply add the locally defined A/AAAA to the
    expanded ANAME response.  A suggestion has been made that this could
    be used as a fallback in the event of resolution failure, or a
+   suggestion about address preference.  We'll need to settle this.  -
+   each]
+
 
 
 
@@ -281,9 +281,6 @@ Hunt, et al.             Expires October 1, 2017                [Page 5]
 
 Internet-Draft                    aname                       March 2017
 
-
-   suggestion about address preference.  We'll need to settle this.  -
-   each]
 
    ANAME MUST NOT coexist with CNAME, or any other RR type that
    restricts the types with which it can itself coexist.
@@ -329,6 +326,9 @@ Internet-Draft                    aname                       March 2017
    other considerations, and the resolver will find a different answer
    than the authoritative server did.
 
+   If configured to do so, the resolver MAY include an EDNS CLIENT-
+   SUBNET option when re-querying for the ANAME <target> and cache the
+   response accordingly (see [RFC7871]).
 
 
 
@@ -337,10 +337,6 @@ Hunt, et al.             Expires October 1, 2017                [Page 6]
 
 Internet-Draft                    aname                       March 2017
 
-
-   If configured to do so, the resolver MAY include an EDNS CLIENT-
-   SUBNET option when re-querying for the ANAME <target> and cache the
-   response accordingly (see [RFC7871]).
 
 5.  Operational Considerations
 
@@ -375,8 +371,8 @@ Internet-Draft                    aname                       March 2017
 
 8.  Acknowledgments
 
-   Thanks to Mukund Sivaraman, Ray Bellis, and Mark Andrews for
-   discussion and feedback.
+   Thanks to Mukund Sivaraman, Stephen Morris, Ray Bellis, and Mark
+   Andrews for discussion and feedback.
 
 9.  References
 
@@ -384,6 +380,10 @@ Internet-Draft                    aname                       March 2017
 
    [RFC1033]  Lottor, M., "Domain administrators operations guide",
               RFC 1033, November 1987.
+
+   [RFC3597]  Gustafsson, A., "Handling of Unknown DNS Resource Record
+              (RR) Types", RFC 3597, September 2003.
+
 
 
 
@@ -393,9 +393,6 @@ Hunt, et al.             Expires October 1, 2017                [Page 7]
 
 Internet-Draft                    aname                       March 2017
 
-
-   [RFC3597]  Gustafsson, A., "Handling of Unknown DNS Resource Record
-              (RR) Types", RFC 3597, September 2003.
 
    [RFC4034]  Arends, R., Austein, R., Larson, M., Massey, D., and S.
               Rose, "Resource Records for the DNS Security Extensions",
@@ -438,18 +435,6 @@ Authors' Addresses
    Email: peter.van.dijk@powerdns.com
 
 
-
-
-
-
-
-
-
-Hunt, et al.             Expires October 1, 2017                [Page 8]
-
-Internet-Draft                    aname                       March 2017
-
-
    Anthony Eden
    DNSimple
    Boston, MA
@@ -460,45 +445,4 @@ Internet-Draft                    aname                       March 2017
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Hunt, et al.             Expires October 1, 2017                [Page 9]
+Hunt, et al.             Expires October 1, 2017                [Page 8]

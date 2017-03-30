@@ -103,12 +103,12 @@
     impermissible at apex nodes.
   </t>
   <t>
-    (It should be noted that <xref target="RFC4034"/> relaxed
-    this restriction by allowing coexistence between CNAME and RRSIG and
-    NSEC records, but such exceptions are not realistic for other query
-    types. If, for example, a recursive resolver with a cached CNAME
-    received a query for MX or DNSKEY, it would follow the CNAME, and
-    would not find the correct answer.)
+    It should be noted that <xref target="RFC4034"/> relaxed this
+    restriction by allowing coexistence between CNAME and RRSIG and NSEC
+    records, but such exceptions are not applicable to other resource
+    records. RRSIG and NSEC exist to prove the integrity of the CNAME
+    record; they are not intended to associate arbitrary data with the
+    domain name.
   </t>
   <t>
     DNAME <xref target="RFC6672"/> is also not a solution, as its
@@ -117,8 +117,8 @@
   </t>
   <t>
     Redirecting website lookups to an alternate domain name via SRV or
-    URI resource records would be an effective solution, but this
-    approach has not been accepted by browser implementers.
+    URI resource records would be an effective solution, but to date
+    this approach has not been accepted by browser implementations.
   </t>
   <t>
     As a result of the above, the only widely supported and
@@ -403,8 +403,8 @@
 <section title="Acknowledgments" anchor="acknowledgments">
   
   <t>
-    Thanks to Mukund Sivaraman, Ray Bellis, and Mark Andrews for
-    discussion and feedback.
+    Thanks to Mukund Sivaraman, Stephen Morris, Ray Bellis, and Mark
+    Andrews for discussion and feedback.
   </t>
 </section>
 

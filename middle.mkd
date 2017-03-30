@@ -15,19 +15,19 @@ other record type. Zone apex nodes always contain SOA and NS RRsets
 records, and frequently contain other types such as DNSKEY, MX, TXT/SPF,
 etc. Consequently, CNAME is impermissible at apex nodes.
 
-(It should be noted that [](#RFC4034) relaxed this restriction by allowing
+It should be noted that [](#RFC4034) relaxed this restriction by allowing
 coexistence between CNAME and RRSIG and NSEC records, but such exceptions
-are not realistic for other query types.  If, for example, a recursive
-resolver with a cached CNAME received a query for MX or DNSKEY, it would
-follow the CNAME, and would not find the correct answer.)
+are not applicable to other resource records. RRSIG and NSEC exist to prove
+the integrity of the CNAME record; they are not intended to associate
+arbitrary data with the domain name.
 
 DNAME [](#RFC6672) is also not a solution, as its function is to redirect
 all names in the namespace below the DNAME \<owner\>, not the DNAME
 \<owner\> itself. 
 
 Redirecting website lookups to an alternate domain name via SRV or URI
-resource records would be an effective solution, but this approach has
-not been accepted by browser implementers.
+resource records would be an effective solution, but to date this approach
+has not been accepted by browser implementations.
 
 As a result of the above, the only widely supported and standards-compliant
 way to publish content at a zone apex is to to place A and/or AAAA records
@@ -237,5 +237,5 @@ IANA is requested to allocate a DNS RR type code for the ANAME RR type.
 
 # Acknowledgments
 
-Thanks to Mukund Sivaraman, Ray Bellis, and Mark Andrews for discussion
-and feedback.
+Thanks to Mukund Sivaraman, Stephen Morris, Ray Bellis, and Mark Andrews
+for discussion and feedback.
