@@ -129,10 +129,26 @@
   <t>
     This document proposes a new RR type "ANAME", which
     provides similar functionality to CNAME, but only for address
-    queries (type A and AAAA). The ANAME record can be present at any
-    DNS node, and can coexist with most other RR types, enabling it to
-    be present at a zone apex.
+    queries (i.e., for type A or AAAA). The ANAME record can be present
+    at any DNS node, and can coexist with most other RR types, enabling
+    it to be present at a zone apex. Authoritative servers configured
+    with ANAME records will answer address queries for the ANAME owner
+    with addresses found at the ANAME's target, and also with the ANAME
+    itself. Recursive resolvers which understand ANAME can re-query for
+    the ANAME target, just as if they had received a CNAME response.
   </t>
+  <section title="Terminology" anchor="terminology">
+    
+    <t>
+      "Address type" refers to a DNS RR type that encodes a
+      network address. Currently the set of address types consists of A
+      and AAAA.
+    </t>
+    <t>
+      "Address query" refers to a DNS query for any address
+      type.
+    </t>
+  </section>
   <section title="Reserved Words" anchor="reserved-words">
     
     <t>
@@ -174,24 +190,34 @@
     When an ANAME record is present at a DNS node and a query is
     received by an authoritative server for type A or AAAA, the
     authoritative server returns the ANAME RRset in the answer section.
+  </t>
+  <t>
     For the benefit of querying resolvers that do not implement ANAME,
     the authoritative server also returns address records as described
     below. (This is similar to the synthesized CNAME record included
     with DNAME <xref target="RFC6672"/>.)
   </t>
+  <t>
+    Authoritative servers implementing ANAME MUST be equipped resolve
+    the ANAME &lt;target&gt; on the querying resolver's behalf, either
+    by sending queries to an external recursive resolver, or by
+    implementing recursive resolution logic internally.
+  </t>
+  <t>
+    If the ANAME &lt;target&gt; returns a chaining response (i.e., CNAME
+    or DNAME), then the authoritative server MUST follow it until it is
+    able to resolve an address response.
+  </t>
   <section title="Address records returned with ANAME" anchor="address-records-returned-with-aname">
     
     <t>
-      [TODO: Add a note on the need for flattening.]
-    </t>
-    <t>
-      If the original query is for type A, and an A RRset exists at the
-      ANAME &lt;target&gt;, then that A RRset (with &lt;owner&gt;
+      If the original query is for type A, and an RRset of type A exists
+      at the ANAME &lt;target&gt;, then that A RRset (with &lt;owner&gt;
       changed to match that of the ANAME RR), MUST be appended to the
-      answer section after the ANAME RRset. If an AAAA RRset eixsts at
-      the ANAME &lt;target&gt;, then it MAY be appended to the
-      additional section (again, with &lt;owner&gt; changed to match
-      that of the ANAME RR).
+      answer section after the ANAME RRset. If an AAAA RRset is also
+      known to exist at the ANAME &lt;target&gt;, then the AAAA RRset
+      MAY be appended to the additional section (again, with
+      &lt;owner&gt; changed to match that of the ANAME RR).
     </t>
     <t>
       Similarly, if the original query was for type AAAA, and an AAAA
@@ -200,29 +226,50 @@
       &lt;target&gt; then it MAY be appended to the additional section.
     </t>
     <t>
-      How and when an authoritative server resolves the A and AAAA
-      responses from the ANAME &lt;target&gt; (when it is not itself
-      authoritative for &lt;target&gt;) is unspecified. If an
-      authoritative server is capable of recursion, then it MAY perform
-      recursion itself, or it MAY send A and AAAA queries to an external
-      resolver. It MAY resolve A and AAAA when loading the zone and
-      cache the responses (in which case it MUST periodically refresh
-      them when their TTLs expire), or it MAY delay resolution of the A
-      and AAAA at the ANAME &lt;target&gt; until an address query is
-      received for the ANAME &lt;owner&gt;. (In either case, for
-      peformance reasons, it is RECOMMENDED that the authoritative
-      server cache the A and AAAA responses.) [TODO: Add a sentence
-      about ECS.]
-    </t>
-    <t>
       If the original query is for type ANAME, A and AAAA records MAY be
       returned in the additional section.
     </t>
     <t>
-      The TTL for the A and/or AAAA RRsets MUST be set to the lesser of
-      the ANAME TTL and the TTL of the A and/or AAAA RRsets at the ANAME
-      &lt;target&gt;. The TTL of cached A and/or AAAA RRsets MUST count
-      down, just as they would do in a resolver cache.
+      How and when an authoritative server resolves the A and AAAA
+      responses from the ANAME &lt;target&gt; (when it is not itself
+      authoritative for &lt;target&gt;) is unspecified. If the
+      authoritative server is capable of performing recursive
+      resolution, then it MAY resolve the query itself, or it MAY send
+      address queries to an external resolver. It MAY send address
+      queries to the ANAME &lt;target&gt; when loading the zone and
+      store the responses locally, or it MAY delay resolution of the
+      address records until a query is received for the ANAME
+      &lt;owner&gt;. In either case, for performance reasons, it is
+      RECOMMENDED that address records be cached locally by the
+      authoritative server.
+    </t>
+    <t>
+      Address records cached locally MUST have a limited TTL. The
+      initial TTL for locally-cached address records MUST be set to the
+      lesser of the ANAME TTL and the TTL of the address records
+      retrieved from the ANAME &lt;target&gt;. The local TTL MUST count
+      down, just as it would in a conventional resolver cache. Records
+      with an expired TTL MUST NOT be returned until refreshed with a
+      new query to the ANAME &lt;target&gt;.
+    </t>
+    <t>
+      If configured to do so, then the authoritative server MAY, when
+      sending queries to the ANAME &lt;target&gt;, include an EDNS
+      CLIENT-SUBNET (ECS) option <xref target="RFC7871"/>, either
+      forwarding an ECS option that was sent to it by the querying
+      resolver, or generating a new ECS option from the querying
+      resolver's address. If a response from the ANAME &lt;target&gt;
+      includes an ECS option with a SCOPE PREFIX-LENGTH greater than
+      zero, the response SHOULD be cached with the ECS data and should
+      only be used in response to queries from the same client subnet.
+    </t>
+    <t>
+      [REMOVE BEFORE PUBLICATION: Some suggestions have been made about
+      signaling ANAME capability via an EDNS option. If a query
+      indicated that the client understood ANAME, then the authority
+      could respond differently. This may turn out to be necessary, but
+      I want to hold off on specifying it until we're sure that it is. -
+      each]
     </t>
   </section>
   <section title="Coexistence with other types" anchor="coexistence-with-other-types">
@@ -279,14 +326,20 @@
     <t>
       This implies that every authoritative server providing ANAME
       responses in a signed zone MUST have access to the zone signing
-      key for that zone.
+      key for that zone. Deployment of ANAME in signed zones where the
+      private key is not accessible to all authoritative servers is NOT
+      RECOMMENDED.
     </t>
     <t>
-      Deployment of ANAME in signed zones where the private key is not
-      accessible to all authoritative servers is NOT RECOMMENDED.
-    </t>
-    <t>
-      [TODO: Add a paragraph on NSEC/NSEC3]
+      When ANAME is present in a signed DNS node, the type bit map in
+      the NSEC <xref target="RFC4034"/> or NSEC3
+      <xref target="RFC5155"/> record for that node MUST include
+      at least one of A and AAAA as well as ANAME. This is for the
+      benefit of validating resolvers not implementing ANAME which may
+      use a signed proof of nonexistence for type A and AAAA to prevent
+      address queries from being resolved. The type bit map SHOULD only
+      include address types which are known to exist at the ANAME
+      &lt;target&gt;.
     </t>
   </section>
 </section>
@@ -374,20 +427,6 @@
 </reference>
 <?xml version='1.0' encoding='UTF-8'?>
 
-<reference anchor='RFC1034'>
-
-<front>
-<title abbrev='Domain Concepts and Facilities'>Domain names - concepts and facilities</title>
-<author initials='P.' surname='Mockapetris' fullname='P. Mockapetris'>
-<organization>Information Sciences Institute (ISI)</organization></author>
-<date year='1987' day='1' month='November' /></front>
-
-<seriesInfo name='STD' value='13' />
-<seriesInfo name='RFC' value='1034' />
-<format type='TXT' octets='129180' target='http://www.rfc-editor.org/rfc/rfc1034.txt' />
-</reference>
-<?xml version='1.0' encoding='UTF-8'?>
-
 <reference anchor='RFC3597'>
 
 <front>
@@ -469,6 +508,27 @@
 <format type='TXT' octets='4723' target='http://www.rfc-editor.org/rfc/rfc2119.txt' />
 <format type='HTML' octets='17491' target='http://xml.resource.org/public/rfc/html/rfc2119.html' />
 <format type='XML' octets='5777' target='http://xml.resource.org/public/rfc/xml/rfc2119.xml' />
+</reference>
+<?xml version='1.0' encoding='UTF-8'?>
+
+<reference anchor='RFC5155'>
+
+<front>
+<title>DNS Security (DNSSEC) Hashed Authenticated Denial of Existence</title>
+<author initials='B.' surname='Laurie' fullname='B. Laurie'>
+<organization /></author>
+<author initials='G.' surname='Sisson' fullname='G. Sisson'>
+<organization /></author>
+<author initials='R.' surname='Arends' fullname='R. Arends'>
+<organization /></author>
+<author initials='D.' surname='Blacka' fullname='D. Blacka'>
+<organization /></author>
+<date year='2008' month='March' />
+<abstract>
+<t>The Domain Name System Security (DNSSEC) Extensions introduced the NSEC resource record (RR) for authenticated denial of existence.  This document introduces an alternative resource record, NSEC3, which similarly provides authenticated denial of existence.  However, it also provides measures against zone enumeration and permits gradual expansion of delegation-centric zones. [STANDARDS-TRACK]</t></abstract></front>
+
+<seriesInfo name='RFC' value='5155' />
+<format type='TXT' octets='112338' target='http://www.rfc-editor.org/rfc/rfc5155.txt' />
 </reference>
 <?xml version='1.0' encoding='UTF-8'?>
 
