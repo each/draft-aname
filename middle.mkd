@@ -69,6 +69,8 @@ record included with DNAME [](#RFC6672).)
 
 ## Address records returned with ANAME
 
+[TODO: Add a note on the need for flattening.]
+
 If the original query is for type A, and an A RRset exists at the
 ANAME \<target\>, then that A RRset (with \<owner\> changed to match that
 of the ANAME RR), MUST be appended to the answer section after the ANAME
@@ -91,6 +93,7 @@ their TTLs expire), or it MAY delay resolution of the A and AAAA at the
 ANAME \<target\> until an address query is received for the ANAME
 \<owner\>. (In either case, for peformance reasons, it is RECOMMENDED
 that the authoritative server cache the A and AAAA responses.)
+[TODO: Add a sentence about ECS.]
 
 If the original query is for type ANAME, A and AAAA records MAY be returned
 in the additional section.
@@ -99,11 +102,6 @@ The TTL for the A and/or AAAA RRsets MUST be set to the lesser of the
 ANAME TTL and the TTL of the A and/or AAAA RRsets at the ANAME \<target\>.
 The TTL of cached A and/or AAAA RRsets MUST count down, just as they would
 do in a resolver cache.
-
-If an A or AAAA RRset is included in the answer section which was 
-resolved from a source for which the server is not authoritative, then
-the AA ("authoritative answer") bit in the DNS response header MUST be
-clear.
 
 ## Coexistence with other types
 
@@ -150,6 +148,8 @@ in a signed zone MUST have access to the zone signing key for that zone.
 
 Deployment of ANAME in signed zones where the private key is not
 accessible to all authoritative servers is NOT RECOMMENDED.
+
+[TODO: Add a paragraph on NSEC/NSEC3]
 
 # Recursive Server Behavior
 

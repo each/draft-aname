@@ -66,10 +66,10 @@
 <t>
   This document proposes a new DNS RR type ANAME, which provides similar
   functionality to CNAME but is specific to address queries (type A and
-  AAAA), and can coexist with other record types at a zone apex. This
-  allows zone owners to redirect queries for apex domain names without
-  violating specifications that require CNAME not to coexist with other
-  RR types such as NS and SOA.
+  AAAA), and can coexist with other record types. This allows zone
+  owners to redirect queries for apex domain names without violating
+  specifications that require CNAME not to coexist with other RR types
+  such as NS and SOA.
 </t>
 
   </abstract>
@@ -111,15 +111,27 @@
     would not find the correct answer.)
   </t>
   <t>
-    As a result of the above, the only standards-compliant way to
-    publish content there is to to use A and AAAA records in the apex
-    node, limiting the flexibility afforded by CNAME.
+    DNAME <xref target="RFC6672"/> is also not a solution, as its
+    function is to redirect all names in the namespace below the DNAME
+    &lt;owner&gt;, not the DNAME &lt;owner&gt; itself.
+  </t>
+  <t>
+    Redirecting website lookups to an alternate domain name via SRV or
+    URI resource records would be an effective solution, but this
+    approach has not been accepted by browser implementers.
+  </t>
+  <t>
+    As a result of the above, the only widely supported and
+    standards-compliant way to publish content at a zone apex is to to
+    place A and/or AAAA records at that node. THe flexibility afforded
+    by CNAME is not available.
   </t>
   <t>
     This document proposes a new RR type "ANAME", which
     provides similar functionality to CNAME, but only for address
     queries (type A and AAAA). The ANAME record can be present at any
-    DNS node, and can coexist with other RR types at a zone apex.
+    DNS node, and can coexist with most other RR types, enabling it to
+    be present at a zone apex.
   </t>
   <section title="Reserved Words" anchor="reserved-words">
     
@@ -170,6 +182,9 @@
   <section title="Address records returned with ANAME" anchor="address-records-returned-with-aname">
     
     <t>
+      [TODO: Add a note on the need for flattening.]
+    </t>
+    <t>
       If the original query is for type A, and an A RRset exists at the
       ANAME &lt;target&gt;, then that A RRset (with &lt;owner&gt;
       changed to match that of the ANAME RR), MUST be appended to the
@@ -196,7 +211,8 @@
       and AAAA at the ANAME &lt;target&gt; until an address query is
       received for the ANAME &lt;owner&gt;. (In either case, for
       peformance reasons, it is RECOMMENDED that the authoritative
-      server cache the A and AAAA responses.)
+      server cache the A and AAAA responses.) [TODO: Add a sentence
+      about ECS.]
     </t>
     <t>
       If the original query is for type ANAME, A and AAAA records MAY be
@@ -207,12 +223,6 @@
       the ANAME TTL and the TTL of the A and/or AAAA RRsets at the ANAME
       &lt;target&gt;. The TTL of cached A and/or AAAA RRsets MUST count
       down, just as they would do in a resolver cache.
-    </t>
-    <t>
-      If an A or AAAA RRset is included in the answer section which was
-      resolved from a source for which the server is not authoritative,
-      then the AA ("authoritative answer") bit in the DNS
-      response header MUST be clear.
     </t>
   </section>
   <section title="Coexistence with other types" anchor="coexistence-with-other-types">
@@ -274,6 +284,9 @@
     <t>
       Deployment of ANAME in signed zones where the private key is not
       accessible to all authoritative servers is NOT RECOMMENDED.
+    </t>
+    <t>
+      [TODO: Add a paragraph on NSEC/NSEC3]
     </t>
   </section>
 </section>

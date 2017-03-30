@@ -18,10 +18,10 @@ Abstract
 
    This document proposes a new DNS RR type ANAME, which provides
    similar functionality to CNAME but is specific to address queries
-   (type A and AAAA), and can coexist with other record types at a zone
-   apex.  This allows zone owners to redirect queries for apex domain
-   names without violating specifications that require CNAME not to
-   coexist with other RR types such as NS and SOA.
+   (type A and AAAA), and can coexist with other record types.  This
+   allows zone owners to redirect queries for apex domain names without
+   violating specifications that require CNAME not to coexist with other
+   RR types such as NS and SOA.
 
 Status of This Memo
 
@@ -69,7 +69,7 @@ Table of Contents
      1.1.  Reserved Words  . . . . . . . . . . . . . . . . . . . . .   3
    2.  The ANAME Resource Record . . . . . . . . . . . . . . . . . .   3
    3.  Authoritative Server Behavior . . . . . . . . . . . . . . . .   3
-     3.1.  Address records returned with ANAME . . . . . . . . . . .   3
+     3.1.  Address records returned with ANAME . . . . . . . . . . .   4
      3.2.  Coexistence with other types  . . . . . . . . . . . . . .   4
      3.3.  DNSSEC signing  . . . . . . . . . . . . . . . . . . . . .   5
    4.  Recursive Server Behavior . . . . . . . . . . . . . . . . . .   5
@@ -77,8 +77,8 @@ Table of Contents
    6.  Security Considerations . . . . . . . . . . . . . . . . . . .   6
    7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   6
    8.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .   6
-   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   6
-     9.1.  Normative References  . . . . . . . . . . . . . . . . . .   6
+   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   7
+     9.1.  Normative References  . . . . . . . . . . . . . . . . . .   7
      9.2.  Informative References  . . . . . . . . . . . . . . . . .   7
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   7
 
@@ -114,14 +114,24 @@ Hunt, et al.             Expires October 1, 2017                [Page 2]
 Internet-Draft                    aname                       March 2017
 
 
-   As a result of the above, the only standards-compliant way to publish
-   content there is to to use A and AAAA records in the apex node,
-   limiting the flexibility afforded by CNAME.
+   DNAME [RFC6672] is also not a solution, as its function is to
+   redirect all names in the namespace below the DNAME <owner>, not the
+   DNAME <owner> itself.
+
+   Redirecting website lookups to an alternate domain name via SRV or
+   URI resource records would be an effective solution, but this
+   approach has not been accepted by browser implementers.
+
+   As a result of the above, the only widely supported and standards-
+   compliant way to publish content at a zone apex is to to place A and/
+   or AAAA records at that node.  THe flexibility afforded by CNAME is
+   not available.
 
    This document proposes a new RR type "ANAME", which provides similar
    functionality to CNAME, but only for address queries (type A and
    AAAA).  The ANAME record can be present at any DNS node, and can
-   coexist with other RR types at a zone apex.
+   coexist with most other RR types, enabling it to be present at a zone
+   apex.
 
 1.1.  Reserved Words
 
@@ -152,16 +162,6 @@ Internet-Draft                    aname                       March 2017
    server returns the ANAME RRset in the answer section.  For the
    benefit of querying resolvers that do not implement ANAME, the
    authoritative server also returns address records as described below.
-   (This is similar to the synthesized CNAME record included with DNAME
-   [RFC6672].)
-
-3.1.  Address records returned with ANAME
-
-   If the original query is for type A, and an A RRset exists at the
-   ANAME <target>, then that A RRset (with <owner> changed to match that
-   of the ANAME RR), MUST be appended to the answer section after the
-   ANAME RRset.  If an AAAA RRset eixsts at the ANAME <target>, then it
-
 
 
 
@@ -170,6 +170,17 @@ Hunt, et al.             Expires October 1, 2017                [Page 3]
 Internet-Draft                    aname                       March 2017
 
 
+   (This is similar to the synthesized CNAME record included with DNAME
+   [RFC6672].)
+
+3.1.  Address records returned with ANAME
+
+   [TODO: Add a note on the need for flattening.]
+
+   If the original query is for type A, and an A RRset exists at the
+   ANAME <target>, then that A RRset (with <owner> changed to match that
+   of the ANAME RR), MUST be appended to the answer section after the
+   ANAME RRset.  If an AAAA RRset eixsts at the ANAME <target>, then it
    MAY be appended to the additional section (again, with <owner>
    changed to match that of the ANAME RR).
 
@@ -188,7 +199,8 @@ Internet-Draft                    aname                       March 2017
    or it MAY delay resolution of the A and AAAA at the ANAME <target>
    until an address query is received for the ANAME <owner>.  (In either
    case, for peformance reasons, it is RECOMMENDED that the
-   authoritative server cache the A and AAAA responses.)
+   authoritative server cache the A and AAAA responses.)  [TODO: Add a
+   sentence about ECS.]
 
    If the original query is for type ANAME, A and AAAA records MAY be
    returned in the additional section.
@@ -198,11 +210,6 @@ Internet-Draft                    aname                       March 2017
    <target>.  The TTL of cached A and/or AAAA RRsets MUST count down,
    just as they would do in a resolver cache.
 
-   If an A or AAAA RRset is included in the answer section which was
-   resolved from a source for which the server is not authoritative,
-   then the AA ("authoritative answer") bit in the DNS response header
-   MUST be clear.
-
 3.2.  Coexistence with other types
 
    If the zone is configured with an A RRset with the same owner as
@@ -211,13 +218,6 @@ Internet-Draft                    aname                       March 2017
    Similarly, if ANAME coexists with AAAA, then ANAME MUST NOT be
    returned for queries of type AAAA.
 
-   If ANAME coexists with both A and AAAA RRsets, then the ANAME MUST
-   NOT be returned under any circumstances.  If a zone is configured
-   with all three of ANAME, A, and AAAA at the same node, the server MAY
-   treat this as an error condition and reject the zone.
-
-   [REMOVE BEFORE PUBLICATION: I wrote the above thinking that someone
-   might want to use ANAME for A or AAAA but not both.  Existing
 
 
 
@@ -226,6 +226,13 @@ Hunt, et al.             Expires October 1, 2017                [Page 4]
 Internet-Draft                    aname                       March 2017
 
 
+   If ANAME coexists with both A and AAAA RRsets, then the ANAME MUST
+   NOT be returned under any circumstances.  If a zone is configured
+   with all three of ANAME, A, and AAAA at the same node, the server MAY
+   treat this as an error condition and reject the zone.
+
+   [REMOVE BEFORE PUBLICATION: I wrote the above thinking that someone
+   might want to use ANAME for A or AAAA but not both.  Existing
    implementations apparently handle coexistence with A and AAAA
    differently.  Some simply add the locally defined A/AAAA to the
    expanded ANAME response.  A suggestion has been made that this could
@@ -260,11 +267,21 @@ Internet-Draft                    aname                       March 2017
    Deployment of ANAME in signed zones where the private key is not
    accessible to all authoritative servers is NOT RECOMMENDED.
 
+   [TODO: Add a paragraph on NSEC/NSEC3]
+
 4.  Recursive Server Behavior
 
    When a recursive resolver sends a query of type A or AAAA and
    receives a response with an ANAME RRset in the answer section, it
    MUST re-query for the ANAME <target>, disregarding any addresses that
+
+
+
+Hunt, et al.             Expires October 1, 2017                [Page 5]
+
+Internet-Draft                    aname                       March 2017
+
+
    were included with the response.  This is necessary because, in some
    cases, the address received will be dependent on network topology and
    other considerations, and the resolver will find a different answer
@@ -273,14 +290,6 @@ Internet-Draft                    aname                       March 2017
    If configured to do so, the resolver MAY include an EDNS CLIENT-
    SUBNET option when re-querying for the ANAME <target> and cache the
    response accordingly (see [RFC7871]).
-
-
-
-
-Hunt, et al.             Expires October 1, 2017                [Page 5]
-
-Internet-Draft                    aname                       March 2017
-
 
 5.  Operational Considerations
 
@@ -318,6 +327,17 @@ Internet-Draft                    aname                       March 2017
    Thanks to Mukund Sivaraman, Ray Bellis, and Mark Andrews for
    discussion and feedback.
 
+
+
+
+
+
+
+Hunt, et al.             Expires October 1, 2017                [Page 6]
+
+Internet-Draft                    aname                       March 2017
+
+
 9.  References
 
 9.1.  Normative References
@@ -330,13 +350,6 @@ Internet-Draft                    aname                       March 2017
 
    [RFC3597]  Gustafsson, A., "Handling of Unknown DNS Resource Record
               (RR) Types", RFC 3597, September 2003.
-
-
-
-Hunt, et al.             Expires October 1, 2017                [Page 6]
-
-Internet-Draft                    aname                       March 2017
-
 
    [RFC4034]  Arends, R., Austein, R., Larson, M., Massey, D., and S.
               Rose, "Resource Records for the DNS Security Extensions",
@@ -375,6 +388,12 @@ Authors' Addresses
    Email: peter.van.dijk@powerdns.com
 
 
+
+Hunt, et al.             Expires October 1, 2017                [Page 7]
+
+Internet-Draft                    aname                       March 2017
+
+
    Anthony Eden
    DNSimple
    Boston, MA
@@ -389,4 +408,41 @@ Authors' Addresses
 
 
 
-Hunt, et al.             Expires October 1, 2017                [Page 7]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.             Expires October 1, 2017                [Page 8]
