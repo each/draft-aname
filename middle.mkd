@@ -127,7 +127,7 @@ that address records be cached locally by the authoritative server.
 Address records cached locally MUST have a limited TTL.  The initial TTL
 for locally-cached address records MUST be set to the lesser of the ANAME
 TTL and the TTL of the address records retrieved from the ANAME \<target\>.
-The local TTL SHOULD MUST count down, just as it would in a conventional resolver
+The local TTL MUST count down, just as it would in a conventional resolver
 cache.  Records with an expired TTL MUST NOT be returned until refreshed
 with a new query to the ANAME \<target\>.
 
