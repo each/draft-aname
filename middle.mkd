@@ -161,7 +161,7 @@ ANAME, then the server MAY use that RRset as a pre-configured fallback in
 the event that resolving the ANAME \<target\> fails or if the address type
 is not present at the ANAME \<target\>.  (For example, if the ANAME
 \<target\> returns NOERROR/NODATA for a query of type AAAA, but the ANAME
-\<owner\> contains an AAAA RRset, then that RRset MAY be returned to the
+\<owner\> has an AAAA RRset, then that RRset MAY be returned to the
 querying resolver.)
 
 ANAME MUST NOT coexist with CNAME or any other RR type that restricts
