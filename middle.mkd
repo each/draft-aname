@@ -88,17 +88,18 @@ an external recursive resolver, or by implementing recursive resolution
 logic internally.
 
 If the ANAME \<target\> returns a chaining response (i.e., CNAME, DNAME, or
-another ANAME), then the authoritative server MUST follow it until it is
-able to resolve an address response. Intermediate ANAMEs, CNAMEs, and
-DNAMEs MUST be omitted from the response.
+another ANAME), then the authoritative server (or the resolver tasked with
+resolving the ANAME target on behalf of it) MUST follow it until it is able to
+resolve a final address response. Intermediate ANAMEs, CNAMEs, and DNAMEs MUST
+be omitted from the response.
 
 ## Address records returned with ANAME
 
 If the original query is for type A, and an RRset of type A exists at the
-ANAME \<target\>, then that A RRset (with \<owner\> changed to match that
-of the ANAME RR), MUST be appended to the answer section after the ANAME
-RRset.  If an AAAA RRset is also known to exist at the ANAME \<target\>,
-then the AAAA RRset MAY be appended to the additional section (again, with
+final ANAME \<target\>, then that A RRset (with \<owner\> changed to match
+that of the ANAME RR), MUST be appended to the answer section after the ANAME
+RRset.  If an AAAA RRset is also known to exist at the ANAME \<target\>, then
+the AAAA RRset MAY be appended to the additional section (again, with
 \<owner\> changed to match that of the ANAME RR).
 
 Similarly, if the original query was for type AAAA, and an AAAA RRset
