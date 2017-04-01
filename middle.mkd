@@ -41,7 +41,7 @@ Authoritative servers configured with ANAME records will answer address
 queries for the ANAME owner with addresses found at the ANAME's target, and
 also with the ANAME itself. Recursive resolvers which understand ANAME can
 re-query for the ANAME target, just as if they had received a CNAME
-response. Rrecursive resolvers which do not understand ANAME will ignore
+response. Recursive resolvers which do not understand ANAME will ignore
 the ANAME and consume the provided A/AAAA records directly.
 
 ## Terminology
