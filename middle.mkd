@@ -250,8 +250,8 @@ the ANAME \<target\> are not. If the primary server implements ANAME but
 the secondary server does not, then the two will return different answers
 for address queries. It is therefore RECOMMENDED that ANAME not be deployed
 in a zone unless all of the authoritative servers for that zone implement
-ANAME, or the primary is able to expand/augment the ANAME with the related
-address RRsets during the zone transfer.
+ANAME, or the primary is able to augment the ANAME with the related address
+RRsets during the zone transfer.
 
 # Security Considerations
 
