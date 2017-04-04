@@ -1,609 +1,205 @@
-<?xml version="1.0" ?>
-<!DOCTYPE rfc SYSTEM 'rfc2629.dtd' [
-<!ENTITY pandocAbstract PUBLIC '' 'abstract.xml'>
-<!ENTITY pandocMiddle PUBLIC '' 'middle.xml'>
-<!ENTITY pandocBack   PUBLIC '' 'back.xml'>
-]>
-<rfc ipr="trust200902" category="std" docName="draft-hunt-dnsop-aname-00">
-<?rfc toc="yes"?>         <!-- generate a table of contents -->
-<?rfc symrefs="yes"?>     <!-- use anchors instead of numbers for references -->
-<?rfc sortrefs="yes" ?>   <!-- alphabetize the references -->
-<?rfc compact="yes" ?>    <!-- conserve vertical whitespace -->
-<?rfc subcompact="no" ?>  <!-- but keep a blank line between list items -->
-<front>
-  <title abbrev="aname">Address-specific DNS Name Redirection (ANAME)</title>
-
-  <author initials="E." surname="Hunt" fullname="Evan Hunt">
-    <organization>ISC</organization> 
-    <address>
-      <postal>
-        <street>950 Charter St</street>
-        <city>Redwood City</city> <region>CA</region>
-        <code>94063</code>
-        <country>USA</country>
-      </postal>
-      <email>each@isc.org</email>
-    </address>
-  </author>
-  <author initials="P.D." surname="van Dijk" fullname="Peter van Dijk">
-    <organization>PowerDNS.COM B.V.</organization>
-    <address>
-      <postal>
-        <street>Seinstraat 76</street>
-        <city>Hilversum</city>
-        <code>1223 DB</code>
-        <country>The Netherlands</country>
-      </postal>
-      <email>peter.van.dijk@powerdns.com</email>
-    </address>
-  </author>
-  <author initials="A." surname="Eden" fullname="Anthony Eden">
-    <organization>DNSimple</organization>
-    <address>
-      <postal>
-	<street></street>
-	<city>Boston</city> <region>MA</region>
-	<country>USA</country>
-      </postal>
-      <email>anthony.eden@dnsimple.com</email>
-      <uri>https://dnsimple.com/</uri>
-    </address>
-  </author>
-
-  <date month="Mar" year="2017"/>
-
-  <area>General</area>
-  <keyword>DNS</keyword>
-  <keyword>RR</keyword>
-  <keyword>aname</keyword>
-  <keyword>apex</keyword>
-  <keyword>cname</keyword>
-  <abstract>
-<!-- This document was prepared using Pandoc2rfc -->
-<!-- https://github.com/miekg/pandoc2rfc -->
-
-  
-<t>
-  This document proposes a new DNS RR type ANAME, which provides similar
-  functionality to CNAME but is specific to address queries (type A and
-  AAAA), and can coexist with other record types. This allows zone
-  owners to redirect queries for apex domain names without violating
-  specifications that require CNAME not to coexist with other RR types
-  such as NS and SOA.
-</t>
-
-  </abstract>
-</front>
-
-<middle>
-<!-- This document was prepared using Pandoc2rfc -->
-<!-- https://github.com/miekg/pandoc2rfc -->
-
-  
-<section title="Introduction" anchor="introduction">
-  
-  <t>
-    Websites hosted by content distribution networks are often served by
-    multiple IP addresses handling different geographic areas. In many
-    cases, an initial query for a domain name returns a CNAME record
-    whose &lt;target&gt; is a name served by the CDN, and which
-    ultimately resolves to a different final answer depending on the
-    client's IP address or subnet, geographic location, or other
-    considerations.
-  </t>
-  <t>
-    It is common practice for sites to publish content at their
-    registered domain name (sometimes referred to as a "bare
-    domain" or "zone apex": for example,
-    "example.com" rather than "www.example.com").
-    However, <xref target="RFC1033"/> forbids the use of CNAME
-    records at the same node as any other record type. Zone apex nodes
-    always contain SOA and NS RRsets records, and frequently contain
-    other types such as DNSKEY, MX, TXT/SPF, etc. Consequently, CNAME is
-    impermissible at apex nodes.
-  </t>
-  <t>
-    It should be noted that <xref target="RFC4034"/> relaxed this
-    restriction by allowing coexistence between CNAME and RRSIG and NSEC
-    records, but such exceptions are not applicable to other resource
-    records. RRSIG and NSEC exist to prove the integrity of the CNAME
-    record; they are not intended to associate arbitrary data with the
-    domain name.
-  </t>
-  <t>
-    DNAME <xref target="RFC6672"/> is also not a solution, as its
-    function is to redirect all names in the namespace below the DNAME
-    &lt;owner&gt;, not the DNAME &lt;owner&gt; itself.
-  </t>
-  <t>
-    Redirecting website lookups to an alternate domain name via SRV or
-    URI resource records would be an effective solution, but to date
-    this approach has not been accepted by browser implementations.
-  </t>
-  <t>
-    As a result of the above, the only widely supported and
-    standards-compliant way to publish content at a zone apex is to to
-    place A and/or AAAA records at that node. THe flexibility afforded
-    by CNAME is not available.
-  </t>
-  <t>
-    This document proposes a new RR type "ANAME", which
-    provides similar functionality to CNAME, but only for address
-    queries (i.e., for type A or AAAA). The ANAME record can be present
-    at any DNS node, and can coexist with most other RR types, enabling
-    it to be present at a zone apex. Authoritative servers configured
-    with ANAME records will answer address queries for the ANAME owner
-    with addresses found at the ANAME's target, and also with the ANAME
-    itself. Recursive resolvers which understand ANAME can re-query for
-    the ANAME target, just as if they had received a CNAME response.
-    Rrecursive resolvers which do not understand ANAME will ignore the
-    ANAME and consume the provided A/AAAA records directly.
-  </t>
-  <section title="Terminology" anchor="terminology">
-    
-    <t>
-      "Address type" refers to a DNS RR type that encodes a
-      network address. Currently the set of address types consists of A
-      and AAAA.
-    </t>
-    <t>
-      "Address query" refers to a DNS query for any address
-      type.
-    </t>
-  </section>
-  <section title="Reserved Words" anchor="reserved-words">
-    
-    <t>
-      The key words "MUST", "MUST NOT",
-      "REQUIRED", "SHALL", "SHALL NOT",
-      "SHOULD", "SHOULD NOT",
-      "RECOMMENDED", "MAY", and "OPTIONAL"
-      in this document are to be interpreted as described in
-      <xref target="RFC2119"/>.
-    </t>
-  </section>
-</section>
-<section title="The ANAME Resource Record" anchor="the-aname-resource-record">
-  
-  <t>
-    This document specifies a new DNS resource record type ANAME, with
-    RR code point [TBD].
-  </t>
-  <t>
-    The ANAME presentation format is identical to that of CNAME
-    <xref target="RFC1033"/>:
-  </t>
-  <figure><artwork>
+<?xml version='1.0' encoding='ascii'?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd">
+<rfc ipr="trust200902" category="std" docName="draft-hunt-dnsop-aname-00" obsoletes="" updates="" submissionType="IETF" xml:lang="en">
+  <?rfc toc="yes"?>
+  <!--generate a table of contents -->
+  <?rfc symrefs="yes"?>
+  <!--use anchors instead of numbers for references -->
+  <?rfc sortrefs="yes" ?>
+  <!--alphabetize the references -->
+  <?rfc compact="yes" ?>
+  <!--conserve vertical whitespace -->
+  <?rfc subcompact="no" ?>
+  <!--but keep a blank line between list items -->
+  <front>
+    <title abbrev="aname">Address-specific DNS Name Redirection (ANAME)</title>
+    <author initials="E." surname="Hunt" fullname="Evan Hunt">
+      <organization>ISC</organization>
+      <address>
+        <postal>
+          <street>950 Charter St</street>
+          <city>Redwood City</city>
+          <region>CA</region>
+          <code>94063</code>
+          <country>USA</country>
+        </postal>
+        <email>each@isc.org</email>
+      </address>
+    </author>
+    <author initials="P.D." surname="van Dijk" fullname="Peter van Dijk">
+      <organization>PowerDNS.COM B.V.</organization>
+      <address>
+        <postal>
+          <street>Seinstraat 76</street>
+          <city>Hilversum</city>
+          <code>1223 DB</code>
+          <country>The Netherlands</country>
+        </postal>
+        <email>peter.van.dijk@powerdns.com</email>
+      </address>
+    </author>
+    <author initials="A." surname="Eden" fullname="Anthony Eden">
+      <organization>DNSimple</organization>
+      <address>
+        <postal>
+          <street/>
+          <city>Boston</city>
+          <region>MA</region>
+          <country>USA</country>
+        </postal>
+        <email>anthony.eden@dnsimple.com</email>
+        <uri>https://dnsimple.com/</uri>
+      </address>
+    </author>
+    <date month="Mar" year="2017"/>
+    <area>General</area>
+    <keyword>DNS</keyword>
+    <keyword>RR</keyword>
+    <keyword>aname</keyword>
+    <keyword>apex</keyword>
+    <keyword>cname</keyword>
+    <abstract><!--This document was prepared using Pandoc2rfc, https://github.com/miekg/pandoc2rfc --><t>This document proposes a new DNS RR type ANAME, which provides similar functionality to CNAME but is specific to address queries (type A and AAAA), and can coexist with other record types. This allows zone owners to redirect queries for apex domain names without violating specifications that require CNAME not to coexist with other RR types such as NS and SOA.  </t> </abstract>
+  </front>
+  <middle><!--This document was prepared using Pandoc2rfc, https://github.com/miekg/pandoc2rfc --><section title="Introduction" anchor="introduction" toc="default"><t>Websites hosted by content distribution networks are often served by multiple IP addresses handling different geographic areas. In many cases, an initial query for a domain name returns a CNAME record whose &lt;target&gt; is a name served by the CDN, and which ultimately resolves to a different final answer depending on the client's IP address or subnet, geographic location, or other considerations.  </t><t>It is common practice for sites to publish content at their registered domain name (sometimes referred to as a "bare domain" or "zone apex": for example, "example.com" rather than "www.example.com").  However, <xref target="RFC1033" pageno="false" format="default"/> forbids the use of CNAME records at the same node as any other record type. Zone apex nodes always contain SOA and NS RRsets records, and frequently contain other types such as DNSKEY, MX, TXT/SPF, etc. Consequently, CNAME is impermissible at apex nodes.  </t><t>It should be noted that <xref target="RFC4034" pageno="false" format="default"/> relaxed this restriction by allowing coexistence between CNAME and RRSIG and NSEC records, but such exceptions are not applicable to other resource records. RRSIG and NSEC exist to prove the integrity of the CNAME record; they are not intended to associate arbitrary data with the domain name.  </t><t>DNAME <xref target="RFC6672" pageno="false" format="default"/> is also not a solution, as its function is to redirect all names in the namespace below the DNAME &lt;owner&gt;, not the DNAME &lt;owner&gt; itself.  </t><t>Redirecting website lookups to an alternate domain name via SRV or URI resource records would be an effective solution, but to date this approach has not been accepted by browser implementations.  </t><t>As a result of the above, the only widely supported and standards-compliant way to publish content at a zone apex is to to place A and/or AAAA records at that node. THe flexibility afforded by CNAME is not available.  </t><t>This document proposes a new RR type "ANAME", which provides similar functionality to CNAME, but only for address queries (i.e., for type A or AAAA). The ANAME record can be present at any DNS node, and can coexist with most other RR types, enabling it to be present at a zone apex. Authoritative servers configured with ANAME records will answer address queries for the ANAME owner with addresses found at the ANAME's target, and also with the ANAME itself. Recursive resolvers which understand ANAME can re-query for the ANAME target, just as if they had received a CNAME response.  Recursive resolvers which do not understand ANAME will ignore the ANAME and consume the provided A/AAAA records directly.  </t><section title="Terminology" anchor="terminology" toc="default"><t>"Address type" refers to a DNS RR type that encodes a network address. Currently the set of address types consists of A and AAAA.  </t><t>"Address query" refers to a DNS query for any address type.  </t></section><section title="Reserved Words" anchor="reserved-words" toc="default"><t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in <xref target="RFC2119" pageno="false" format="default"/>.  </t></section></section><section title="The ANAME Resource Record" anchor="the-aname-resource-record" toc="default"><t>This document specifies a new DNS resource record type ANAME, with RR code point [TBD].  </t><t>The ANAME presentation format is identical to that of CNAME <xref target="RFC1033" pageno="false" format="default"/>: </t><figure title="" suppress-title="false" align="left" alt="" width="" height=""><artwork xml:space="preserve" name="" type="" align="left" alt="" width="" height="">
     owner ttl class ANAME target
-</artwork></figure>
-  <t>
-    The wire format is also identical to CNAME, except that name
-    compression is not permitted in ANAME RDATA, per
-    <xref target="RFC3597"/>.
-  </t>
-  <t>
-    No more than one ANAME resource record can be present at any DNS
-    node.
-  </t>
-</section>
-<section title="Authoritative Server Behavior" anchor="authoritative-server-behavior">
-  
-  <t>
-    When an ANAME record is present at a DNS node and a query is
-    received by an authoritative server for type A or AAAA, the
-    authoritative server returns the ANAME RRset in the answer section.
-  </t>
-  <t>
-    For the benefit of querying resolvers that do not implement ANAME,
-    the authoritative server also returns address records as described
-    below. (This is similar to the synthesized CNAME record included
-    with DNAME <xref target="RFC6672"/>.)
-  </t>
-  <t>
-    Authoritative servers implementing ANAME MUST be equipped to resolve
-    the ANAME &lt;target&gt; on the querying resolver's behalf, either
-    by sending queries to an external recursive resolver, or by
-    implementing recursive resolution logic internally.
-  </t>
-  <t>
-    If the ANAME &lt;target&gt; returns a chaining response (i.e.,
-    CNAME, DNAME, or another ANAME), then the authoritative server MUST
-    follow it until it is able to resolve an address response.
-    Intermediate ANAMEs, CNAMEs, and DNAMEs MUST be omitted from the
-    response.
-  </t>
-  <section title="Address records returned with ANAME" anchor="address-records-returned-with-aname">
-    
-    <t>
-      If the original query is for type A, and an RRset of type A exists
-      at the ANAME &lt;target&gt;, then that A RRset (with &lt;owner&gt;
-      changed to match that of the ANAME RR), MUST be appended to the
-      answer section after the ANAME RRset. If an AAAA RRset is also
-      known to exist at the ANAME &lt;target&gt;, then the AAAA RRset
-      MAY be appended to the additional section (again, with
-      &lt;owner&gt; changed to match that of the ANAME RR).
-    </t>
-    <t>
-      Similarly, if the original query was for type AAAA, and an AAAA
-      RRset exists at the ANAME &lt;target&gt;, then it is appended to
-      the answer section, and if an A RRset also exists at the ANAME
-      &lt;target&gt; then it MAY be appended to the additional section.
-    </t>
-    <t>
-      If the original query is for type ANAME, A and AAAA records MAY be
-      returned in the additional section.
-    </t>
-    <t>
-      If the original query is for type ANY and access to ANY query
-      processing is not restricted, then the answer section contains the
-      ANAME and the A and AAAA RRsets, if present and successfully
-      resolved at the ANAME &lt;target&gt;, or if fallback address
-      records are configured locally.
-    </t>
-    <t>
-      How and when an authoritative server resolves the A and AAAA
-      responses from the ANAME &lt;target&gt; (when it is not itself
-      authoritative for &lt;target&gt;) is unspecified. If the
-      authoritative server is capable of performing recursive
-      resolution, then it MAY resolve the query itself, or it MAY send
-      address queries to an external resolver. It MAY send address
-      queries to the ANAME &lt;target&gt; when loading the zone and
-      store the responses locally, or it MAY delay resolution of the
-      address records until a query is received for the ANAME
-      &lt;owner&gt;. In either case, for performance reasons, it is
-      RECOMMENDED that address records be cached locally by the
-      authoritative server.
-    </t>
-    <t>
-      Address records cached locally MUST have a limited TTL. The
-      initial TTL for locally-cached address records MUST be set to the
-      lesser of the ANAME TTL and the TTL of the address records
-      retrieved from the ANAME &lt;target&gt;. The local TTL MUST count
-      down, just as it would in a conventional resolver cache. Records
-      with an expired TTL MUST NOT be returned until refreshed with a
-      new query to the ANAME &lt;target&gt;.
-    </t>
-    <t>
-      If configured to do so, then the authoritative server MAY, when
-      sending queries to the ANAME &lt;target&gt;, include an EDNS
-      CLIENT-SUBNET (ECS) option <xref target="RFC7871"/>, either
-      forwarding an ECS option that was sent to it by the querying
-      resolver, or generating a new ECS option from the querying
-      resolver's address. If a response from the ANAME &lt;target&gt;
-      includes an ECS option with a SCOPE PREFIX-LENGTH greater than
-      zero, the response SHOULD be cached with the ECS data and should
-      only be used in response to queries from the same client subnet.
-    </t>
-    <t>
-      [REMOVE BEFORE PUBLICATION: Some suggestions have been made about
-      signaling ANAME capability via an EDNS option. If a query
-      indicated that the client understood ANAME, then the authority
-      could respond differently. This may turn out to be necessary, but
-      I want to hold off on specifying it until we're sure that it is. -
-      each]
-    </t>
-  </section>
-  <section title="Coexistence with other types" anchor="coexistence-with-other-types">
-    
-    <t>
-      If the zone is configured with an A or AAAA RRset at the same DNS
-      node as ANAME, then the server MAY use that RRset as a
-      pre-configured fallback in the event that resolving the ANAME
-      &lt;target&gt; fails or if the address type is not present at the
-      ANAME &lt;target&gt;. (For example, if the ANAME &lt;target&gt;
-      returns NOERROR/NODATA for a query of type AAAA, but the ANAME
-      &lt;owner&gt; contains an AAAA RRset, then that RRset MAY be
-      returned to the querying resolver.)
-    </t>
-    <t>
-      ANAME MUST NOT coexist with CNAME or any other RR type that
-      restricts the types with which it can itself coexist.
-    </t>
-    <t>
-      Like other types, ANAME MUST NOT exist below a DNAME, but it can
-      coexist at the same node; in fact, the two can be used
-      cooperatively to redirect both the owner name (via ANAME) and
-      everything under it (via DNAME).
-    </t>
-    <t>
-      ANAME can freely coexist at the same owner name with any other RR
-      type.
-    </t>
-  </section>
-  <section title="DNSSEC signing" anchor="dnssec-signing">
-    
-    <t>
-      If the zone in which the ANAME resides is DNSSEC signed, and if
-      the server has access to the private zone-signing key, then the A
-      and AAAA RRsets MUST be signed, either in advance when populating
-      the A/AAAA answers for the ANAME records, or "on the
-      fly" when responding to a query.
-    </t>
-    <t>
-      If the server does not have access to the private zone-signing key
-      then it MAY return unsigned address records, but this is NOT
-      RECOMMENDED unless every resolver with access to the zone is known
-      to support ANAME (as might be the case in a split-horizon
-      deployment where ANAME records are only served to an internal
-      network with its own resolvers).
-    </t>
-    <t>
-      Validating resolvers which do not yet implement ANAME will not be
-      able to validate the A and AAAA responses included with an ANAME
-      response unless those responses are validly signed by a DNSKEY at
-      the apex of the zone in which the ANAME resides. Passing along the
-      RRSIGs associated with the original A and AAAA RRsets from the
-      ANAME &lt;target&gt; will not be sufficient for DNSSEC validation.
-    </t>
-    <t>
-      Implementers MAY allow address records associated with the ANAME
-      to be populated and signed by the primary server, then sent along
-      with their RRSIGs to secondaries via zone transfer. In this case,
-      the master server MUST refresh the address records when their TTLs
-      expire and MUST inform secondary servers via DNS NOTIFY that they
-      need to refresh the zone. The secondary MUST store address
-      information and associated RRSIGs supplied via zone transfer in
-      cache such that its TTL will count down and force a refresh query.
-    </t>
-    <t>
-      [REMOVE BEFORE PUBLICATION: this rules out using any non-ANAME
-      aware secondary, which I think is too much to ask. A short TTL
-      plus frequent NOTIFY should be allowed - pdvd]
-    </t>
-    <t>
-      If this address record expansion and signing during zone transfer
-      is not supported, then every authoritative server providing ANAME
-      responses in a signed zone SHOULD have access to the private
-      zone-signing key for that zone. Deployment of ANAME in signed
-      zones where address records cannot be signed due to lack of access
-      to the private zone-signing key is NOT RECOMMENDED.
-    </t>
-    <t>
-      When ANAME is present in a signed DNS node, the type bit map in
-      the NSEC <xref target="RFC4034"/> or NSEC3
-      <xref target="RFC5155"/> record for that node MUST include
-      at least one of A and AAAA as well as ANAME. This is for the
-      benefit of validating resolvers not implementing ANAME which may
-      use a signed proof of nonexistence for type A and AAAA to prevent
-      address queries from being resolved. The type bit map SHOULD only
-      include address types which are known to exist at the ANAME
-      &lt;target&gt;.
-    </t>
-  </section>
-</section>
-<section title="Recursive Server Behavior" anchor="recursive-server-behavior">
-  
-  <t>
-    When a recursive resolver sends a query of type A or AAAA and
-    receives a response with an ANAME RRset in the answer section, it
-    MUST re-query for the ANAME &lt;target&gt;. This is necessary
-    because, in some cases, the address received will be dependent on
-    network topology and other considerations, and the resolver may find
-    a different answer than the authoritative server did.
-  </t>
-  <t>
-    If resolution fails -- for example, due to the local resolver being
-    nonfunctional or the ANAME &lt;target&gt; zone being unreachable --
-    then the resolver MAY use the address records that were included in
-    the authoritative response as a fallback.
-  </t>
-  <t>
-    If configured to do so, the resolver MAY include an EDNS
-    CLIENT-SUBNET option <xref target="RFC7871"/> both when
-    sending the initial query to the ANAME &lt;owner&gt; and when
-    re-querying for the ANAME &lt;target&gt;. If the response includes a
-    SCOPE PREFIX-LENGTH greater than zero, the response SHOULD be cached
-    with the ECS data and should only be used in response to queries
-    from the same client subnet.
-  </t>
-</section>
-<section title="Operational Considerations" anchor="operational-considerations">
-  
-  <t>
-    When a zone containing ANAME records is transferred to a secondary
-    server, the ANAME records are transferred, but the A or AAAA records
-    retrieved from the ANAME &lt;target&gt; are not. If the primary
-    server implements ANAME but the secondary server does not, then the
-    two will return different answers for address queries. It is
-    therefore RECOMMENDED that ANAME not be deployed in a zone unless
-    all of the authoritative servers for that zone implement ANAME, or
-    the primary is able to expand/augment the ANAME with the related
-    address RRsets during the zone transfer.
-  </t>
-</section>
-<section title="Security Considerations" anchor="security-considerations">
-  
-  <t>
-    An authoritative server which implements ANAME must resolve address
-    queries on behalf its clients, either internally or by querying an
-    external resolver. This resolution must be allowed to take place
-    regardless of whether the client would ordinaily have been permitted
-    by local policy to send recursive queries.
-  </t>
-  <t>
-    When a resolver that does not understand ANAME receives a response
-    containing A or AAAA records with &lt;owner&gt; rewritten to match
-    that of the ANAME RR, this may bypass security mechanisms based on
-    local policy limiting access to the original ANAME &lt;target&gt;.
-  </t>
-  <t>
-    A validating resolver that does not understand ANAME will not be
-    able to validate A and AAAA records unless they are signed.
-  </t>
-  <t>
-    Both authoritative servers and resolvers that implement ANAME should
-    carefully check for loops and treat them as an error condition.
-  </t>
-</section>
-<section title="IANA Considerations" anchor="iana-considerations">
-  
-  <t>
-    IANA is requested to allocate a DNS RR type code for the ANAME RR
-    type.
-  </t>
-</section>
-<section title="Acknowledgments" anchor="acknowledgments">
-  
-  <t>
-    Thanks to Mukund Sivaraman, Stephen Morris, Ray Bellis, and Mark
-    Andrews for discussion and feedback.
-  </t>
-</section>
-
-</middle>
-
-<back>
-  <references title="Normative References">
-<?xml version='1.0' encoding='UTF-8'?>
-
-<reference anchor='RFC1033'>
-
-<front>
-<title abbrev='DOMAIN OPERATIONS GUIDE'>Domain administrators operations guide</title>
-<author initials='M.' surname='Lottor' fullname='M. Lottor'>
-<organization>SRI International</organization></author>
-<date year='1987' day='1' month='November' /></front>
-
-<seriesInfo name='RFC' value='1033' />
-<format type='TXT' octets='37263' target='http://www.rfc-editor.org/rfc/rfc1033.txt' />
-</reference>
-<?xml version='1.0' encoding='UTF-8'?>
-
-<reference anchor='RFC3597'>
-
-<front>
-<title>Handling of Unknown DNS Resource Record (RR) Types</title>
-<author initials='A.' surname='Gustafsson' fullname='A. Gustafsson'>
-<organization /></author>
-<date year='2003' month='September' />
-<abstract>
-<t>Extending the Domain Name System (DNS) with new Resource Record (RR) types currently requires changes to name server software.  This document specifies the changes necessary to allow future DNS implementations to handle new RR types transparently. [STANDARDS-TRACK]</t></abstract></front>
-
-<seriesInfo name='RFC' value='3597' />
-<format type='TXT' octets='17559' target='http://www.rfc-editor.org/rfc/rfc3597.txt' />
-</reference>
-<?xml version='1.0' encoding='UTF-8'?>
-
-<reference anchor='RFC4034'>
-
-<front>
-<title>Resource Records for the DNS Security Extensions</title>
-<author initials='R.' surname='Arends' fullname='R. Arends'>
-<organization /></author>
-<author initials='R.' surname='Austein' fullname='R. Austein'>
-<organization /></author>
-<author initials='M.' surname='Larson' fullname='M. Larson'>
-<organization /></author>
-<author initials='D.' surname='Massey' fullname='D. Massey'>
-<organization /></author>
-<author initials='S.' surname='Rose' fullname='S. Rose'>
-<organization /></author>
-<date year='2005' month='March' />
-<abstract>
-<t>This document is part of a family of documents that describe the DNS Security Extensions (DNSSEC). The DNS Security Extensions are a collection of resource records and protocol modifications that provide source authentication for the DNS. This document defines the public key (DNSKEY), delegation signer (DS), resource record digital signature (RRSIG), and authenticated denial of existence (NSEC) resource records. The purpose and format of each resource record is described in detail, and an example of each resource record is given.&lt;/t>&lt;t> This document obsoletes RFC 2535 and incorporates changes from all updates to RFC 2535. [STANDARDS-TRACK]</t></abstract></front>
-
-<seriesInfo name='RFC' value='4034' />
-<format type='TXT' octets='63879' target='http://www.rfc-editor.org/rfc/rfc4034.txt' />
-</reference>
-  </references>
-  <references title="Informative References">
-<?xml version='1.0' encoding='UTF-8'?>
-
-<reference anchor='RFC2119'>
-
-<front>
-<title abbrev='RFC Key Words'>Key words for use in RFCs to Indicate Requirement Levels</title>
-<author initials='S.' surname='Bradner' fullname='Scott Bradner'>
-<organization>Harvard University</organization>
-<address>
-<postal>
-<street>1350 Mass. Ave.</street>
-<street>Cambridge</street>
-<street>MA 02138</street></postal>
-<phone>- +1 617 495 3864</phone>
-<email>sob@harvard.edu</email></address></author>
-<date year='1997' month='March' />
-<area>General</area>
-<keyword>keyword</keyword>
-<abstract>
-<t>
-   In many standards track documents several words are used to signify
-   the requirements in the specification.  These words are often
-   capitalized.  This document defines these words as they should be
-   interpreted in IETF documents.  Authors who follow these guidelines
-   should incorporate this phrase near the beginning of their document:
-
-<list>
-<t>
-      The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
-      NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and
-      "OPTIONAL" in this document are to be interpreted as described in
-      RFC 2119.
-</t></list></t>
-<t>
-   Note that the force of these words is modified by the requirement
-   level of the document in which they are used.
-</t></abstract></front>
-
-<seriesInfo name='BCP' value='14' />
-<seriesInfo name='RFC' value='2119' />
-<format type='TXT' octets='4723' target='http://www.rfc-editor.org/rfc/rfc2119.txt' />
-<format type='HTML' octets='17491' target='http://xml.resource.org/public/rfc/html/rfc2119.html' />
-<format type='XML' octets='5777' target='http://xml.resource.org/public/rfc/xml/rfc2119.xml' />
-</reference>
-<?xml version='1.0' encoding='UTF-8'?>
-
-<reference anchor='RFC5155'>
-
-<front>
-<title>DNS Security (DNSSEC) Hashed Authenticated Denial of Existence</title>
-<author initials='B.' surname='Laurie' fullname='B. Laurie'>
-<organization /></author>
-<author initials='G.' surname='Sisson' fullname='G. Sisson'>
-<organization /></author>
-<author initials='R.' surname='Arends' fullname='R. Arends'>
-<organization /></author>
-<author initials='D.' surname='Blacka' fullname='D. Blacka'>
-<organization /></author>
-<date year='2008' month='March' />
-<abstract>
-<t>The Domain Name System Security (DNSSEC) Extensions introduced the NSEC resource record (RR) for authenticated denial of existence.  This document introduces an alternative resource record, NSEC3, which similarly provides authenticated denial of existence.  However, it also provides measures against zone enumeration and permits gradual expansion of delegation-centric zones. [STANDARDS-TRACK]</t></abstract></front>
-
-<seriesInfo name='RFC' value='5155' />
-<format type='TXT' octets='112338' target='http://www.rfc-editor.org/rfc/rfc5155.txt' />
-</reference>
-<?xml version='1.0' encoding='UTF-8'?>
-
-<reference anchor='RFC6672'>
-
-<front>
-<title>DNAME Redirection in the DNS</title>
-<author initials='S.' surname='Rose' fullname='S. Rose'>
-<organization /></author>
-<author initials='W.' surname='Wijngaards' fullname='W. Wijngaards'>
-<organization /></author>
-<date year='2012' month='June' />
-<abstract>
-<t>The DNAME record provides redirection for a subtree of the domain name tree in the DNS.  That is, all names that end with a particular suffix are redirected to another part of the DNS.  This document obsoletes the original specification in RFC 2672 as well as updates the document on representing IPv6 addresses in DNS (RFC 3363). [STANDARDS-TRACK]</t></abstract></front>
-
-<seriesInfo name='RFC' value='6672' />
-<format type='TXT' octets='45704' target='http://www.rfc-editor.org/rfc/rfc6672.txt' />
-</reference>
-<?xml version='1.0' encoding='UTF-8'?>
-
-<reference  anchor='RFC7871' target='http://www.rfc-editor.org/info/rfc7871'>
-<front>
-<title>Client Subnet in DNS Queries</title>
-<author initials='C.' surname='Contavalli' fullname='C. Contavalli'><organization /></author>
-<author initials='W.' surname='van der Gaast' fullname='W. van der Gaast'><organization /></author>
-<author initials='D.' surname='Lawrence' fullname='D. Lawrence'><organization /></author>
-<author initials='W.' surname='Kumari' fullname='W. Kumari'><organization /></author>
-<date year='2016' month='May' />
-<abstract><t>This document describes an Extension Mechanisms for DNS (EDNS0) option that is in active use to carry information about the network that originated a DNS query and the network for which the subsequent response can be cached.  Since it has some known operational and privacy shortcomings, a revision will be worked through the IETF for improvement.</t></abstract>
-</front>
-<seriesInfo name='RFC' value='7871'/>
-<seriesInfo name='DOI' value='10.17487/RFC7871'/>
-</reference>
-  </references>
-</back>
+</artwork></figure><t>The wire format is also identical to CNAME, except that name compression is not permitted in ANAME RDATA, per <xref target="RFC3597" pageno="false" format="default"/>.  </t><t>No more than one ANAME resource record can be present at any DNS node.  </t></section><section title="Authoritative Server Behavior" anchor="authoritative-server-behavior" toc="default"><t>When an ANAME record is present at a DNS node and a query is received by an authoritative server for type A or AAAA, the authoritative server returns the ANAME RRset in the answer section.  </t><t>For the benefit of querying resolvers that do not implement ANAME, the authoritative server also returns address records as described below. (This is similar to the synthesized CNAME record included with DNAME <xref target="RFC6672" pageno="false" format="default"/>.) </t><t>Authoritative servers implementing ANAME MUST be equipped to resolve the ANAME &lt;target&gt; on the querying resolver's behalf, either by sending queries to an external recursive resolver, or by implementing recursive resolution logic internally.  </t><t>If the ANAME &lt;target&gt; returns a chaining response (i.e., CNAME, DNAME, or another ANAME), then the authoritative server (or the resolver tasked with resolving the ANAME target on behalf of it) MUST follow it until it is able to resolve a final address response.  Intermediate ANAMEs, CNAMEs, and DNAMEs MUST be omitted from the response.  </t><section title="Address records returned with ANAME" anchor="address-records-returned-with-aname" toc="default"><t>If the original query is for type A, and an RRset of type A exists at the final ANAME &lt;target&gt;, then that A RRset (with &lt;owner&gt; changed to match that of the ANAME RR), MUST be appended to the answer section after the ANAME RRset. If an AAAA RRset is also known to exist at the ANAME &lt;target&gt;, then the AAAA RRset MAY be appended to the additional section (again, with &lt;owner&gt; changed to match that of the ANAME RR).  </t><t>Similarly, if the original query was for type AAAA, and an AAAA RRset exists at the ANAME &lt;target&gt;, then it is appended to the answer section, and if an A RRset also exists at the ANAME &lt;target&gt; then it MAY be appended to the additional section.  </t><t>If the original query is for type ANAME, A and AAAA records MAY be returned in the additional section.  </t><t>If the original query is for type ANY and access to ANY query processing is not restricted, then the answer section contains the ANAME and the A and AAAA RRsets, if present and successfully resolved at the ANAME &lt;target&gt;, or if fallback address records are configured locally.  </t><t>How and when an authoritative server resolves the A and AAAA responses from the ANAME &lt;target&gt; (when it is not itself authoritative for &lt;target&gt;) is unspecified. If the authoritative server is capable of performing recursive resolution, then it MAY resolve the query itself, or it MAY send address queries to an external resolver. It MAY send address queries to the ANAME &lt;target&gt; when loading the zone and store the responses locally, or it MAY delay resolution of the address records until a query is received for the ANAME &lt;owner&gt;. In either case, for performance reasons, it is RECOMMENDED that address records be cached locally by the authoritative server.  </t><t>Address records cached locally MUST have a limited TTL. The initial TTL for locally-cached address records MUST be set to the lesser of the ANAME TTL and the TTL of the address records retrieved from the ANAME &lt;target&gt;. The local TTL MUST count down, just as it would in a conventional resolver cache. Records with an expired TTL MUST NOT be returned until refreshed with a new query to the ANAME &lt;target&gt;.  </t><t>If configured to do so, then the authoritative server MAY, when sending queries to the ANAME &lt;target&gt;, include an EDNS CLIENT-SUBNET (ECS) option <xref target="RFC7871" pageno="false" format="default"/>, either forwarding an ECS option that was sent to it by the querying resolver, or generating a new ECS option from the querying resolver's address. If a response from the ANAME &lt;target&gt; includes an ECS option with a SCOPE PREFIX-LENGTH greater than zero, the response SHOULD be cached with the ECS data and should only be used in response to queries from the same client subnet.  </t><t>[REMOVE BEFORE PUBLICATION: Some suggestions have been made about signaling ANAME capability via an EDNS option. If a query indicated that the client understood ANAME, then the authority could respond differently. This may turn out to be necessary, but I want to hold off on specifying it until we're sure that it is. - each] </t></section><section title="Coexistence with other types" anchor="coexistence-with-other-types" toc="default"><t>If the zone is configured with an A or AAAA RRset at the same DNS node as ANAME, then the server MAY use that RRset as a pre-configured fallback in the event that resolving the ANAME &lt;target&gt; fails or if the address type is not present at the ANAME &lt;target&gt;. (For example, if the ANAME &lt;target&gt; returns NOERROR/NODATA for a query of type AAAA, but the ANAME &lt;owner&gt; has an AAAA RRset, then that RRset MAY be returned to the querying resolver.) </t><t>ANAME MUST NOT coexist with CNAME or any other RR type that restricts the types with which it can itself coexist.  </t><t>Like other types, ANAME MUST NOT exist below a DNAME, but it can coexist at the same node; in fact, the two can be used cooperatively to redirect both the owner name (via ANAME) and everything under it (via DNAME).  </t><t>ANAME can freely coexist at the same owner name with any other RR type.  </t></section><section title="DNSSEC signing" anchor="dnssec-signing" toc="default"><t>If the zone in which the ANAME resides is DNSSEC signed, and if the server has access to the private zone-signing key, then the A and AAAA RRsets MUST be signed, either in advance when populating the A/AAAA answers for the ANAME records, or "on the fly" when responding to a query.  </t><t>If the server does not have access to the private zone-signing key then it MAY return unsigned address records, but this is NOT RECOMMENDED unless every resolver with access to the zone is known to support ANAME (as might be the case in a split-horizon deployment where ANAME records are only served to an internal network with its own resolvers).  </t><t>Validating resolvers which do not yet implement ANAME will not be able to validate the A and AAAA responses included with an ANAME response unless those responses are validly signed by a DNSKEY at the apex of the zone in which the ANAME resides. Passing along the RRSIGs associated with the original A and AAAA RRsets from the ANAME &lt;target&gt; will not be sufficient for DNSSEC validation.  </t><t>Implementers MAY allow address records associated with the ANAME to be populated and signed by the primary server, then sent along with their RRSIGs to secondaries via zone transfer. In this case, the master server MUST refresh the address records when their TTLs expire and MUST inform secondary servers via DNS NOTIFY that they need to refresh the zone. The secondary MUST store address information and associated RRSIGs supplied via zone transfer in cache such that its TTL will count down and force a refresh query.  </t><t>[REMOVE BEFORE PUBLICATION: this rules out using any non-ANAME aware secondary, which I think is too much to ask. A short TTL plus frequent NOTIFY should be allowed - pdvd] </t><t>If this address record expansion and signing during zone transfer is not supported, then every authoritative server providing ANAME responses in a signed zone SHOULD have access to the private zone-signing key for that zone. Deployment of ANAME in signed zones where address records cannot be signed due to lack of access to the private zone-signing key is NOT RECOMMENDED.  </t><t>When ANAME is present in a signed DNS node, the type bit map in the NSEC <xref target="RFC4034" pageno="false" format="default"/> or NSEC3 <xref target="RFC5155" pageno="false" format="default"/> record for that node MUST include at least one of A and AAAA as well as ANAME. This is for the benefit of validating resolvers not implementing ANAME which may use a signed proof of nonexistence for type A and AAAA to prevent address queries from being resolved. The type bit map SHOULD only include address types which are known to exist at the ANAME &lt;target&gt;.  </t></section></section><section title="Recursive Server Behavior" anchor="recursive-server-behavior" toc="default"><t>When a recursive resolver sends a query of type A or AAAA and receives a response with an ANAME RRset in the answer section, it MUST re-query for the ANAME &lt;target&gt;. This is necessary because, in some cases, the address received will be dependent on network topology and other considerations, and the resolver may find a different answer than the authoritative server did.  </t><t>If resolution fails -- for example, due to the local resolver being nonfunctional or the ANAME &lt;target&gt; zone being unreachable -- then the resolver MAY use the address records that were included in the authoritative response as a fallback.  </t><t>If configured to do so, the resolver MAY include an EDNS CLIENT-SUBNET option <xref target="RFC7871" pageno="false" format="default"/> both when sending the initial query to the ANAME &lt;owner&gt; and when re-querying for the ANAME &lt;target&gt;. If the response includes a SCOPE PREFIX-LENGTH greater than zero, the response SHOULD be cached with the ECS data and should only be used in response to queries from the same client subnet.  </t></section><section title="Operational Considerations" anchor="operational-considerations" toc="default"><t>When a zone containing ANAME records is transferred to a secondary server, the ANAME records are transferred, but the A or AAAA records retrieved from the ANAME &lt;target&gt; are not. If the primary server implements ANAME but the secondary server does not, then the two will return different answers for address queries. It is therefore RECOMMENDED that ANAME not be deployed in a zone unless all of the authoritative servers for that zone implement ANAME, or the primary is able to augment the ANAME with the related address RRsets during the zone transfer.  </t></section><section title="Security Considerations" anchor="security-considerations" toc="default"><t>An authoritative server which implements ANAME must resolve address queries on behalf its clients, either internally or by querying an external resolver. This resolution must be allowed to take place regardless of whether the client would ordinaily have been permitted by local policy to send recursive queries.  </t><t>When a resolver that does not understand ANAME receives a response containing A or AAAA records with &lt;owner&gt; rewritten to match that of the ANAME RR, this may bypass security mechanisms based on local policy limiting access to the original ANAME &lt;target&gt;.  </t><t>A validating resolver that does not understand ANAME will not be able to validate A and AAAA records unless they are signed.  </t><t>Both authoritative servers and resolvers that implement ANAME should carefully check for loops and treat them as an error condition.  </t></section><section title="IANA Considerations" anchor="iana-considerations" toc="default"><t>IANA is requested to allocate a DNS RR type code for the ANAME RR type.  </t></section><section title="Acknowledgments" anchor="acknowledgments" toc="default"><t>Thanks to Mukund Sivaraman, Stephen Morris, Ray Bellis, and Mark Andrews for discussion and feedback.  </t></section> </middle>
+  <back>
+    <references title="Normative References">
+      <reference anchor="RFC1033" target="http://www.rfc-editor.org/info/rfc1033">
+        <front>
+          <title>Domain Administrators Operations Guide</title>
+          <author initials="M." surname="Lottor" fullname="M. Lottor">
+            <organization/>
+          </author>
+          <date year="1987" month="November"/>
+          <abstract>
+            <t>This RFC provides guidelines for domain administrators in operating a domain server and maintaining their portion of the hierarchical database.  Familiarity with the domain system is assumed (see RFCs 1031, 1032, 1034, and 1035).</t>
+          </abstract>
+        </front>
+        <seriesInfo name="RFC" value="1033"/>
+        <seriesInfo name="DOI" value="10.17487/RFC1033"/>
+      </reference>
+      <reference anchor="RFC3597" target="http://www.rfc-editor.org/info/rfc3597">
+        <front>
+          <title>Handling of Unknown DNS Resource Record (RR) Types</title>
+          <author initials="A." surname="Gustafsson" fullname="A. Gustafsson">
+            <organization/>
+          </author>
+          <date year="2003" month="September"/>
+          <abstract>
+            <t>Extending the Domain Name System (DNS) with new Resource Record (RR) types currently requires changes to name server software.  This document specifies the changes necessary to allow future DNS implementations to handle new RR types transparently.  [STANDARDS-TRACK]</t>
+          </abstract>
+        </front>
+        <seriesInfo name="RFC" value="3597"/>
+        <seriesInfo name="DOI" value="10.17487/RFC3597"/>
+      </reference>
+      <reference anchor="RFC4034" target="http://www.rfc-editor.org/info/rfc4034">
+        <front>
+          <title>Resource Records for the DNS Security Extensions</title>
+          <author initials="R." surname="Arends" fullname="R. Arends">
+            <organization/>
+          </author>
+          <author initials="R." surname="Austein" fullname="R. Austein">
+            <organization/>
+          </author>
+          <author initials="M." surname="Larson" fullname="M. Larson">
+            <organization/>
+          </author>
+          <author initials="D." surname="Massey" fullname="D. Massey">
+            <organization/>
+          </author>
+          <author initials="S." surname="Rose" fullname="S. Rose">
+            <organization/>
+          </author>
+          <date year="2005" month="March"/>
+          <abstract>
+            <t>This document is part of a family of documents that describe the DNS Security Extensions (DNSSEC).  The DNS Security Extensions are a collection of resource records and protocol modifications that provide source authentication for the DNS.  This document defines the public key (DNSKEY), delegation signer (DS), resource record digital signature (RRSIG), and authenticated denial of existence (NSEC) resource records.  The purpose and format of each resource record is described in detail, and an example of each resource record is given. </t>
+            <t>This document obsoletes RFC 2535 and incorporates changes from all updates to RFC 2535.  [STANDARDS-TRACK]</t>
+          </abstract>
+        </front>
+        <seriesInfo name="RFC" value="4034"/>
+        <seriesInfo name="DOI" value="10.17487/RFC4034"/>
+      </reference>
+    </references>
+    <references title="Informative References">
+      <reference anchor="RFC2119" target="http://www.rfc-editor.org/info/rfc2119">
+        <front>
+          <title>Key words for use in RFCs to Indicate Requirement Levels</title>
+          <author initials="S." surname="Bradner" fullname="S. Bradner">
+            <organization/>
+          </author>
+          <date year="1997" month="March"/>
+          <abstract>
+            <t>In many standards track documents several words are used to signify the requirements in the specification.  These words are often capitalized. This document defines these words as they should be interpreted in IETF documents.  This document specifies an Internet Best Current Practices for the Internet Community, and requests discussion and suggestions for improvements.</t>
+          </abstract>
+        </front>
+        <seriesInfo name="BCP" value="14"/>
+        <seriesInfo name="RFC" value="2119"/>
+        <seriesInfo name="DOI" value="10.17487/RFC2119"/>
+      </reference>
+      <reference anchor="RFC5155" target="http://www.rfc-editor.org/info/rfc5155">
+        <front>
+          <title>DNS Security (DNSSEC) Hashed Authenticated Denial of Existence</title>
+          <author initials="B." surname="Laurie" fullname="B. Laurie">
+            <organization/>
+          </author>
+          <author initials="G." surname="Sisson" fullname="G. Sisson">
+            <organization/>
+          </author>
+          <author initials="R." surname="Arends" fullname="R. Arends">
+            <organization/>
+          </author>
+          <author initials="D." surname="Blacka" fullname="D. Blacka">
+            <organization/>
+          </author>
+          <date year="2008" month="March"/>
+          <abstract>
+            <t>The Domain Name System Security (DNSSEC) Extensions introduced the NSEC resource record (RR) for authenticated denial of existence. This document introduces an alternative resource record, NSEC3, which similarly provides authenticated denial of existence.  However, it also provides measures against zone enumeration and permits gradual expansion of delegation-centric zones.  [STANDARDS-TRACK]</t>
+          </abstract>
+        </front>
+        <seriesInfo name="RFC" value="5155"/>
+        <seriesInfo name="DOI" value="10.17487/RFC5155"/>
+      </reference>
+      <reference anchor="RFC6672" target="http://www.rfc-editor.org/info/rfc6672">
+        <front>
+          <title>DNAME Redirection in the DNS</title>
+          <author initials="S." surname="Rose" fullname="S. Rose">
+            <organization/>
+          </author>
+          <author initials="W." surname="Wijngaards" fullname="W. Wijngaards">
+            <organization/>
+          </author>
+          <date year="2012" month="June"/>
+          <abstract>
+            <t>The DNAME record provides redirection for a subtree of the domain name tree in the DNS.  That is, all names that end with a particular suffix are redirected to another part of the DNS.  This document obsoletes the original specification in RFC 2672 as well as updates the document on representing IPv6 addresses in DNS (RFC 3363). [STANDARDS-TRACK]</t>
+          </abstract>
+        </front>
+        <seriesInfo name="RFC" value="6672"/>
+        <seriesInfo name="DOI" value="10.17487/RFC6672"/>
+      </reference>
+      <reference anchor="RFC7871" target="http://www.rfc-editor.org/info/rfc7871">
+        <front>
+          <title>Client Subnet in DNS Queries</title>
+          <author initials="C." surname="Contavalli" fullname="C. Contavalli">
+            <organization/>
+          </author>
+          <author initials="W." surname="van der Gaast" fullname="W. van der Gaast">
+            <organization/>
+          </author>
+          <author initials="D." surname="Lawrence" fullname="D. Lawrence">
+            <organization/>
+          </author>
+          <author initials="W." surname="Kumari" fullname="W. Kumari">
+            <organization/>
+          </author>
+          <date year="2016" month="May"/>
+          <abstract>
+            <t>This document describes an Extension Mechanisms for DNS (EDNS0) option that is in active use to carry information about the network that originated a DNS query and the network for which the subsequent response can be cached.  Since it has some known operational and privacy shortcomings, a revision will be worked through the IETF for improvement.</t>
+          </abstract>
+        </front>
+        <seriesInfo name="RFC" value="7871"/>
+        <seriesInfo name="DOI" value="10.17487/RFC7871"/>
+      </reference>
+    </references>
+  </back>
 </rfc>
