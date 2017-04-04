@@ -124,7 +124,7 @@ Internet-Draft                    aname                       March 2017
 
    As a result of the above, the only widely supported and standards-
    compliant way to publish content at a zone apex is to to place A and/
-   or AAAA records at that node.  THe flexibility afforded by CNAME is
+   or AAAA records at that node.  The flexibility afforded by CNAME is
    not available.
 
    This document proposes a new RR type "ANAME", which provides similar
