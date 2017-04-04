@@ -397,7 +397,7 @@ Internet-Draft                    aname                       March 2017
 6.  Security Considerations
 
    An authoritative server which implements ANAME must resolve address
-   queries on behalf its clients, either internally or by querying an
+   queries on behalf of its clients, either internally or by querying an
    external resolver.  This resolution must be allowed to take place
    regardless of whether the client would ordinaily have been permitted
    by local policy to send recursive queries.
