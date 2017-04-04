@@ -102,13 +102,6 @@ RRset.  If an AAAA RRset is also known to exist at the ANAME \<target\>, then
 the AAAA RRset MAY be appended to the additional section (again, with
 \<owner\> changed to match that of the ANAME RR).
 
-[REMOVE BEFORE PUBLICATION: are we forcing an order in the answer section
-here? DNAME has no such requirement, and even though this has triggered bugs
-in BIND if I recall correctly, I'm not sure we should write down that
-appending is required. Even if all authoritatives honour 'append' vs 'insert
-randomly', some proxy or forwarder might reorder 'to enable round-robin' and
-thus resolvers should not be allowed to rely on the ordering.]
-
 Similarly, if the original query was for type AAAA, and an AAAA RRset
 exists at the ANAME \<target\>, then it is appended to the answer section,
 and if an A RRset also exists at the ANAME \<target\> then it MAY be appended
