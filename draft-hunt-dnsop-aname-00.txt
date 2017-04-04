@@ -489,11 +489,11 @@ Authors' Addresses
 
    Peter van Dijk
    PowerDNS.COM B.V.
-   Seinstraat 76
-   Hilversum  1223 DB
+   Den Haag
    The Netherlands
 
    Email: peter.van.dijk@powerdns.com
+
 
 
 
