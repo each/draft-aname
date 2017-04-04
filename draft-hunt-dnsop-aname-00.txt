@@ -420,8 +420,12 @@ Internet-Draft                    aname                       March 2017
 
 8.  Acknowledgments
 
-   Thanks to Mukund Sivaraman, Stephen Morris, Ray Bellis, and Mark
-   Andrews for discussion and feedback.
+   Thanks to Mukund Sivaraman, Stephen Morris, Ray Bellis, Mark Andrews,
+   Richard Salts, and Haekan Lindqvist for discussion and feedback.
+
+   [REMOVE BEFORE PUBLICATION: Make sure Haekan renders correctly (with
+   an accented first a, not an ae replacement); otherwise, replace with
+   Hakan]
 
 9.  References
 
@@ -435,10 +439,6 @@ Internet-Draft                    aname                       March 2017
               (RR) Types", RFC 3597, DOI 10.17487/RFC3597, September
               2003, <http://www.rfc-editor.org/info/rfc3597>.
 
-   [RFC4034]  Arends, R., Austein, R., Larson, M., Massey, D., and S.
-              Rose, "Resource Records for the DNS Security Extensions",
-              RFC 4034, DOI 10.17487/RFC4034, March 2005,
-              <http://www.rfc-editor.org/info/rfc4034>.
 
 
 
@@ -449,6 +449,11 @@ Hunt, et al.            Expires September 2, 2017               [Page 8]
 
 Internet-Draft                    aname                       March 2017
 
+
+   [RFC4034]  Arends, R., Austein, R., Larson, M., Massey, D., and S.
+              Rose, "Resource Records for the DNS Security Extensions",
+              RFC 4034, DOI 10.17487/RFC4034, March 2005,
+              <http://www.rfc-editor.org/info/rfc4034>.
 
 9.2.  Informative References
 
@@ -491,6 +496,16 @@ Authors' Addresses
    Email: peter.van.dijk@powerdns.com
 
 
+
+
+
+
+
+Hunt, et al.            Expires September 2, 2017               [Page 9]
+
+Internet-Draft                    aname                       March 2017
+
+
    Anthony Eden
    DNSimple
    Boston, MA
@@ -501,4 +516,45 @@ Authors' Addresses
 
 
 
-Hunt, et al.            Expires September 2, 2017               [Page 9]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.            Expires September 2, 2017              [Page 10]

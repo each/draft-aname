@@ -271,5 +271,9 @@ IANA is requested to allocate a DNS RR type code for the ANAME RR type.
 
 # Acknowledgments
 
-Thanks to Mukund Sivaraman, Stephen Morris, Ray Bellis, and Mark Andrews
-for discussion and feedback.
+Thanks to Mukund Sivaraman, Stephen Morris, Ray Bellis, Mark Andrews,
+Richard Salts, and Håkan Lindqvist for discussion and feedback.
+
+[REMOVE BEFORE PUBLICATION: Make sure Håkan renders correctly (with
+an accented first a, not an ae replacement); otherwise, replace with
+Hakan]
