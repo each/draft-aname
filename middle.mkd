@@ -76,10 +76,8 @@ When an ANAME record is present at a DNS node and a query is received by an
 authoritative server for type A or AAAA, the authoritative server returns
 the ANAME RRset in the answer section.
 
-For the benefit of querying resolvers that do not implement ANAME, the
-authoritative server also returns address records as described below.
-(This is similar to the synthesized CNAME record included with DNAME
-[](#RFC6672).)
+For the benefit of querying resolvers that do not support ANAME RR type, the authoritative server is RECOMMENDED to also returns address records as described below.
+This is similar to the synthesized CNAME record included with DNAME [](#RFC6672).
 
 Authoritative servers implementing ANAME MUST be equipped to resolve the ANAME
 \<target\> on the querying resolver's behalf, either by sending queries to
