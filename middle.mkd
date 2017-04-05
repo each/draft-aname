@@ -267,7 +267,7 @@ carefully check for loops and treat them as an error condition.
 
 # IANA Considerations
 
-IANA is requested to allocate a DNS RR type code for the ANAME RR type.
+IANA is requested to assign a DNS RR data type value for the ANAME RR type under the "Resource Record (RR) TYPEs" subregistry under the "Domain Name System (DNS) Parameters" registry.
 
 # Acknowledgments
 
