@@ -13,7 +13,7 @@ example, "example.com" rather than "www.example.com"). However,
 [](#RFC1033) forbids the use of CNAME records at the same node as any
 other record type. Zone apex nodes always contain SOA and NS RRsets
 records, and frequently contain other types such as DNSKEY, MX, TXT/SPF,
-etc. Consequently, CNAME is impermissible at apex nodes.
+etc. Consequently, a CNAME record is not permitted at zone apex nodes.
 
 It should be noted that [](#RFC4034) relaxed this restriction by allowing
 coexistence between CNAME and RRSIG and NSEC records, but such exceptions
@@ -59,8 +59,7 @@ document are to be interpreted as described in [](#RFC2119).
     
 # The ANAME Resource Record
 
-This document specifies a new DNS resource record type ANAME, with RR
-code point [TBD].
+This document defines the "ANAME" DNS resource record type , with RR TYPE value [TBD].
 
 The ANAME presentation format is identical to that of CNAME [](#RFC1033):
 ```
@@ -69,7 +68,7 @@ The ANAME presentation format is identical to that of CNAME [](#RFC1033):
 The wire format is also identical to CNAME, except that name compression
 is not permitted in ANAME RDATA, per [](#RFC3597).
 
-No more than one ANAME resource record can be present at any DNS node.
+No more than one ANAME resource record SHALL be present at any DNS node.
 
 # Authoritative Server Behavior
 
@@ -77,10 +76,8 @@ When an ANAME record is present at a DNS node and a query is received by an
 authoritative server for type A or AAAA, the authoritative server returns
 the ANAME RRset in the answer section.
 
-For the benefit of querying resolvers that do not implement ANAME, the
-authoritative server also returns address records as described below.
-(This is similar to the synthesized CNAME record included with DNAME
-[](#RFC6672).)
+For the benefit of querying resolvers that do not support ANAME RR type, the authoritative server MUST also return address records as described below.
+This is similar to the synthesized CNAME record included with DNAME [](#RFC6672).
 
 Authoritative servers implementing ANAME MUST be equipped to resolve the ANAME
 \<target\> on the querying resolver's behalf, either by sending queries to
@@ -248,7 +245,7 @@ RRsets during the zone transfer.
 
 # Security Considerations
 
-An authoritative server which implements ANAME must resolve address
+An authoritative server which implements ANAME MUST resolve address
 queries on behalf of its clients, either internally or by querying an
 external resolver. This resolution must be allowed to take place
 regardless of whether the client would ordinaily have been permitted
@@ -267,7 +264,7 @@ carefully check for loops and treat them as an error condition.
 
 # IANA Considerations
 
-IANA is requested to allocate a DNS RR type code for the ANAME RR type.
+IANA is requested to assign a DNS RR data type value for the ANAME RR type under the "Resource Record (RR) TYPEs" subregistry under the "Domain Name System (DNS) Parameters" registry.
 
 # Acknowledgments
 
