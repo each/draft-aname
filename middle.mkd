@@ -59,8 +59,7 @@ document are to be interpreted as described in [](#RFC2119).
     
 # The ANAME Resource Record
 
-This document specifies a new DNS resource record type ANAME, with RR
-code point [TBD].
+This document defines the "ANAME" DNS resource record type , with RR TYPE value [TBD].
 
 The ANAME presentation format is identical to that of CNAME [](#RFC1033):
 ```
