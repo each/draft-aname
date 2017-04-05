@@ -16,12 +16,11 @@ Expires: September 2, 2017                                      PowerDNS
 
 Abstract
 
-   This document proposes a new DNS RR type ANAME, which provides
-   similar functionality to CNAME but is specific to address queries
-   (type A and AAAA), and can coexist with other record types.  This
-   allows zone owners to redirect queries for apex domain names without
-   violating specifications that require CNAME not to coexist with other
-   RR types such as NS and SOA.
+   This document defines the "ANAME" DNS RR type, to provide similar
+   functionality to CNAME, but limited to the type A and AAAA address
+   queries.  Unlike CNAME, an ANAME can coexist with other record types.
+   The ANAME RR type allows zone owners to redirect queries for apex
+   domain names in a standards compliant manner.
 
 Status of This Memo
 
@@ -50,6 +49,7 @@ Copyright Notice
    (http://trustee.ietf.org/license-info) in effect on the date of
    publication of this document.  Please review these documents
    carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
 
 
 
@@ -58,7 +58,6 @@ Hunt, et al.            Expires September 2, 2017               [Page 1]
 Internet-Draft                    aname                       March 2017
 
 
-   to this document.  Code Components extracted from this document must
    include Simplified BSD License text as described in Section 4.e of
    the Trust Legal Provisions and are provided without warranty as
    described in the Simplified BSD License.
@@ -98,14 +97,15 @@ Table of Contents
    "www.example.com").  However, [RFC1033] forbids the use of CNAME
    records at the same node as any other record type.  Zone apex nodes
    always contain SOA and NS RRsets records, and frequently contain
-   other types such as DNSKEY, MX, TXT/SPF, etc.  Consequently, CNAME is
-   impermissible at apex nodes.
+   other types such as DNSKEY, MX, TXT/SPF, etc.  Consequently, a CNAME
+   record is not permitted at zone apex nodes.
 
    It should be noted that [RFC4034] relaxed this restriction by
    allowing coexistence between CNAME and RRSIG and NSEC records, but
    such exceptions are not applicable to other resource records.  RRSIG
    and NSEC exist to prove the integrity of the CNAME record; they are
    not intended to associate arbitrary data with the domain name.
+
 
 
 
@@ -154,8 +154,8 @@ Internet-Draft                    aname                       March 2017
 
 2.  The ANAME Resource Record
 
-   This document specifies a new DNS resource record type ANAME, with RR
-   code point [TBD].
+   This document defines the "ANAME" DNS resource record type , with RR
+   TYPE value [TBD].
 
    The ANAME presentation format is identical to that of CNAME
    [RFC1033]:
@@ -173,7 +173,7 @@ Internet-Draft                    aname                       March 2017
    The wire format is also identical to CNAME, except that name
    compression is not permitted in ANAME RDATA, per [RFC3597].
 
-   No more than one ANAME resource record can be present at any DNS
+   No more than one ANAME resource record SHALL be present at any DNS
    node.
 
 3.  Authoritative Server Behavior
@@ -182,10 +182,10 @@ Internet-Draft                    aname                       March 2017
    by an authoritative server for type A or AAAA, the authoritative
    server returns the ANAME RRset in the answer section.
 
-   For the benefit of querying resolvers that do not implement ANAME,
-   the authoritative server also returns address records as described
-   below.  (This is similar to the synthesized CNAME record included
-   with DNAME [RFC6672].)
+   For the benefit of querying resolvers that do not support ANAME RR
+   type, the authoritative server MUST also return address records as
+   described below.  This is similar to the synthesized CNAME record
+   included with DNAME [RFC6672].
 
    Authoritative servers implementing ANAME MUST be equipped to resolve
    the ANAME <target> on the querying resolver's behalf, either by
@@ -396,10 +396,10 @@ Internet-Draft                    aname                       March 2017
 
 6.  Security Considerations
 
-   An authoritative server which implements ANAME must resolve address
+   An authoritative server which implements ANAME resolves address
    queries on behalf of its clients, either internally or by querying an
    external resolver.  This resolution must be allowed to take place
-   regardless of whether the client would ordinaily have been permitted
+   regardless of whether the client would ordinarily have been permitted
    by local policy to send recursive queries.
 
    When a resolver that does not understand ANAME receives a response
@@ -415,13 +415,15 @@ Internet-Draft                    aname                       March 2017
 
 7.  IANA Considerations
 
-   IANA is requested to allocate a DNS RR type code for the ANAME RR
-   type.
+   IANA is requested to assign a DNS RR data type value for the ANAME RR
+   type under the "Resource Record (RR) TYPEs" subregistry under the
+   "Domain Name System (DNS) Parameters" registry.
 
 8.  Acknowledgments
 
    Thanks to Mukund Sivaraman, Stephen Morris, Ray Bellis, Mark Andrews,
-   Richard Salts, and Haekan Lindqvist for discussion and feedback.
+   Richard Salts, Job Snijders, and Haekan Lindqvist for discussion and
+   feedback.
 
    [REMOVE BEFORE PUBLICATION: Make sure Haekan renders correctly (with
    an accented first a, not an ae replacement); otherwise, replace with
@@ -438,8 +440,6 @@ Internet-Draft                    aname                       March 2017
    [RFC3597]  Gustafsson, A., "Handling of Unknown DNS Resource Record
               (RR) Types", RFC 3597, DOI 10.17487/RFC3597, September
               2003, <http://www.rfc-editor.org/info/rfc3597>.
-
-
 
 
 
