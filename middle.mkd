@@ -7,19 +7,19 @@ is a name served by the CDN, and which ultimately resolves to a different
 final answer depending on the client's IP address or subnet, geographic
 location, or other considerations.
 
-It is common practice for sites to publish content at their registered
+It is common practice for websites to publish content at their registered
 domain name (sometimes referred to as a "bare domain" or "zone apex": for
 example, "example.com" rather than "www.example.com"). However,
 [](#RFC1033) forbids the use of CNAME records at the same node as any
-other record type. Zone apex nodes always contain SOA and NS RRsets
-records, and frequently contain other types such as DNSKEY, MX, TXT/SPF,
-etc. Consequently, a CNAME record is not permitted at zone apex nodes.
+other record type. Zone apex nodes always contain SOA and NS RRsets,
+and frequently contain other types such as DNSKEY, MX, TXT/SPF, etc.
+Consequently, CNAME is impermissible at apex nodes.
 
 It should be noted that [](#RFC4034) relaxed this restriction by allowing
-coexistence between CNAME and RRSIG and NSEC records, but such exceptions
-are not applicable to other resource records. RRSIG and NSEC exist to prove
-the integrity of the CNAME record; they are not intended to associate
-arbitrary data with the domain name.
+coexistence of CNAME with RRSIG and NSEC records, but such exceptions are
+not applicable to other resource records. RRSIG and NSEC exist to prove the
+integrity of the CNAME record; they are not intended to associate arbitrary
+data with the domain name.
 
 DNAME [](#RFC6672) is also not a solution, as its function is to redirect
 all names in the namespace below the DNAME \<owner\>, not the DNAME
@@ -27,13 +27,14 @@ all names in the namespace below the DNAME \<owner\>, not the DNAME
 
 Redirecting website lookups to an alternate domain name via SRV or URI
 resource records would be an effective solution, but to date this approach
-has not been accepted by browser implementations.
+has not been accepted by browser implementations. In addition, it is
+not possible to use SRV records with wildcard names.
 
 As a result of the above, the only widely supported and standards-compliant
 way to publish content at a zone apex is to to place A and/or AAAA records
 at that node.  The flexibility afforded by CNAME is not available.
 
-This document proposes a new RR type "ANAME", which provides similar
+This document specifies a new RR type "ANAME", which provides similar
 functionality to CNAME, but only for address queries (i.e., for type A or
 AAAA).  The ANAME record can be present at any DNS node, and can coexist
 with most other RR types, enabling it to be present at a zone apex.
@@ -74,10 +75,12 @@ No more than one ANAME resource record SHALL be present at any DNS node.
 
 When an ANAME record is present at a DNS node and a query is received by an
 authoritative server for type A or AAAA, the authoritative server returns
-the ANAME RRset in the answer section.
+the ANAME RR in the answer section.
 
-For the benefit of querying resolvers that do not support ANAME RR type, the authoritative server MUST also return address records as described below.
-This is similar to the synthesized CNAME record included with DNAME [](#RFC6672).
+For the benefit of querying resolvers that do not understand ANAME,
+the authoritative server MUST also return address records as described
+below.  This is similar to the synthesized CNAME record included with
+DNAME [](#RFC6672).
 
 Authoritative servers implementing ANAME MUST be equipped to resolve the ANAME
 \<target\> on the querying resolver's behalf, either by sending queries to
