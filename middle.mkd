@@ -245,7 +245,7 @@ RRsets during the zone transfer.
 
 # Security Considerations
 
-An authoritative server which implements ANAME MUST resolve address
+An authoritative server which implements ANAME resolves address
 queries on behalf of its clients, either internally or by querying an
 external resolver. This resolution must be allowed to take place
 regardless of whether the client would ordinaily have been permitted
