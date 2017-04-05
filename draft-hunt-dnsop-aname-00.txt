@@ -5,7 +5,7 @@
 Network Working Group                                            E. Hunt
 Internet-Draft                                                       ISC
 Intended status: Standards Track                             P. van Dijk
-Expires: September 2, 2017                             PowerDNS.COM B.V.
+Expires: September 2, 2017                                      PowerDNS
                                                                  A. Eden
                                                                 DNSimple
                                                               March 2017
