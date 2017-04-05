@@ -13,7 +13,7 @@ example, "example.com" rather than "www.example.com"). However,
 [](#RFC1033) forbids the use of CNAME records at the same node as any
 other record type. Zone apex nodes always contain SOA and NS RRsets
 records, and frequently contain other types such as DNSKEY, MX, TXT/SPF,
-etc. Consequently, CNAME is impermissible at apex nodes.
+etc. Consequently, a CNAME record is not permitted at zone apex nodes.
 
 It should be noted that [](#RFC4034) relaxed this restriction by allowing
 coexistence between CNAME and RRSIG and NSEC records, but such exceptions
