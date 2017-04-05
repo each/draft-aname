@@ -1,16 +1,24 @@
+PANDOC2RFC=pandoc2rfc
+XML=abstract.xml middle.xml
+TITLE=$(shell grep docName template.xml | sed -e 's/.*docName=\"//' -e 's/\">//')
+.PHONY: txt html xml
+
 all: xml txt
 
-xml: draft-hunt-dnsop-aname-00.xml 
+xml: $(TITLE).xml 
 
-txt: draft-hunt-dnsop-aname-00.txt
+txt: $(TITLE).txt
 
-html: draft-hunt-dnsop-aname-00.html
+html: $(TITLE).html
 
-draft-hunt-dnsop-aname-00.xml: abstract.mkd middle.mkd template.xml
-	pandoc2rfc -X abstract.mkd middle.mkd && mv draft.xml draft-hunt-dnsop-aname-00.xml
+$(TITLE).xml: abstract.mkd middle.mkd template.xml
+	$(PANDOC2RFC) -X abstract.mkd middle.mkd && cp -f draft.xml $(TITLE).xml
 
-draft-hunt-dnsop-aname-00.txt: abstract.mkd middle.mkd template.xml
-	pandoc2rfc -T abstract.mkd middle.mkd && mv draft.txt draft-hunt-dnsop-aname-00.txt
+$(TITLE).txt: abstract.mkd middle.mkd template.xml
+	$(PANDOC2RFC) -T abstract.mkd middle.mkd && cp -f draft.txt $(TITLE).txt
 
-draft-hunt-dnsop-aname-00.html: abstract.mkd middle.mkd template.xml
-	pandoc2rfc -M abstract.mkd middle.mkd && mv draft.html draft-hunt-dnsop-aname-00.html
+$(TITLE).html: abstract.mkd middle.mkd template.xml
+	$(PANDOC2RFC) -M abstract.mkd middle.mkd && cp -f draft.html $(TITLE).html
+
+clean:
+	rm -f $(XML) $(TITLE).txt $(TITLE).html  $(TITLE).xml
