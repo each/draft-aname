@@ -91,20 +91,20 @@ Table of Contents
    resolves to a different final answer depending on the client's IP
    address or subnet, geographic location, or other considerations.
 
-   It is common practice for sites to publish content at their
+   It is common practice for websites to publish content at their
    registered domain name (sometimes referred to as a "bare domain" or
    "zone apex": for example, "example.com" rather than
    "www.example.com").  However, [RFC1033] forbids the use of CNAME
    records at the same node as any other record type.  Zone apex nodes
-   always contain SOA and NS RRsets records, and frequently contain
-   other types such as DNSKEY, MX, TXT/SPF, etc.  Consequently, a CNAME
-   record is not permitted at zone apex nodes.
+   always contain SOA and NS RRsets, and frequently contain other types
+   such as DNSKEY, MX, TXT/SPF, etc.  Consequently, CNAME is
+   impermissible at apex nodes.
 
    It should be noted that [RFC4034] relaxed this restriction by
-   allowing coexistence between CNAME and RRSIG and NSEC records, but
-   such exceptions are not applicable to other resource records.  RRSIG
-   and NSEC exist to prove the integrity of the CNAME record; they are
-   not intended to associate arbitrary data with the domain name.
+   allowing coexistence of CNAME with RRSIG and NSEC records, but such
+   exceptions are not applicable to other resource records.  RRSIG and
+   NSEC exist to prove the integrity of the CNAME record; they are not
+   intended to associate arbitrary data with the domain name.
 
 
 
@@ -120,14 +120,15 @@ Internet-Draft                    aname                         Mar 2017
 
    Redirecting website lookups to an alternate domain name via SRV or
    URI resource records would be an effective solution, but to date this
-   approach has not been accepted by browser implementations.
+   approach has not been accepted by browser implementations.  In
+   addition, it is not possible to use SRV records with wildcard names.
 
    As a result of the above, the only widely supported and standards-
    compliant way to publish content at a zone apex is to to place A and/
    or AAAA records at that node.  The flexibility afforded by CNAME is
    not available.
 
-   This document proposes a new RR type "ANAME", which provides similar
+   This document specifies a new RR type "ANAME", which provides similar
    functionality to CNAME, but only for address queries (i.e., for type
    A or AAAA).  The ANAME record can be present at any DNS node, and can
    coexist with most other RR types, enabling it to be present at a zone
@@ -164,7 +165,6 @@ Internet-Draft                    aname                         Mar 2017
 
 
 
-
 Hunt, et al.            Expires September 2, 2017               [Page 3]
 
 Internet-Draft                    aname                         Mar 2017
@@ -180,10 +180,10 @@ Internet-Draft                    aname                         Mar 2017
 
    When an ANAME record is present at a DNS node and a query is received
    by an authoritative server for type A or AAAA, the authoritative
-   server returns the ANAME RRset in the answer section.
+   server returns the ANAME RR in the answer section.
 
-   For the benefit of querying resolvers that do not support ANAME RR
-   type, the authoritative server MUST also return address records as
+   For the benefit of querying resolvers that do not understand ANAME,
+   the authoritative server MUST also return address records as
    described below.  This is similar to the synthesized CNAME record
    included with DNAME [RFC6672].
 
@@ -321,15 +321,15 @@ Internet-Draft                    aname                         Mar 2017
    Implementers MAY allow address records associated with the ANAME to
    be populated and signed by the primary server, then sent along with
    their RRSIGs to secondaries via zone transfer.  In this case, the
-   master server MUST refresh the address records when their TTLs expire
-   and MUST inform secondary servers via DNS NOTIFY that they need to
-   refresh the zone.  The secondary MUST store address information and
-   associated RRSIGs supplied via zone transfer in cache such that its
-   TTL will count down and force a refresh query.
+   master server MUST refresh the address records when their TTLs
+   expire, and MUST inform secondary servers via DNS NOTIFY that they
+   need to refresh the zone.  A secondary server SHOULD store address
+   records and associated RRSIGs supplied via zone transfer in such a
+   way that their TTLs will count down, as they would in a normal DNS
+   cache, and ultimately trigger a refresh query upon reaching zero.
+   When a secondary server is responding to an address query, it SHOULD
+   answer with the reduced TTL, but when responding to a zone transfer
 
-   [REMOVE BEFORE PUBLICATION: this rules out using any non-ANAME aware
-   secondary, which I think is too much to ask.  A short TTL plus
-   frequent NOTIFY should be allowed - pdvd]
 
 
 
@@ -337,6 +337,9 @@ Hunt, et al.            Expires September 2, 2017               [Page 6]
 
 Internet-Draft                    aname                         Mar 2017
 
+
+   request, it SHOULD answer with the original TTL received from the
+   primary.
 
    If this address record expansion and signing during zone transfer is
    not supported, then every authoritative server providing ANAME
@@ -383,9 +386,6 @@ Internet-Draft                    aname                         Mar 2017
    return different answers for address queries.  It is therefore
    RECOMMENDED that ANAME not be deployed in a zone unless all of the
    authoritative servers for that zone implement ANAME, or the primary
-   is able to augment the ANAME with the related address RRsets during
-   the zone transfer.
-
 
 
 
@@ -393,6 +393,9 @@ Hunt, et al.            Expires September 2, 2017               [Page 7]
 
 Internet-Draft                    aname                         Mar 2017
 
+
+   is able to augment the ANAME with the related address RRsets during
+   the zone transfer.
 
 6.  Security Considerations
 
@@ -439,9 +442,6 @@ Internet-Draft                    aname                         Mar 2017
    [RFC3597]  Gustafsson, A., "Handling of Unknown DNS Resource Record
               (RR) Types", RFC 3597, September 2003.
 
-   [RFC4034]  Arends, R., Austein, R., Larson, M., Massey, D., and S.
-              Rose, "Resource Records for the DNS Security Extensions",
-              RFC 4034, March 2005.
 
 
 
@@ -449,6 +449,10 @@ Hunt, et al.            Expires September 2, 2017               [Page 8]
 
 Internet-Draft                    aname                         Mar 2017
 
+
+   [RFC4034]  Arends, R., Austein, R., Larson, M., Massey, D., and S.
+              Rose, "Resource Records for the DNS Security Extensions",
+              RFC 4034, March 2005.
 
 9.2.  Informative References
 
@@ -493,10 +497,6 @@ Authors' Addresses
 
    Email: anthony.eden@dnsimple.com
    URI:   https://dnsimple.com/
-
-
-
-
 
 
 
