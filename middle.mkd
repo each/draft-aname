@@ -248,7 +248,7 @@ RRsets during the zone transfer.
 An authoritative server which implements ANAME resolves address
 queries on behalf of its clients, either internally or by querying an
 external resolver. This resolution must be allowed to take place
-regardless of whether the client would ordinaily have been permitted
+regardless of whether the client would ordinarily have been permitted
 by local policy to send recursive queries.
 
 When a resolver that does not understand ANAME receives a response
