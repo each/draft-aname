@@ -17,10 +17,10 @@ Expires: September 2, 2017                                      PowerDNS
 Abstract
 
    This document defines the "ANAME" DNS RR type, to provide similar
-   functionality to CNAME, but limited to type A and AAAA address
-   queries.  Unlike CNAME, an ANAME can coexist with other record types.
-   The ANAME RR type allows zone owners to redirect queries for apex
-   domain names in a standards compliant manner.
+   functionality to CNAME, but only redirects type A and AAAA queries.
+   Unlike CNAME, an ANAME can coexist with other record types.  The
+   ANAME RR allows zone owners to redirect queries for apex domain names
+   in a standards compliant manner.
 
 Status of This Memo
 
