@@ -97,8 +97,8 @@ Table of Contents
    "www.example.com").  However, [RFC1033] forbids the use of CNAME
    records at the same node as any other record type.  Zone apex nodes
    always contain SOA and NS RRsets, and frequently contain other types
-   such as DNSKEY, MX, TXT/SPF, etc.  Consequently, CNAME is
-   impermissible at apex nodes.
+   such as DNSKEY, MX, TXT/SPF, etc.  Consequently, a CNAME record is
+   not permitted at zone apex nodes.
 
    It should be noted that [RFC4034] relaxed this restriction by
    allowing coexistence of CNAME with RRSIG and NSEC records, but such
@@ -342,13 +342,14 @@ Internet-Draft                    aname                         Mar 2017
    address records cannot be signed due to lack of access to the private
    zone-signing key is NOT RECOMMENDED.
 
-   When ANAME is present in a signed DNS node, the type bit map in the
-   NSEC [RFC4034] or NSEC3 [RFC5155] record for that node MUST include
-   at least one of A and AAAA as well as ANAME.  This is for the benefit
-   of validating resolvers not implementing ANAME which may use a signed
-   proof of nonexistence for type A and AAAA to prevent address queries
-   from being resolved.  The type bit map SHOULD only include address
-   types which are known to exist at the ANAME <target>.
+   When ANAME is present in a signed DNS node and address records exist
+   at the ANAME <target>, the type bit map in the NSEC [RFC4034] or
+   NSEC3 [RFC5155] record for that node MUST include bits for A and/or
+   AAAA as well as ANAME.  This is for the benefit of validating
+   resolvers not implementing ANAME which may use a signed proof of
+   nonexistence for type A and AAAA to prevent address queries from
+   being resolved.  The type bit map SHOULD only include address types
+   which are known to exist at the <target>.
 
 4.  Recursive Server Behavior
 
@@ -385,7 +386,6 @@ Internet-Draft                    aname                         Mar 2017
    authoritative servers for that zone implement ANAME, or the primary
    is able to expand the ANAME with the related address RRsets during
    the zone transfer.
-
 
 
 
