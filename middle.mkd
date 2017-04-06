@@ -60,7 +60,8 @@ document are to be interpreted as described in [](#RFC2119).
     
 # The ANAME Resource Record
 
-This document defines the "ANAME" DNS resource record type , with RR TYPE value [TBD].
+This document defines the "ANAME" DNS resource record type, with RR TYPE
+value [TBD].
 
 The ANAME presentation format is identical to that of CNAME [](#RFC1033):
 ```
@@ -77,21 +78,22 @@ When an ANAME record is present at a DNS node and a query is received by an
 authoritative server for type A or AAAA, the authoritative server returns
 the ANAME RR in the answer section.
 
-For the benefit of querying resolvers that do not understand ANAME,
-the authoritative server MUST also return address records as described
-below.  This is similar to the synthesized CNAME record included with
-DNAME [](#RFC6672).
+For the benefit of querying resolvers that do not understand ANAME, the
+authoritative server MUST also return address records as described below.
+This is similar to the synthesized CNAME record included with DNAME
+[](#RFC6672).
 
-Authoritative servers implementing ANAME MUST be equipped to resolve the ANAME
-\<target\> on the querying resolver's behalf, either by sending queries to
-an external recursive resolver, or by implementing recursive resolution
-logic internally.
+Authoritative servers implementing ANAME MUST be equipped to resolve the
+ANAME \<target\> on the querying resolver's behalf, either by sending
+queries to an external recursive resolver, or by implementing recursive
+resolution logic internally, in order for address records to be expanded
+for an ANAME \<target\> in a separate zone from \<owner\>.
 
-If the ANAME \<target\> returns a chaining response (i.e., CNAME, DNAME, or
-another ANAME), then the authoritative server (or the resolver tasked with
-resolving the ANAME target on behalf of it) MUST follow it until it is able to
-resolve a final address response. Intermediate ANAMEs, CNAMEs, and DNAMEs MUST
-be omitted from the response.
+If a query for the ANAME \<target\> returns a chaining response (i.e.,
+CNAME, DNAME, or another ANAME), then the authoritative server (or the
+resolver tasked with resolving the ANAME \<target\> on its behalf) MUST
+follow the chain until it is able to resolve a final address response.
+Intermediate ANAMEs, CNAMEs, and DNAMEs MUST be omitted from the response.
 
 ## Address records returned with ANAME
 
@@ -103,9 +105,9 @@ the AAAA RRset MAY be appended to the additional section (again, with
 \<owner\> changed to match that of the ANAME RR).
 
 Similarly, if the original query was for type AAAA, and an AAAA RRset
-exists at the ANAME \<target\>, then it is appended to the answer section,
-and if an A RRset also exists at the ANAME \<target\> then it MAY be appended
-to the additional section.
+exists at the final ANAME \<target\>, then it is appended to the answer
+section (with \<owner\> changed), and if an A RRset also exists at the
+final ANAME \<target\> then it MAY be appended to the additional section.
 
 If the original query is for type ANAME, A and AAAA records MAY be returned
 in the additional section.
@@ -129,8 +131,8 @@ Address records cached locally MUST have a limited TTL.  The initial TTL
 for locally-cached address records MUST be set to the lesser of the ANAME
 TTL and the TTL of the address records retrieved from the ANAME \<target\>.
 The local TTL MUST count down, just as it would in a conventional resolver
-cache.  Records with an expired TTL MUST NOT be returned until refreshed
-with a new query to the ANAME \<target\>.
+cache.  Records with an expired TTL MUST NOT be used to answer address
+queries until refreshed with a new query to the ANAME \<target\>.
 
 If configured to do so, then the authoritative server MAY, when sending
 queries to the ANAME \<target\>, include an EDNS CLIENT-SUBNET (ECS)
@@ -267,7 +269,9 @@ carefully check for loops and treat them as an error condition.
 
 # IANA Considerations
 
-IANA is requested to assign a DNS RR data type value for the ANAME RR type under the "Resource Record (RR) TYPEs" subregistry under the "Domain Name System (DNS) Parameters" registry.
+IANA is requested to assign a DNS RR data type value for the ANAME RR type
+under the "Resource Record (RR) TYPEs" subregistry under the "Domain Name
+System (DNS) Parameters" registry.
 
 # Acknowledgments
 

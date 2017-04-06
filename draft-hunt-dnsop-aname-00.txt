@@ -155,7 +155,7 @@ Internet-Draft                    aname                         Mar 2017
 
 2.  The ANAME Resource Record
 
-   This document defines the "ANAME" DNS resource record type , with RR
+   This document defines the "ANAME" DNS resource record type, with RR
    TYPE value [TBD].
 
    The ANAME presentation format is identical to that of CNAME
@@ -190,14 +190,15 @@ Internet-Draft                    aname                         Mar 2017
    Authoritative servers implementing ANAME MUST be equipped to resolve
    the ANAME <target> on the querying resolver's behalf, either by
    sending queries to an external recursive resolver, or by implementing
-   recursive resolution logic internally.
+   recursive resolution logic internally, in order for address records
+   to be expanded for an ANAME <target> in a separate zone from <owner>.
 
-   If the ANAME <target> returns a chaining response (i.e., CNAME,
-   DNAME, or another ANAME), then the authoritative server (or the
-   resolver tasked with resolving the ANAME target on behalf of it) MUST
-   follow it until it is able to resolve a final address response.
-   Intermediate ANAMEs, CNAMEs, and DNAMEs MUST be omitted from the
-   response.
+   If a query for the ANAME <target> returns a chaining response (i.e.,
+   CNAME, DNAME, or another ANAME), then the authoritative server (or
+   the resolver tasked with resolving the ANAME <target> on its behalf)
+   MUST follow the chain until it is able to resolve a final address
+   response.  Intermediate ANAMEs, CNAMEs, and DNAMEs MUST be omitted
+   from the response.
 
 3.1.  Address records returned with ANAME
 
@@ -210,14 +211,13 @@ Internet-Draft                    aname                         Mar 2017
    ANAME RR).
 
    Similarly, if the original query was for type AAAA, and an AAAA RRset
-   exists at the ANAME <target>, then it is appended to the answer
-   section, and if an A RRset also exists at the ANAME <target> then it
-   MAY be appended to the additional section.
+   exists at the final ANAME <target>, then it is appended to the answer
+   section (with <owner> changed), and if an A RRset also exists at the
+   final ANAME <target> then it MAY be appended to the additional
+   section.
 
    If the original query is for type ANAME, A and AAAA records MAY be
    returned in the additional section.
-
-
 
 
 
@@ -249,7 +249,8 @@ Internet-Draft                    aname                         Mar 2017
    the ANAME TTL and the TTL of the address records retrieved from the
    ANAME <target>.  The local TTL MUST count down, just as it would in a
    conventional resolver cache.  Records with an expired TTL MUST NOT be
-   returned until refreshed with a new query to the ANAME <target>.
+   used to answer address queries until refreshed with a new query to
+   the ANAME <target>.
 
    If configured to do so, then the authoritative server MAY, when
    sending queries to the ANAME <target>, include an EDNS CLIENT-SUBNET
@@ -273,7 +274,6 @@ Internet-Draft                    aname                         Mar 2017
    fallback in the event that resolving the ANAME <target> fails or if
    the address type is not present at the ANAME <target>.  (For example,
    if the ANAME <target> returns NOERROR/NODATA for a query of type
-
 
 
 
