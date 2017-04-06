@@ -277,8 +277,4 @@ System (DNS) Parameters" registry.
 # Acknowledgments
 
 Thanks to Mukund Sivaraman, Stephen Morris, Ray Bellis, Mark Andrews,
-Richard Salts, Job Snijders, and Håkan Lindqvist for discussion and feedback.
-
-[REMOVE BEFORE PUBLICATION: Make sure Håkan renders correctly (with
-an accented first a, not an ae replacement); otherwise, replace with
-Hakan]
+Richard Salts, Job Snijders, and Hakan Lindqvist for discussion and feedback.

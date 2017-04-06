@@ -425,12 +425,8 @@ Internet-Draft                    aname                         Mar 2017
 8.  Acknowledgments
 
    Thanks to Mukund Sivaraman, Stephen Morris, Ray Bellis, Mark Andrews,
-   Richard Salts, Job Snijders, and Haekan Lindqvist for discussion and
+   Richard Salts, Job Snijders, and Hakan Lindqvist for discussion and
    feedback.
-
-   [REMOVE BEFORE PUBLICATION: Make sure Haekan renders correctly (with
-   an accented first a, not an ae replacement); otherwise, replace with
-   Hakan]
 
 9.  References
 
@@ -442,6 +438,10 @@ Internet-Draft                    aname                         Mar 2017
    [RFC3597]  Gustafsson, A., "Handling of Unknown DNS Resource Record
               (RR) Types", RFC 3597, September 2003.
 
+   [RFC4034]  Arends, R., Austein, R., Larson, M., Massey, D., and S.
+              Rose, "Resource Records for the DNS Security Extensions",
+              RFC 4034, March 2005.
+
 
 
 
@@ -449,10 +449,6 @@ Hunt, et al.            Expires September 2, 2017               [Page 8]
 
 Internet-Draft                    aname                         Mar 2017
 
-
-   [RFC4034]  Arends, R., Austein, R., Larson, M., Massey, D., and S.
-              Rose, "Resource Records for the DNS Security Extensions",
-              RFC 4034, March 2005.
 
 9.2.  Informative References
 
@@ -497,6 +493,10 @@ Authors' Addresses
 
    Email: anthony.eden@dnsimple.com
    URI:   https://dnsimple.com/
+
+
+
+
 
 
 
