@@ -144,12 +144,6 @@ includes an ECS option with a SCOPE PREFIX-LENGTH greater than zero, the
 response SHOULD be cached with the ECS data and should only be used in
 response to queries from the same client subnet.
 
-[REMOVE BEFORE PUBLICATION: Some suggestions have been made about signaling
-ANAME capability via an EDNS option. If a query indicated that the client
-understood ANAME, then the authority could respond differently. This may
-turn out to be necessary, but I want to hold off on specifying it until
-we're sure that it is. - each]
-
 ## Coexistence with other types
 
 If the zone is configured with an A or AAAA RRset at the same DNS node as
