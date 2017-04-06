@@ -1,3 +1,5 @@
-This document defines the "ANAME" DNS RR type, to provide similar functionality to CNAME, but limited to the type A and AAAA address queries.
+This document defines the "ANAME" DNS RR type, to provide similar
+functionality to CNAME, but limited to type A and AAAA address queries.
 Unlike CNAME, an ANAME can coexist with other record types.
-The ANAME RR type allows zone owners to redirect queries for apex domain names in a standards compliant manner.
+The ANAME RR type allows zone owners to redirect queries for apex domain
+names in a standards compliant manner.
