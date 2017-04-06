@@ -78,22 +78,23 @@ When an ANAME record is present at a DNS node and a query is received by an
 authoritative server for type A or AAAA, the authoritative server returns
 the ANAME RR in the answer section.
 
-For the benefit of querying resolvers that do not understand ANAME, the
-authoritative server MUST also return address records as described below.
-This is similar to the synthesized CNAME record included with DNAME
-[](#RFC6672).
+Because not all querying resolvers understand ANAME, the authoritative
+server MUST also return address records, as described below.  This is
+conceptually similar to the synthesized CNAME record included with DNAME
+responses [](#RFC6672).
 
 Authoritative servers implementing ANAME MUST be equipped to resolve the
 ANAME \<target\> on the querying resolver's behalf, either by sending
-queries to an external recursive resolver, or by implementing recursive
-resolution logic internally, in order for address records to be expanded
-for an ANAME \<target\> in a separate zone from \<owner\>.
+queries to an external recursive resolver or by implementing recursive
+resolution logic internally, so that address records can be expanded
+when the ANAME \<target\> is in a separate zone from \<owner\>.
 
 If a query for the ANAME \<target\> returns a chaining response (i.e.,
 CNAME, DNAME, or another ANAME), then the authoritative server (or the
-resolver tasked with resolving the ANAME \<target\> on its behalf) MUST
-follow the chain until it is able to resolve a final address response.
-Intermediate ANAMEs, CNAMEs, and DNAMEs MUST be omitted from the response.
+resolver tasked with resolving the ANAME \<target\> on its behalf)
+MUST attempt to follow the chain until it is able to resolve a final
+address response, or until resolution fails.  Intermediate ANAMEs,
+CNAMEs, and DNAMEs MUST be omitted from the response.
 
 ## Address records returned with ANAME
 
@@ -122,7 +123,7 @@ the ANAME \<target\> (when it is not itself authoritative for \<target\>) is
 unspecified. If the authoritative server is capable of performing recursive
 resolution, then it MAY resolve the query itself, or it MAY send address
 queries to an external resolver.  It MAY send address queries to the ANAME
-\<target\> when loading the zone and store the responses locally, or it MAY
+\<target\> when loading the zone and cache the responses locally, or it MAY
 delay resolution of the address records until a query is received for the
 ANAME \<owner\>. In either case, for performance reasons, it is RECOMMENDED
 that address records be cached locally by the authoritative server.
@@ -153,9 +154,9 @@ we're sure that it is. - each]
 
 If the zone is configured with an A or AAAA RRset at the same DNS node as
 ANAME, then the ANAME is considered to have been pre-expanded for zone
-transfer purposes. When a zone is being transferred to a secondary
-server, if any address record already exists at the same node as an
-ANAME RR, then the ANAME RR MUST NOT be recursively expanded.
+transfer purposes. When a zone is being transferred to a secondary server,
+if any address record already exists at the same node as an ANAME RR, then
+the ANAME RR MUST NOT be recursively expanded.
 
 ANAME MUST NOT coexist with CNAME or any other RR type that restricts
 the types with which it can itself coexist.
@@ -169,7 +170,7 @@ ANAME can freely coexist at the same owner name with any other RR type.
 ## DNSSEC signing
 
 If the zone in which the ANAME resides is DNSSEC-signed, and if the server
-has access to the private zone-signing key, then the A and AAAA RRsets MUST
+has access to its private zone-signing key, then the A and AAAA RRsets MUST
 be signed, either in advance when populating the A/AAAA answers for the
 ANAME records, or "on the fly" when responding to a query.
 
@@ -189,15 +190,18 @@ for DNSSEC validation.
 Implementers MAY allow address records associated with the ANAME to be
 populated and signed by the primary server, then sent along with their
 RRSIGs to secondaries via zone transfer. In this case, the master server
-MUST refresh the address records when their TTLs expire, and MUST inform
-secondary servers via DNS NOTIFY that they need to refresh the zone.
-A secondary server SHOULD store address records and associated RRSIGs
-supplied via zone transfer in such a way that their TTLs will count down,
-as they would in a normal DNS cache, and ultimately trigger a refresh
-query upon reaching zero. When a secondary server is responding to an
-address query, it SHOULD answer with the reduced TTL, but when responding
-to a zone transfer request, it MUST answer with the original TTL received
-from the primary.
+MUST respect the TTLs of the address records, MUST refresh the address
+records by re-resolving the ANAME \<target\> when their TTLs expire,
+SHOULD respond to address queries with TTLs that count down as they would
+when answering from a normal DNS cache, and MUST inform secondary servers
+via DNS NOTIFY they need to refresh the zone when address records have been
+updated.  A secondary server SHOULD store address records and associated
+RRSIGs supplied via zone transfer in such a way that their TTLs will count
+down, as they would in a normal DNS cache, and ultimately trigger a zone
+refresh query upon reaching zero. When a secondary server is responding to
+an address query, it SHOULD answer with the reduced TTL, but when
+responding to a zone transfer request, it MUST answer with the original
+TTL received from the primary.
 
 If this address record expansion and signing during zone transfer is not
 supported, then every authoritative server providing ANAME responses
@@ -242,11 +246,11 @@ from the same client subnet.
 
 When a zone containing ANAME records is transferred to a secondary server,
 the ANAME records are transferred, but the A or AAAA records retrieved from
-the ANAME \<target\> are not. If the primary server implements ANAME but
+the ANAME \<target\> may not be. If the primary server implements ANAME but
 the secondary server does not, then the two will return different answers
 for address queries. It is therefore RECOMMENDED that ANAME not be deployed
 in a zone unless all of the authoritative servers for that zone implement
-ANAME, or the primary is able to augment the ANAME with the related address
+ANAME, or the primary is able to expand the ANAME with the related address
 RRsets during the zone transfer.
 
 # Security Considerations
