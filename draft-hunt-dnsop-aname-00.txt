@@ -8,7 +8,7 @@ Intended status: Standards Track                             P. van Dijk
 Expires: September 2, 2017                                      PowerDNS
                                                                  A. Eden
                                                                 DNSimple
-                                                                Mar 2017
+                                                              March 2017
 
 
              Address-specific DNS Name Redirection (ANAME)
@@ -55,7 +55,7 @@ Copyright Notice
 
 Hunt, et al.            Expires September 2, 2017               [Page 1]
 
-Internet-Draft                    aname                         Mar 2017
+Internet-Draft                    aname                       March 2017
 
 
    include Simplified BSD License text as described in Section 4.e of
@@ -67,18 +67,18 @@ Table of Contents
    1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
      1.1.  Terminology . . . . . . . . . . . . . . . . . . . . . . .   3
      1.2.  Reserved Words  . . . . . . . . . . . . . . . . . . . . .   3
-   2.  The ANAME Resource Record . . . . . . . . . . . . . . . . . .   3
+   2.  The ANAME Resource Record . . . . . . . . . . . . . . . . . .   4
    3.  Authoritative Server Behavior . . . . . . . . . . . . . . . .   4
      3.1.  Address records returned with ANAME . . . . . . . . . . .   4
-     3.2.  Coexistence with other types  . . . . . . . . . . . . . .   5
+     3.2.  Coexistence with other types  . . . . . . . . . . . . . .   6
      3.3.  DNSSEC signing  . . . . . . . . . . . . . . . . . . . . .   6
    4.  Recursive Server Behavior . . . . . . . . . . . . . . . . . .   7
-   5.  Operational Considerations  . . . . . . . . . . . . . . . . .   7
+   5.  Operational Considerations  . . . . . . . . . . . . . . . . .   8
    6.  Security Considerations . . . . . . . . . . . . . . . . . . .   8
    7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   8
    8.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .   8
-   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   8
-     9.1.  Normative References  . . . . . . . . . . . . . . . . . .   8
+   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   9
+     9.1.  Normative References  . . . . . . . . . . . . . . . . . .   9
      9.2.  Informative References  . . . . . . . . . . . . . . . . .   9
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   9
 
@@ -111,7 +111,7 @@ Table of Contents
 
 Hunt, et al.            Expires September 2, 2017               [Page 2]
 
-Internet-Draft                    aname                         Mar 2017
+Internet-Draft                    aname                       March 2017
 
 
    DNAME [RFC6672] is also not a solution, as its function is to
@@ -140,6 +140,14 @@ Internet-Draft                    aname                         Mar 2017
    which do not understand ANAME will ignore the ANAME and consume the
    provided A/AAAA records directly.
 
+   [REMOVE BEFORE PUBLICATION: The authors are aware that similar
+   functionality is currently implemented and deployed by various
+   software vendors and service providers, under names such as ALIAS,
+   ANAME, or CNAME-flattening.  It is our hope that most, if not all, of
+   these implementations, will adjust to ANAME as described in here.
+   This would improve interoperability of authoritative hosters and
+   would give users more choice.]
+
 1.1.  Terminology
 
    "Address type" refers to a DNS RR type that encodes a network
@@ -153,6 +161,15 @@ Internet-Draft                    aname                         Mar 2017
    "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
    document are to be interpreted as described in [RFC2119].
 
+
+
+
+
+Hunt, et al.            Expires September 2, 2017               [Page 3]
+
+Internet-Draft                    aname                       March 2017
+
+
 2.  The ANAME Resource Record
 
    This document defines the "ANAME" DNS resource record type, with RR
@@ -162,13 +179,6 @@ Internet-Draft                    aname                         Mar 2017
    [RFC1033]:
 
        owner ttl class ANAME target
-
-
-
-Hunt, et al.            Expires September 2, 2017               [Page 3]
-
-Internet-Draft                    aname                         Mar 2017
-
 
    The wire format is also identical to CNAME, except that name
    compression is not permitted in ANAME RDATA, per [RFC3597].
@@ -207,6 +217,15 @@ Internet-Draft                    aname                         Mar 2017
    match that of the ANAME RR), MUST be appended to the answer section
    after the ANAME RRset.  If an AAAA RRset is also known to exist at
    the ANAME <target>, then the AAAA RRset MAY be appended to the
+
+
+
+
+Hunt, et al.            Expires September 2, 2017               [Page 4]
+
+Internet-Draft                    aname                       March 2017
+
+
    additional section (again, with <owner> changed to match that of the
    ANAME RR).
 
@@ -218,13 +237,6 @@ Internet-Draft                    aname                         Mar 2017
 
    If the original query is for type ANAME, A and AAAA records MAY be
    returned in the additional section.
-
-
-
-Hunt, et al.            Expires September 2, 2017               [Page 4]
-
-Internet-Draft                    aname                         Mar 2017
-
 
    If the original query is for type ANY and access to ANY query
    processing is not restricted, then the answer section MUST contain
@@ -260,6 +272,16 @@ Internet-Draft                    aname                         Mar 2017
    than zero, the response SHOULD be cached with the ECS data and should
    only be used in response to queries from the same client subnet.
 
+
+
+
+
+
+Hunt, et al.            Expires September 2, 2017               [Page 5]
+
+Internet-Draft                    aname                       March 2017
+
+
 3.2.  Coexistence with other types
 
    If the zone is configured with an A or AAAA RRset at the same DNS
@@ -274,14 +296,6 @@ Internet-Draft                    aname                         Mar 2017
 
    Like other types, ANAME MUST NOT exist below a DNAME, but it can
    coexist at the same node; in fact, the two can be used cooperatively
-
-
-
-Hunt, et al.            Expires September 2, 2017               [Page 5]
-
-Internet-Draft                    aname                         Mar 2017
-
-
    to redirect both the owner name (via ANAME) and everything under it
    (via DNAME).
 
@@ -316,6 +330,14 @@ Internet-Draft                    aname                         Mar 2017
    master server MUST respect the TTLs of the address records, MUST
    refresh the address records by re-resolving the ANAME <target> when
    their TTLs expire, SHOULD respond to address queries with TTLs that
+
+
+
+Hunt, et al.            Expires September 2, 2017               [Page 6]
+
+Internet-Draft                    aname                       March 2017
+
+
    count down as they would when answering from a normal DNS cache, and
    MUST inform secondary servers via DNS NOTIFY they need to refresh the
    zone when address records have been updated.  A secondary server
@@ -330,14 +352,6 @@ Internet-Draft                    aname                         Mar 2017
    If this address record expansion and signing during zone transfer is
    not supported, then every authoritative server providing ANAME
    responses in a signed zone SHOULD have access to the private zone-
-
-
-
-Hunt, et al.            Expires September 2, 2017               [Page 6]
-
-Internet-Draft                    aname                         Mar 2017
-
-
    signing key for that zone.  Deployment of ANAME in signed zones where
    address records cannot be signed due to lack of access to the private
    zone-signing key is NOT RECOMMENDED.
@@ -372,6 +386,14 @@ Internet-Draft                    aname                         Mar 2017
    SUBNET option [RFC7871] both when sending the initial query to the
    ANAME <owner> and when re-querying for the ANAME <target>.  If the
    response includes a SCOPE PREFIX-LENGTH greater than zero, the
+
+
+
+Hunt, et al.            Expires September 2, 2017               [Page 7]
+
+Internet-Draft                    aname                       March 2017
+
+
    response SHOULD be cached with the ECS data and should only be used
    in response to queries from the same client subnet.
 
@@ -386,13 +408,6 @@ Internet-Draft                    aname                         Mar 2017
    authoritative servers for that zone implement ANAME, or the primary
    is able to expand the ANAME with the related address RRsets during
    the zone transfer.
-
-
-
-Hunt, et al.            Expires September 2, 2017               [Page 7]
-
-Internet-Draft                    aname                         Mar 2017
-
 
 6.  Security Considerations
 
@@ -425,21 +440,6 @@ Internet-Draft                    aname                         Mar 2017
    Richard Salts, Job Snijders, and Hakan Lindqvist for discussion and
    feedback.
 
-9.  References
-
-9.1.  Normative References
-
-   [RFC1033]  Lottor, M., "Domain administrators operations guide",
-              RFC 1033, November 1987.
-
-   [RFC3597]  Gustafsson, A., "Handling of Unknown DNS Resource Record
-              (RR) Types", RFC 3597, September 2003.
-
-   [RFC4034]  Arends, R., Austein, R., Larson, M., Massey, D., and S.
-              Rose, "Resource Records for the DNS Security Extensions",
-              RFC 4034, March 2005.
-
-
 
 
 
@@ -447,20 +447,41 @@ Internet-Draft                    aname                         Mar 2017
 
 Hunt, et al.            Expires September 2, 2017               [Page 8]
 
-Internet-Draft                    aname                         Mar 2017
+Internet-Draft                    aname                       March 2017
 
+
+9.  References
+
+9.1.  Normative References
+
+   [RFC1033]  Lottor, M., "Domain Administrators Operations Guide",
+              RFC 1033, DOI 10.17487/RFC1033, November 1987,
+              <http://www.rfc-editor.org/info/rfc1033>.
+
+   [RFC3597]  Gustafsson, A., "Handling of Unknown DNS Resource Record
+              (RR) Types", RFC 3597, DOI 10.17487/RFC3597, September
+              2003, <http://www.rfc-editor.org/info/rfc3597>.
+
+   [RFC4034]  Arends, R., Austein, R., Larson, M., Massey, D., and S.
+              Rose, "Resource Records for the DNS Security Extensions",
+              RFC 4034, DOI 10.17487/RFC4034, March 2005,
+              <http://www.rfc-editor.org/info/rfc4034>.
 
 9.2.  Informative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
-              Requirement Levels", BCP 14, RFC 2119, March 1997.
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <http://www.rfc-editor.org/info/rfc2119>.
 
    [RFC5155]  Laurie, B., Sisson, G., Arends, R., and D. Blacka, "DNS
               Security (DNSSEC) Hashed Authenticated Denial of
-              Existence", RFC 5155, March 2008.
+              Existence", RFC 5155, DOI 10.17487/RFC5155, March 2008,
+              <http://www.rfc-editor.org/info/rfc5155>.
 
    [RFC6672]  Rose, S. and W. Wijngaards, "DNAME Redirection in the
-              DNS", RFC 6672, June 2012.
+              DNS", RFC 6672, DOI 10.17487/RFC6672, June 2012,
+              <http://www.rfc-editor.org/info/rfc6672>.
 
    [RFC7871]  Contavalli, C., van der Gaast, W., Lawrence, D., and W.
               Kumari, "Client Subnet in DNS Queries", RFC 7871,
@@ -476,6 +497,13 @@ Authors' Addresses
    USA
 
    Email: each@isc.org
+
+
+
+
+Hunt, et al.            Expires September 2, 2017               [Page 9]
+
+Internet-Draft                    aname                       March 2017
 
 
    Peter van Dijk
@@ -501,4 +529,32 @@ Authors' Addresses
 
 
 
-Hunt, et al.            Expires September 2, 2017               [Page 9]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.            Expires September 2, 2017              [Page 10]

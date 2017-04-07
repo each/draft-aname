@@ -45,6 +45,13 @@ re-query for the ANAME target, just as if they had received a CNAME
 response. Recursive resolvers which do not understand ANAME will ignore
 the ANAME and consume the provided A/AAAA records directly.
 
+[REMOVE BEFORE PUBLICATION: The authors are aware that similar functionality
+is currently implemented and deployed by various software vendors and service
+providers, under names such as ALIAS, ANAME, or CNAME-flattening. It is our
+hope that most, if not all, of these implementations, will adjust to ANAME as
+described in here. This would improve interoperability of authoritative
+hosters and would give users more choice.]
+
 ## Terminology
 
 "Address type" refers to a DNS RR type that encodes a network address.
