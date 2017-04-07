@@ -49,7 +49,7 @@ the ANAME and consume the provided A/AAAA records directly.
 is currently implemented and deployed by various software vendors and service
 providers, under names such as ALIAS, ANAME, or CNAME-flattening. It is our
 hope that most, if not all, of these implementations, will adjust to ANAME as
-described in here. This would improve interoperability of authoritative
+described here. This would improve interoperability of authoritative
 hosters and would give users more choice.]
 
 ## Terminology
@@ -58,8 +58,6 @@ hosters and would give users more choice.]
 Currently the set of address types consists of A and AAAA.
 
 "Address query" refers to a DNS query for any address type.
-
-## Reserved Words
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
 "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this

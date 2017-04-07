@@ -8,7 +8,7 @@ Intended status: Standards Track                             P. van Dijk
 Expires: September 2, 2017                                      PowerDNS
                                                                  A. Eden
                                                                 DNSimple
-                                                              March 2017
+                                                                Mar 2017
 
 
              Address-specific DNS Name Redirection (ANAME)
@@ -55,7 +55,7 @@ Copyright Notice
 
 Hunt, et al.            Expires September 2, 2017               [Page 1]
 
-Internet-Draft                    aname                       March 2017
+Internet-Draft                    aname                         Mar 2017
 
 
    include Simplified BSD License text as described in Section 4.e of
@@ -66,7 +66,6 @@ Table of Contents
 
    1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
      1.1.  Terminology . . . . . . . . . . . . . . . . . . . . . . .   3
-     1.2.  Reserved Words  . . . . . . . . . . . . . . . . . . . . .   3
    2.  The ANAME Resource Record . . . . . . . . . . . . . . . . . .   4
    3.  Authoritative Server Behavior . . . . . . . . . . . . . . . .   4
      3.1.  Address records returned with ANAME . . . . . . . . . . .   4
@@ -109,9 +108,10 @@ Table of Contents
 
 
 
+
 Hunt, et al.            Expires September 2, 2017               [Page 2]
 
-Internet-Draft                    aname                       March 2017
+Internet-Draft                    aname                         Mar 2017
 
 
    DNAME [RFC6672] is also not a solution, as its function is to
@@ -144,9 +144,9 @@ Internet-Draft                    aname                       March 2017
    functionality is currently implemented and deployed by various
    software vendors and service providers, under names such as ALIAS,
    ANAME, or CNAME-flattening.  It is our hope that most, if not all, of
-   these implementations, will adjust to ANAME as described in here.
-   This would improve interoperability of authoritative hosters and
-   would give users more choice.]
+   these implementations, will adjust to ANAME as described here.  This
+   would improve interoperability of authoritative hosters and would
+   give users more choice.]
 
 1.1.  Terminology
 
@@ -154,8 +154,6 @@ Internet-Draft                    aname                       March 2017
    address.  Currently the set of address types consists of A and AAAA.
 
    "Address query" refers to a DNS query for any address type.
-
-1.2.  Reserved Words
 
    The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
    "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
@@ -165,9 +163,11 @@ Internet-Draft                    aname                       March 2017
 
 
 
+
+
 Hunt, et al.            Expires September 2, 2017               [Page 3]
 
-Internet-Draft                    aname                       March 2017
+Internet-Draft                    aname                         Mar 2017
 
 
 2.  The ANAME Resource Record
@@ -223,7 +223,7 @@ Internet-Draft                    aname                       March 2017
 
 Hunt, et al.            Expires September 2, 2017               [Page 4]
 
-Internet-Draft                    aname                       March 2017
+Internet-Draft                    aname                         Mar 2017
 
 
    additional section (again, with <owner> changed to match that of the
@@ -279,7 +279,7 @@ Internet-Draft                    aname                       March 2017
 
 Hunt, et al.            Expires September 2, 2017               [Page 5]
 
-Internet-Draft                    aname                       March 2017
+Internet-Draft                    aname                         Mar 2017
 
 
 3.2.  Coexistence with other types
@@ -335,7 +335,7 @@ Internet-Draft                    aname                       March 2017
 
 Hunt, et al.            Expires September 2, 2017               [Page 6]
 
-Internet-Draft                    aname                       March 2017
+Internet-Draft                    aname                         Mar 2017
 
 
    count down as they would when answering from a normal DNS cache, and
@@ -391,7 +391,7 @@ Internet-Draft                    aname                       March 2017
 
 Hunt, et al.            Expires September 2, 2017               [Page 7]
 
-Internet-Draft                    aname                       March 2017
+Internet-Draft                    aname                         Mar 2017
 
 
    response SHOULD be cached with the ECS data and should only be used
@@ -447,41 +447,34 @@ Internet-Draft                    aname                       March 2017
 
 Hunt, et al.            Expires September 2, 2017               [Page 8]
 
-Internet-Draft                    aname                       March 2017
+Internet-Draft                    aname                         Mar 2017
 
 
 9.  References
 
 9.1.  Normative References
 
-   [RFC1033]  Lottor, M., "Domain Administrators Operations Guide",
-              RFC 1033, DOI 10.17487/RFC1033, November 1987,
-              <http://www.rfc-editor.org/info/rfc1033>.
+   [RFC1033]  Lottor, M., "Domain administrators operations guide",
+              RFC 1033, November 1987.
 
    [RFC3597]  Gustafsson, A., "Handling of Unknown DNS Resource Record
-              (RR) Types", RFC 3597, DOI 10.17487/RFC3597, September
-              2003, <http://www.rfc-editor.org/info/rfc3597>.
+              (RR) Types", RFC 3597, September 2003.
 
    [RFC4034]  Arends, R., Austein, R., Larson, M., Massey, D., and S.
               Rose, "Resource Records for the DNS Security Extensions",
-              RFC 4034, DOI 10.17487/RFC4034, March 2005,
-              <http://www.rfc-editor.org/info/rfc4034>.
+              RFC 4034, March 2005.
 
 9.2.  Informative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
-              Requirement Levels", BCP 14, RFC 2119,
-              DOI 10.17487/RFC2119, March 1997,
-              <http://www.rfc-editor.org/info/rfc2119>.
+              Requirement Levels", BCP 14, RFC 2119, March 1997.
 
    [RFC5155]  Laurie, B., Sisson, G., Arends, R., and D. Blacka, "DNS
               Security (DNSSEC) Hashed Authenticated Denial of
-              Existence", RFC 5155, DOI 10.17487/RFC5155, March 2008,
-              <http://www.rfc-editor.org/info/rfc5155>.
+              Existence", RFC 5155, March 2008.
 
    [RFC6672]  Rose, S. and W. Wijngaards, "DNAME Redirection in the
-              DNS", RFC 6672, DOI 10.17487/RFC6672, June 2012,
-              <http://www.rfc-editor.org/info/rfc6672>.
+              DNS", RFC 6672, June 2012.
 
    [RFC7871]  Contavalli, C., van der Gaast, W., Lawrence, D., and W.
               Kumari, "Client Subnet in DNS Queries", RFC 7871,
@@ -499,19 +492,18 @@ Authors' Addresses
    Email: each@isc.org
 
 
-
-
-Hunt, et al.            Expires September 2, 2017               [Page 9]
-
-Internet-Draft                    aname                       March 2017
-
-
    Peter van Dijk
    PowerDNS.COM B.V.
    Den Haag
    The Netherlands
 
    Email: peter.van.dijk@powerdns.com
+
+
+
+Hunt, et al.            Expires September 2, 2017               [Page 9]
+
+Internet-Draft                    aname                         Mar 2017
 
 
    Anthony Eden
@@ -521,6 +513,14 @@ Internet-Draft                    aname                       March 2017
 
    Email: anthony.eden@dnsimple.com
    URI:   https://dnsimple.com/
+
+
+
+
+
+
+
+
 
 
 
