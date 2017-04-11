@@ -45,12 +45,12 @@ re-query for the ANAME target, just as if they had received a CNAME
 response. Recursive resolvers which do not understand ANAME will ignore
 the ANAME and consume the provided A/AAAA records directly.
 
-[REMOVE BEFORE PUBLICATION: The authors are aware that similar functionality
-is currently implemented and deployed by various software vendors and service
-providers, under names such as ALIAS, ANAME, or CNAME-flattening. It is our
-hope that most, if not all, of these implementations, will adjust to ANAME as
-described here. This would improve interoperability of authoritative
-hosters and would give users more choice.]
+Similar authoritative functionality has been implemented and deployed by
+a number of DNS software vendors and service providers, using names such
+as ALIAS, ANAME, apex CNAME, CNAME flattening, and top level redirection.
+These approaches have all been standards-noncompliant in one way or
+another, and none have provided a mechanism for a recursive resolver
+to follow the redirection chain itself.
 
 ## Terminology
 
@@ -251,6 +251,15 @@ for address queries. It is therefore RECOMMENDED that ANAME not be deployed
 in a zone unless all of the authoritative servers for that zone implement
 ANAME, or the primary is able to expand the ANAME with the related address
 RRsets during the zone transfer.
+
+# Implementation Status
+
+PowerDNS [](https://powerdns.com) currently implements a similar
+authoritative-only feature using "ALIAS" records, which are expanded by the
+primary server and transfered as address records to secondaries.
+
+[TODO: Add discussion of DNSimple, DNS Made Easy, EasyDNS, Cloudflare,
+and Akamai.]
 
 # Security Considerations
 

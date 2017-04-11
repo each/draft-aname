@@ -73,12 +73,13 @@ Table of Contents
      3.3.  DNSSEC signing  . . . . . . . . . . . . . . . . . . . . .   6
    4.  Recursive Server Behavior . . . . . . . . . . . . . . . . . .   7
    5.  Operational Considerations  . . . . . . . . . . . . . . . . .   8
-   6.  Security Considerations . . . . . . . . . . . . . . . . . . .   8
-   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   8
-   8.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .   8
-   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   9
-     9.1.  Normative References  . . . . . . . . . . . . . . . . . .   9
-     9.2.  Informative References  . . . . . . . . . . . . . . . . .   9
+   6.  Implementation Status . . . . . . . . . . . . . . . . . . . .   8
+   7.  Security Considerations . . . . . . . . . . . . . . . . . . .   8
+   8.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   9
+   9.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .   9
+   10. References  . . . . . . . . . . . . . . . . . . . . . . . . .   9
+     10.1.  Normative References . . . . . . . . . . . . . . . . . .   9
+     10.2.  Informative References . . . . . . . . . . . . . . . . .   9
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   9
 
 1.  Introduction
@@ -104,7 +105,6 @@ Table of Contents
    exceptions are not applicable to other resource records.  RRSIG and
    NSEC exist to prove the integrity of the CNAME record; they are not
    intended to associate arbitrary data with the domain name.
-
 
 
 
@@ -140,13 +140,13 @@ Internet-Draft                    aname                       April 2017
    which do not understand ANAME will ignore the ANAME and consume the
    provided A/AAAA records directly.
 
-   [REMOVE BEFORE PUBLICATION: The authors are aware that similar
-   functionality is currently implemented and deployed by various
-   software vendors and service providers, under names such as ALIAS,
-   ANAME, or CNAME-flattening.  It is our hope that most, if not all, of
-   these implementations, will adjust to ANAME as described here.  This
-   would improve interoperability of authoritative hosters and would
-   give users more choice.]
+   Similar authoritative functionality has been implemented and deployed
+   by a number of DNS software vendors and service providers, using
+   names such as ALIAS, ANAME, apex CNAME, CNAME flattening, and top
+   level redirection.  These approaches have all been standards-
+   noncompliant in one way or another, and none have provided a
+   mechanism for a recursive resolver to follow the redirection chain
+   itself.
 
 1.1.  Terminology
 
@@ -409,7 +409,17 @@ Internet-Draft                    aname                       April 2017
    is able to expand the ANAME with the related address RRsets during
    the zone transfer.
 
-6.  Security Considerations
+6.  Implementation Status
+
+   PowerDNS <https://powerdns.com> currently implements a similar
+   authoritative-only feature using "ALIAS" records, which are expanded
+   by the primary server and transfered as address records to
+   secondaries.
+
+   [TODO: Add discussion of DNSimple, DNS Made Easy, EasyDNS,
+   Cloudflare, and Akamai.]
+
+7.  Security Considerations
 
    An authoritative server which implements ANAME resolves address
    queries on behalf of its clients, either internally or by querying an
@@ -428,17 +438,7 @@ Internet-Draft                    aname                       April 2017
    Both authoritative servers and resolvers that implement ANAME should
    carefully check for loops and treat them as an error condition.
 
-7.  IANA Considerations
 
-   IANA is requested to assign a DNS RR data type value for the ANAME RR
-   type under the "Resource Record (RR) TYPEs" subregistry under the
-   "Domain Name System (DNS) Parameters" registry.
-
-8.  Acknowledgments
-
-   Thanks to Mukund Sivaraman, Stephen Morris, Ray Bellis, Mark Andrews,
-   Richard Salts, Job Snijders, and Hakan Lindqvist for discussion and
-   feedback.
 
 
 
@@ -450,9 +450,21 @@ Hunt, et al.            Expires October 12, 2017                [Page 8]
 Internet-Draft                    aname                       April 2017
 
 
-9.  References
+8.  IANA Considerations
 
-9.1.  Normative References
+   IANA is requested to assign a DNS RR data type value for the ANAME RR
+   type under the "Resource Record (RR) TYPEs" subregistry under the
+   "Domain Name System (DNS) Parameters" registry.
+
+9.  Acknowledgments
+
+   Thanks to Mukund Sivaraman, Stephen Morris, Ray Bellis, Mark Andrews,
+   Richard Salts, Job Snijders, and Hakan Lindqvist for discussion and
+   feedback.
+
+10.  References
+
+10.1.  Normative References
 
    [RFC1033]  Lottor, M., "Domain administrators operations guide",
               RFC 1033, November 1987.
@@ -464,7 +476,7 @@ Internet-Draft                    aname                       April 2017
               Rose, "Resource Records for the DNS Security Extensions",
               RFC 4034, March 2005.
 
-9.2.  Informative References
+10.2.  Informative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119, March 1997.
@@ -483,6 +495,17 @@ Internet-Draft                    aname                       April 2017
 
 Authors' Addresses
 
+
+
+
+
+
+
+Hunt, et al.            Expires October 12, 2017                [Page 9]
+
+Internet-Draft                    aname                       April 2017
+
+
    Evan Hunt
    ISC
    950 Charter St
@@ -500,12 +523,6 @@ Authors' Addresses
    Email: peter.van.dijk@powerdns.com
 
 
-
-Hunt, et al.            Expires October 12, 2017                [Page 9]
-
-Internet-Draft                    aname                       April 2017
-
-
    Anthony Eden
    DNSimple
    Boston, MA
@@ -513,23 +530,6 @@ Internet-Draft                    aname                       April 2017
 
    Email: anthony.eden@dnsimple.com
    URI:   https://dnsimple.com/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
