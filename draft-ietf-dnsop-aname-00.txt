@@ -5,14 +5,14 @@
 Network Working Group                                            E. Hunt
 Internet-Draft                                                       ISC
 Intended status: Standards Track                             P. van Dijk
-Expires: October 12, 2017                                       PowerDNS
+Expires: October 3, 2017                                        PowerDNS
                                                                  A. Eden
                                                                 DNSimple
-                                                          April 10, 2017
+                                                                Apr 2017
 
 
              Address-specific DNS Name Redirection (ANAME)
-                       draft-hunt-dnsop-aname-01
+                       draft-ietf-dnsop-aname-00
 
 Abstract
 
@@ -37,7 +37,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on October 12, 2017.
+   This Internet-Draft will expire on October 3, 2017.
 
 Copyright Notice
 
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Hunt, et al.            Expires October 12, 2017                [Page 1]
+Hunt, et al.             Expires October 3, 2017                [Page 1]
 
-Internet-Draft                    aname                       April 2017
+Internet-Draft                    aname                         Apr 2017
 
 
    include Simplified BSD License text as described in Section 4.e of
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Hunt, et al.            Expires October 12, 2017                [Page 2]
+Hunt, et al.             Expires October 3, 2017                [Page 2]
 
-Internet-Draft                    aname                       April 2017
+Internet-Draft                    aname                         Apr 2017
 
 
    DNAME [RFC6672] is also not a solution, as its function is to
@@ -165,9 +165,9 @@ Internet-Draft                    aname                       April 2017
 
 
 
-Hunt, et al.            Expires October 12, 2017                [Page 3]
+Hunt, et al.             Expires October 3, 2017                [Page 3]
 
-Internet-Draft                    aname                       April 2017
+Internet-Draft                    aname                         Apr 2017
 
 
 2.  The ANAME Resource Record
@@ -221,9 +221,9 @@ Internet-Draft                    aname                       April 2017
 
 
 
-Hunt, et al.            Expires October 12, 2017                [Page 4]
+Hunt, et al.             Expires October 3, 2017                [Page 4]
 
-Internet-Draft                    aname                       April 2017
+Internet-Draft                    aname                         Apr 2017
 
 
    additional section (again, with <owner> changed to match that of the
@@ -277,9 +277,9 @@ Internet-Draft                    aname                       April 2017
 
 
 
-Hunt, et al.            Expires October 12, 2017                [Page 5]
+Hunt, et al.             Expires October 3, 2017                [Page 5]
 
-Internet-Draft                    aname                       April 2017
+Internet-Draft                    aname                         Apr 2017
 
 
 3.2.  Coexistence with other types
@@ -333,9 +333,9 @@ Internet-Draft                    aname                       April 2017
 
 
 
-Hunt, et al.            Expires October 12, 2017                [Page 6]
+Hunt, et al.             Expires October 3, 2017                [Page 6]
 
-Internet-Draft                    aname                       April 2017
+Internet-Draft                    aname                         Apr 2017
 
 
    count down as they would when answering from a normal DNS cache, and
@@ -389,9 +389,9 @@ Internet-Draft                    aname                       April 2017
 
 
 
-Hunt, et al.            Expires October 12, 2017                [Page 7]
+Hunt, et al.             Expires October 3, 2017                [Page 7]
 
-Internet-Draft                    aname                       April 2017
+Internet-Draft                    aname                         Apr 2017
 
 
    response SHOULD be cached with the ECS data and should only be used
@@ -445,9 +445,9 @@ Internet-Draft                    aname                       April 2017
 
 
 
-Hunt, et al.            Expires October 12, 2017                [Page 8]
+Hunt, et al.             Expires October 3, 2017                [Page 8]
 
-Internet-Draft                    aname                       April 2017
+Internet-Draft                    aname                         Apr 2017
 
 
 8.  IANA Considerations
@@ -501,9 +501,9 @@ Authors' Addresses
 
 
 
-Hunt, et al.            Expires October 12, 2017                [Page 9]
+Hunt, et al.             Expires October 3, 2017                [Page 9]
 
-Internet-Draft                    aname                       April 2017
+Internet-Draft                    aname                         Apr 2017
 
 
    Evan Hunt
@@ -557,4 +557,4 @@ Internet-Draft                    aname                       April 2017
 
 
 
-Hunt, et al.            Expires October 12, 2017               [Page 10]
+Hunt, et al.             Expires October 3, 2017               [Page 10]
