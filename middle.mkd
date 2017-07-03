@@ -246,6 +246,18 @@ includes a SCOPE PREFIX-LENGTH greater than zero, the response SHOULD be
 cached with the ECS data and should only be used in response to queries
 from the same client subnet.
 
+# Examples
+
+```
+$ORIGIN example.com.
+@   IN SOA   ...
+@   IN NS    ns1
+@   IN ANAME example.com.my-cdn.example.net.
+www IN CNAME example.com.my-cdn.example.net.
+```
+
+TODO: add example query output etc.
+
 # Operational Considerations
 
 When a zone containing ANAME records is transferred to a secondary server,
@@ -296,4 +308,4 @@ System (DNS) Parameters" registry.
 # Acknowledgments
 
 Thanks to Mukund Sivaraman, Stephen Morris, Ray Bellis, Mark Andrews,
-Richard Salts, Job Snijders, Richard Gibson, Hakan Lindqvist, Jan Vcelak, and Tatuya JINMEI for discussion and feedback.
+Richard Salts, Job Snijders, Richard Gibson, Hakan Lindqvist, Jan Vcelak, Tatuya JINMEI, and Tony Finch for discussion and feedback.
