@@ -37,7 +37,9 @@ at that node.  The flexibility afforded by CNAME is not available.
 This document specifies a new RR type "ANAME", which provides similar
 functionality to CNAME, but only for address queries (i.e., for type A or
 AAAA).  The ANAME record can be present at any DNS node, and can coexist
-with most other RR types, enabling it to be present at a zone apex.
+with most other RR types, enabling it to be present at a zone apex,
+or any other place where the presence of other records prevents the use
+of CNAME.
 Authoritative servers configured with ANAME records will answer address
 queries for the ANAME owner with addresses found at the ANAME's target, and
 also with the ANAME itself. Recursive resolvers which understand ANAME can
