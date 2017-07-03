@@ -154,9 +154,8 @@ response to queries from the same client subnet.
 ## Coexistence with other types
 
 If the zone is configured with an A or AAAA RRset at the same DNS node as
-ANAME, then the ANAME is considered to have been pre-expanded for zone
-transfer purposes. When a zone is being transferred to a secondary server,
-if any address record already exists at the same node as an ANAME RR, then
+ANAME, then the ANAME is considered to already have been expanded.
+If during query processing any address record are found at the same node as an ANAME RR, then
 the ANAME RR MUST NOT be further expanded by the authoritative server.
 
 ANAME MUST NOT coexist with CNAME or any other RR type that restricts
@@ -293,4 +292,4 @@ System (DNS) Parameters" registry.
 # Acknowledgments
 
 Thanks to Mukund Sivaraman, Stephen Morris, Ray Bellis, Mark Andrews,
-Richard Salts, Job Snijders, Richard Gibson, Hakan Lindqvist, and Jan Vcelak for discussion and feedback.
+Richard Salts, Job Snijders, Richard Gibson, Hakan Lindqvist, Jan Vcelak, and Tatuya JINMEI for discussion and feedback.
