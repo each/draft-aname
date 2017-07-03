@@ -272,7 +272,9 @@ by local policy to send recursive queries.
 When a resolver that does not understand ANAME receives a response
 containing A or AAAA records with \<owner\> rewritten to match that of the
 ANAME RR, this may bypass security mechanisms based on local policy
-limiting access to the original ANAME \<target\>.
+limiting access to the original ANAME \<target\>. One possible mitigation
+for this is to make sure the resolver being used during ANAME resolution
+lives outside of such critical network sections.
  
 A validating resolver that does not understand ANAME will not be able to
 validate A and AAAA records unless they are signed.
@@ -289,4 +291,4 @@ System (DNS) Parameters" registry.
 # Acknowledgments
 
 Thanks to Mukund Sivaraman, Stephen Morris, Ray Bellis, Mark Andrews,
-Richard Salts, Job Snijders, Richard Gibson, and Hakan Lindqvist for discussion and feedback.
+Richard Salts, Job Snijders, Richard Gibson, Hakan Lindqvist, and Jan Vcelak for discussion and feedback.
