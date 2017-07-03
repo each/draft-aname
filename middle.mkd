@@ -309,16 +309,16 @@ carefully check for loops and treat them as an error condition. One
 possible approach is to implement a hop counter and stop resolution
 when a maximum hop count is reached.
 
-An authoritative resolver returning address records which were obtained
-by resolving the ANAME \<target\> is supplying its own best information to
-clients as to the correct answer. This information may be signed by the
-authortiative server, but that is not a guarantee of the actual correctness
-of the answer. Promoting an insecure response from the ANAME \<target\> to
-a signed response from the \<owner\>, which may then appear to clients to
-be more trustworthy than it should. To mitigate harm from this, DNSSEC
-validation SHOULD be used when resolving the ANAME \<target\>. 
-Authoritative servers MAY refuse to expand ANAME records unless the
-\<target\> node is both signed and validated.
+An authoritative resolver returning address records which were obtained by
+resolving the ANAME \<target\> is supplying its own best information to
+clients as to the correct answer. The response may be signed by the
+authoritative server, but that is not a guarantee of the actual correctness
+of the answer. This can have the effect of promoting an insecure response
+from the ANAME \<target\> to a signed response from the \<owner\>, which
+may then appear to clients to be more trustworthy than it should. To
+mitigate harm from this, DNSSEC validation SHOULD be used when resolving
+the ANAME \<target\>.  Authoritative servers MAY refuse to expand ANAME
+records unless the \<target\> node is both signed and validated.
 
 # IANA Considerations
 
