@@ -151,6 +151,10 @@ includes an ECS option with a SCOPE PREFIX-LENGTH greater than zero, the
 response SHOULD be cached with the ECS data and should only be used in
 response to queries from the same client subnet.
 
+If this process yields no address records due to NODATA or NXDOMAIN, return just the ANAME record. If the query was for a specific address type, also return the SOA as in normal NODATA processing. [FIXME: this is too vague]
+
+If this process yields no address records due to some failure, and the query was for a specific address type, return the ANAME record and set the RCODE to SERVFAIL.
+
 ## Coexistence with other types
 
 If the zone is configured with an A or AAAA RRset at the same DNS node as
