@@ -5,10 +5,10 @@
 Network Working Group                                            E. Hunt
 Internet-Draft                                                       ISC
 Intended status: Standards Track                             P. van Dijk
-Expires: October 3, 2017                                        PowerDNS
+Expires: January 4, 2018                                        PowerDNS
                                                                  A. Eden
                                                                 DNSimple
-                                                                Apr 2017
+                                                            July 3, 2017
 
 
              Address-specific DNS Name Redirection (ANAME)
@@ -37,7 +37,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on October 3, 2017.
+   This Internet-Draft will expire on January 4, 2018.
 
 Copyright Notice
 
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Hunt, et al.             Expires October 3, 2017                [Page 1]
+Hunt, et al.             Expires January 4, 2018                [Page 1]
 
-Internet-Draft                    aname                         Apr 2017
+Internet-Draft                    aname                        July 2017
 
 
    include Simplified BSD License text as described in Section 4.e of
@@ -72,15 +72,16 @@ Table of Contents
      3.2.  Coexistence with other types  . . . . . . . . . . . . . .   6
      3.3.  DNSSEC signing  . . . . . . . . . . . . . . . . . . . . .   6
    4.  Recursive Server Behavior . . . . . . . . . . . . . . . . . .   7
-   5.  Operational Considerations  . . . . . . . . . . . . . . . . .   8
-   6.  Implementation Status . . . . . . . . . . . . . . . . . . . .   8
-   7.  Security Considerations . . . . . . . . . . . . . . . . . . .   8
-   8.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   9
-   9.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .   9
-   10. References  . . . . . . . . . . . . . . . . . . . . . . . . .   9
-     10.1.  Normative References . . . . . . . . . . . . . . . . . .   9
-     10.2.  Informative References . . . . . . . . . . . . . . . . .   9
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   9
+   5.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .   8
+   6.  Operational Considerations  . . . . . . . . . . . . . . . . .   8
+   7.  Implementation Status . . . . . . . . . . . . . . . . . . . .   8
+   8.  Security Considerations . . . . . . . . . . . . . . . . . . .   9
+   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   9
+   10. Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .   9
+   11. References  . . . . . . . . . . . . . . . . . . . . . . . . .   9
+     11.1.  Normative References . . . . . . . . . . . . . . . . . .   9
+     11.2.  Informative References . . . . . . . . . . . . . . . . .  10
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  10
 
 1.  Introduction
 
@@ -108,10 +109,9 @@ Table of Contents
 
 
 
-
-Hunt, et al.             Expires October 3, 2017                [Page 2]
+Hunt, et al.             Expires January 4, 2018                [Page 2]
 
-Internet-Draft                    aname                         Apr 2017
+Internet-Draft                    aname                        July 2017
 
 
    DNAME [RFC6672] is also not a solution, as its function is to
@@ -132,13 +132,14 @@ Internet-Draft                    aname                         Apr 2017
    functionality to CNAME, but only for address queries (i.e., for type
    A or AAAA).  The ANAME record can be present at any DNS node, and can
    coexist with most other RR types, enabling it to be present at a zone
-   apex.  Authoritative servers configured with ANAME records will
-   answer address queries for the ANAME owner with addresses found at
-   the ANAME's target, and also with the ANAME itself.  Recursive
-   resolvers which understand ANAME can re-query for the ANAME target,
-   just as if they had received a CNAME response.  Recursive resolvers
-   which do not understand ANAME will ignore the ANAME and consume the
-   provided A/AAAA records directly.
+   apex, or any other place where the presence of other records prevents
+   the use of CNAME.  Authoritative servers configured with ANAME
+   records will answer address queries for the ANAME owner with
+   addresses found at the ANAME's target, and also with the ANAME
+   itself.  Recursive resolvers which understand ANAME can re-query for
+   the ANAME target, just as if they had received a CNAME response.
+   Recursive resolvers which do not understand ANAME will ignore the
+   ANAME and consume the provided A/AAAA records directly.
 
    Similar authoritative functionality has been implemented and deployed
    by a number of DNS software vendors and service providers, using
@@ -164,10 +165,9 @@ Internet-Draft                    aname                         Apr 2017
 
 
 
-
-Hunt, et al.             Expires October 3, 2017                [Page 3]
+Hunt, et al.             Expires January 4, 2018                [Page 3]
 
-Internet-Draft                    aname                         Apr 2017
+Internet-Draft                    aname                        July 2017
 
 
 2.  The ANAME Resource Record
@@ -221,9 +221,9 @@ Internet-Draft                    aname                         Apr 2017
 
 
 
-Hunt, et al.             Expires October 3, 2017                [Page 4]
+Hunt, et al.             Expires January 4, 2018                [Page 4]
 
-Internet-Draft                    aname                         Apr 2017
+Internet-Draft                    aname                        July 2017
 
 
    additional section (again, with <owner> changed to match that of the
@@ -256,12 +256,12 @@ Internet-Draft                    aname                         Apr 2017
    authoritative server.
 
    Address records cached locally MUST have a limited TTL.  The initial
-   TTL for locally-cached address records MUST be set to the lesser of
-   the ANAME TTL and the TTL of the address records retrieved from the
-   ANAME <target>.  The local TTL MUST count down, just as it would in a
-   conventional resolver cache.  Records with an expired TTL MUST NOT be
-   used to answer address queries until refreshed with a new query to
-   the ANAME <target>.
+   TTL for locally-cached address records MUST be set to the minimum of
+   the ANAME TTL and the TTLs of the intermediate and address records
+   retrieved during ANAME <> resolution.  The local TTL MUST count down,
+   just as it would in a conventional resolver cache.  Records with an
+   expired TTL MUST NOT be used to answer address queries until
+   refreshed with a new query to the ANAME <target>.
 
    If configured to do so, then the authoritative server MAY, when
    sending queries to the ANAME <target>, include an EDNS CLIENT-SUBNET
@@ -272,24 +272,32 @@ Internet-Draft                    aname                         Apr 2017
    than zero, the response SHOULD be cached with the ECS data and should
    only be used in response to queries from the same client subnet.
 
+   If resolution of the ANAME <target> yields no address records due to
+   NODATA or NXDOMAIN, then the authoritative server MUST return only
 
 
 
-
-
-Hunt, et al.             Expires October 3, 2017                [Page 5]
+Hunt, et al.             Expires January 4, 2018                [Page 5]
 
-Internet-Draft                    aname                         Apr 2017
+Internet-Draft                    aname                        July 2017
 
+
+   the ANAME record.  If the query was for a specific address type, then
+   the response MUST also include the SOA as in a normal NODATA
+   response, along with NSEC or NSEC3 if applicable.
+
+   If resolution of the ANAME <target> yields no address records due to
+   some other failure, and the query was for a specific address type,
+   the response MUST include the ANAME record and set the RCODE to
+   SERVFAIL.
 
 3.2.  Coexistence with other types
 
    If the zone is configured with an A or AAAA RRset at the same DNS
-   node as ANAME, then the ANAME is considered to have been pre-expanded
-   for zone transfer purposes.  When a zone is being transferred to a
-   secondary server, if any address record already exists at the same
-   node as an ANAME RR, then the ANAME RR MUST NOT be further expanded
-   by the authoritative server.
+   node as ANAME, then the ANAME is considered to have already been
+   expanded.  If during query processing any address records are found
+   at the same node as an ANAME RR, then the ANAME RR MUST NOT be
+   further expanded by the authoritative server.
 
    ANAME MUST NOT coexist with CNAME or any other RR type that restricts
    the types with which it can itself coexist.
@@ -321,6 +329,15 @@ Internet-Draft                    aname                         Apr 2017
    able to validate the A and AAAA responses included with an ANAME
    response unless those responses are validly signed by a DNSKEY at the
    apex of the zone in which the ANAME resides.  Passing along the
+
+
+
+
+Hunt, et al.             Expires January 4, 2018                [Page 6]
+
+Internet-Draft                    aname                        July 2017
+
+
    RRSIGs associated with the original A and AAAA RRsets from the ANAME
    <target> will not be sufficient for DNSSEC validation.
 
@@ -330,14 +347,6 @@ Internet-Draft                    aname                         Apr 2017
    master server MUST respect the TTLs of the address records, MUST
    refresh the address records by re-resolving the ANAME <target> when
    their TTLs expire, SHOULD respond to address queries with TTLs that
-
-
-
-Hunt, et al.             Expires October 3, 2017                [Page 6]
-
-Internet-Draft                    aname                         Apr 2017
-
-
    count down as they would when answering from a normal DNS cache, and
    MUST inform secondary servers via DNS NOTIFY they need to refresh the
    zone when address records have been updated.  A secondary server
@@ -376,6 +385,15 @@ Internet-Draft                    aname                         Apr 2017
    requirement MAY be relaxed if both the ANAME <owner> and <target> are
    validly signed and provably in the same zone.)
 
+
+
+
+
+Hunt, et al.             Expires January 4, 2018                [Page 7]
+
+Internet-Draft                    aname                        July 2017
+
+
    If resolution fails -- for example, due to the local resolver being
    nonfunctional or the ANAME <target> zone being unreachable -- then
    the resolver MAY use the address records that were included in the
@@ -386,18 +404,20 @@ Internet-Draft                    aname                         Apr 2017
    SUBNET option [RFC7871] both when sending the initial query to the
    ANAME <owner> and when re-querying for the ANAME <target>.  If the
    response includes a SCOPE PREFIX-LENGTH greater than zero, the
-
-
-
-Hunt, et al.             Expires October 3, 2017                [Page 7]
-
-Internet-Draft                    aname                         Apr 2017
-
-
    response SHOULD be cached with the ECS data and should only be used
    in response to queries from the same client subnet.
 
-5.  Operational Considerations
+5.  Examples
+
+   $ORIGIN example.com.
+   @   IN SOA   ...
+   @   IN NS    ns1
+   @   IN ANAME example.com.my-cdn.example.net.
+   www IN CNAME example.com.my-cdn.example.net.
+
+   [TODO: add example query output etc.]
+
+6.  Operational Considerations
 
    When a zone containing ANAME records is transferred to a secondary
    server, the ANAME records are transferred, but the A or AAAA records
@@ -409,7 +429,7 @@ Internet-Draft                    aname                         Apr 2017
    is able to expand the ANAME with the related address RRsets during
    the zone transfer.
 
-6.  Implementation Status
+7.  Implementation Status
 
    PowerDNS <https://powerdns.com> currently implements a similar
    authoritative-only feature using "ALIAS" records, which are expanded
@@ -417,9 +437,20 @@ Internet-Draft                    aname                         Apr 2017
    secondaries.
 
    [TODO: Add discussion of DNSimple, DNS Made Easy, EasyDNS,
-   Cloudflare, and Akamai.]
+   Cloudflare, Amazon, and Akamai.]
 
-7.  Security Considerations
+
+
+
+
+
+
+Hunt, et al.             Expires January 4, 2018                [Page 8]
+
+Internet-Draft                    aname                        July 2017
+
+
+8.  Security Considerations
 
    An authoritative server which implements ANAME resolves address
    queries on behalf of its clients, either internally or by querying an
@@ -430,7 +461,9 @@ Internet-Draft                    aname                         Apr 2017
    When a resolver that does not understand ANAME receives a response
    containing A or AAAA records with <owner> rewritten to match that of
    the ANAME RR, this may bypass security mechanisms based on local
-   policy limiting access to the original ANAME <target>.
+   policy limiting access to the original ANAME <target>.  One possible
+   mitigation for this is to make sure the resolver being used during
+   ANAME resolution lives outside of such critical network sections.
 
    A validating resolver that does not understand ANAME will not be able
    to validate A and AAAA records unless they are signed.
@@ -438,33 +471,21 @@ Internet-Draft                    aname                         Apr 2017
    Both authoritative servers and resolvers that implement ANAME should
    carefully check for loops and treat them as an error condition.
 
-
-
-
-
-
-
-
-Hunt, et al.             Expires October 3, 2017                [Page 8]
-
-Internet-Draft                    aname                         Apr 2017
-
-
-8.  IANA Considerations
+9.  IANA Considerations
 
    IANA is requested to assign a DNS RR data type value for the ANAME RR
    type under the "Resource Record (RR) TYPEs" subregistry under the
    "Domain Name System (DNS) Parameters" registry.
 
-9.  Acknowledgments
+10.  Acknowledgments
 
    Thanks to Mukund Sivaraman, Stephen Morris, Ray Bellis, Mark Andrews,
-   Richard Salts, Job Snijders, and Hakan Lindqvist for discussion and
-   feedback.
+   Richard Salts, Job Snijders, Richard Gibson, Hakan Lindqvist, Jan
+   Vcelak, Tatuya JINMEI, and Tony Finch for discussion and feedback.
 
-10.  References
+11.  References
 
-10.1.  Normative References
+11.1.  Normative References
 
    [RFC1033]  Lottor, M., "Domain administrators operations guide",
               RFC 1033, November 1987.
@@ -476,7 +497,16 @@ Internet-Draft                    aname                         Apr 2017
               Rose, "Resource Records for the DNS Security Extensions",
               RFC 4034, March 2005.
 
-10.2.  Informative References
+
+
+
+
+Hunt, et al.             Expires January 4, 2018                [Page 9]
+
+Internet-Draft                    aname                        July 2017
+
+
+11.2.  Informative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119, March 1997.
@@ -494,17 +524,6 @@ Internet-Draft                    aname                         Apr 2017
               <http://www.rfc-editor.org/info/rfc7871>.
 
 Authors' Addresses
-
-
-
-
-
-
-
-Hunt, et al.             Expires October 3, 2017                [Page 9]
-
-Internet-Draft                    aname                         Apr 2017
-
 
    Evan Hunt
    ISC
@@ -538,23 +557,4 @@ Internet-Draft                    aname                         Apr 2017
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Hunt, et al.             Expires October 3, 2017               [Page 10]
+Hunt, et al.             Expires January 4, 2018               [Page 10]

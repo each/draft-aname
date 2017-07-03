@@ -137,10 +137,11 @@ that address records be cached locally by the authoritative server.
 
 Address records cached locally MUST have a limited TTL.  The initial TTL
 for locally-cached address records MUST be set to the minimum of the ANAME
-TTL and the TTLs of the intermediate and address records retrieved during ANAME <\target\> resolution.
-The local TTL MUST count down, just as it would in a conventional resolver
-cache.  Records with an expired TTL MUST NOT be used to answer address
-queries until refreshed with a new query to the ANAME \<target\>.
+TTL and the TTLs of the intermediate and address records retrieved during
+ANAME <\target\> resolution.  The local TTL MUST count down, just as it
+would in a conventional resolver cache.  Records with an expired TTL MUST
+NOT be used to answer address queries until refreshed with a new query to
+the ANAME \<target\>.
 
 If configured to do so, then the authoritative server MAY, when sending
 queries to the ANAME \<target\>, include an EDNS CLIENT-SUBNET (ECS)
@@ -151,16 +152,23 @@ includes an ECS option with a SCOPE PREFIX-LENGTH greater than zero, the
 response SHOULD be cached with the ECS data and should only be used in
 response to queries from the same client subnet.
 
-If this process yields no address records due to NODATA or NXDOMAIN, return just the ANAME record. If the query was for a specific address type, also return the SOA as in normal NODATA processing. [FIXME: this is too vague]
+If resolution of the ANAME \<target\> yields no address records due
+to NODATA or NXDOMAIN, then the authoritative server MUST return only
+the ANAME record. If the query was for a specific address type, then the
+response MUST also include the SOA as in a normal NODATA response, along
+with NSEC or NSEC3 if applicable.
 
-If this process yields no address records due to some failure, and the query was for a specific address type, return the ANAME record and set the RCODE to SERVFAIL.
+If resolution of the ANAME \<target\> yields no address records due to
+some other failure, and the query was for a specific address type, the
+response MUST include the ANAME record and set the RCODE to SERVFAIL.
 
 ## Coexistence with other types
 
 If the zone is configured with an A or AAAA RRset at the same DNS node as
-ANAME, then the ANAME is considered to already have been expanded.
-If during query processing any address record are found at the same node as an ANAME RR, then
-the ANAME RR MUST NOT be further expanded by the authoritative server.
+ANAME, then the ANAME is considered to have already been expanded.  If
+during query processing any address records are found at the same node as
+an ANAME RR, then the ANAME RR MUST NOT be further expanded by the
+authoritative server.
 
 ANAME MUST NOT coexist with CNAME or any other RR type that restricts
 the types with which it can itself coexist.
@@ -256,7 +264,7 @@ $ORIGIN example.com.
 www IN CNAME example.com.my-cdn.example.net.
 ```
 
-TODO: add example query output etc.
+[TODO: add example query output etc.]
 
 # Operational Considerations
 
@@ -308,4 +316,5 @@ System (DNS) Parameters" registry.
 # Acknowledgments
 
 Thanks to Mukund Sivaraman, Stephen Morris, Ray Bellis, Mark Andrews,
-Richard Salts, Job Snijders, Richard Gibson, Hakan Lindqvist, Jan Vcelak, Tatuya JINMEI, and Tony Finch for discussion and feedback.
+Richard Salts, Job Snijders, Richard Gibson, Hakan Lindqvist, Jan Vcelak,
+Tatuya JINMEI, and Tony Finch for discussion and feedback.
