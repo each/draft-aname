@@ -78,8 +78,8 @@ Table of Contents
    8.  Security Considerations . . . . . . . . . . . . . . . . . . .   9
    9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   9
    10. Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .   9
-   11. References  . . . . . . . . . . . . . . . . . . . . . . . . .   9
-     11.1.  Normative References . . . . . . . . . . . . . . . . . .   9
+   11. References  . . . . . . . . . . . . . . . . . . . . . . . . .  10
+     11.1.  Normative References . . . . . . . . . . . . . . . . . .  10
      11.2.  Informative References . . . . . . . . . . . . . . . . .  10
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  10
 
@@ -469,7 +469,21 @@ Internet-Draft                    aname                        July 2017
    to validate A and AAAA records unless they are signed.
 
    Both authoritative servers and resolvers that implement ANAME should
-   carefully check for loops and treat them as an error condition.
+   carefully check for loops and treat them as an error condition.  One
+   possible approach is to implement a hop counter and stop resolution
+   when a maximum hop count is reached.
+
+   An authoritative resolver returning address records which were
+   obtained by resolving the ANAME <target> is supplying its own best
+   information to clients as to the correct answer.  This information
+   may be signed by the authortiative server, but that is not a
+   guarantee of the actual correctness of the answer.  Promoting an
+   insecure response from the ANAME <target> to a signed response from
+   the <owner>, which may then appear to clients to be more trustworthy
+   than it should.  To mitigate harm from this, DNSSEC validation SHOULD
+   be used when resolving the ANAME <target>.  Authoritative servers MAY
+   refuse to expand ANAME records unless the <target> node is both
+   signed and validated.
 
 9.  IANA Considerations
 
@@ -482,6 +496,15 @@ Internet-Draft                    aname                        July 2017
    Thanks to Mukund Sivaraman, Stephen Morris, Ray Bellis, Mark Andrews,
    Richard Salts, Job Snijders, Richard Gibson, Hakan Lindqvist, Jan
    Vcelak, Tatuya JINMEI, and Tony Finch for discussion and feedback.
+
+
+
+
+
+Hunt, et al.             Expires January 4, 2018                [Page 9]
+
+Internet-Draft                    aname                        July 2017
+
 
 11.  References
 
@@ -496,15 +519,6 @@ Internet-Draft                    aname                        July 2017
    [RFC4034]  Arends, R., Austein, R., Larson, M., Massey, D., and S.
               Rose, "Resource Records for the DNS Security Extensions",
               RFC 4034, March 2005.
-
-
-
-
-
-Hunt, et al.             Expires January 4, 2018                [Page 9]
-
-Internet-Draft                    aname                        July 2017
-
 
 11.2.  Informative References
 
@@ -542,6 +556,12 @@ Authors' Addresses
    Email: peter.van.dijk@powerdns.com
 
 
+
+Hunt, et al.             Expires January 4, 2018               [Page 10]
+
+Internet-Draft                    aname                        July 2017
+
+
    Anthony Eden
    DNSimple
    Boston, MA
@@ -557,4 +577,40 @@ Authors' Addresses
 
 
 
-Hunt, et al.             Expires January 4, 2018               [Page 10]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.             Expires January 4, 2018               [Page 11]
