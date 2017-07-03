@@ -134,8 +134,8 @@ ANAME \<owner\>. In either case, for performance reasons, it is RECOMMENDED
 that address records be cached locally by the authoritative server.
 
 Address records cached locally MUST have a limited TTL.  The initial TTL
-for locally-cached address records MUST be set to the lesser of the ANAME
-TTL and the TTL of the address records retrieved from the ANAME \<target\>.
+for locally-cached address records MUST be set to the minimum of the ANAME
+TTL and the TTLs of the intermediate and address records retrieved during ANAME <\target\> resolution.
 The local TTL MUST count down, just as it would in a conventional resolver
 cache.  Records with an expired TTL MUST NOT be used to answer address
 queries until refreshed with a new query to the ANAME \<target\>.
@@ -289,4 +289,4 @@ System (DNS) Parameters" registry.
 # Acknowledgments
 
 Thanks to Mukund Sivaraman, Stephen Morris, Ray Bellis, Mark Andrews,
-Richard Salts, Job Snijders, and Hakan Lindqvist for discussion and feedback.
+Richard Salts, Job Snijders, Richard Gibson, and Hakan Lindqvist for discussion and feedback.
