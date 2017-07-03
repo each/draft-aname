@@ -138,10 +138,10 @@ that address records be cached locally by the authoritative server.
 Address records cached locally MUST have a limited TTL.  The initial TTL
 for locally-cached address records MUST be set to the minimum of the ANAME
 TTL and the TTLs of the intermediate and address records retrieved during
-ANAME <\target\> resolution.  The local TTL MUST count down, just as it
-would in a conventional resolver cache.  Records with an expired TTL MUST
-NOT be used to answer address queries until refreshed with a new query to
-the ANAME \<target\>.
+ANAME <\target\> resolution.  The TTL of the cached address records
+MUST count down, just as it would in a conventional resolver cache.
+Address records with expired TTLs MUST NOT be used to answer address
+queries until refreshed by sending a new query to the ANAME \<target\>.
 
 If configured to do so, then the authoritative server MAY, when sending
 queries to the ANAME \<target\>, include an EDNS CLIENT-SUBNET (ECS)

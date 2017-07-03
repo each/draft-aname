@@ -258,10 +258,11 @@ Internet-Draft                    aname                        July 2017
    Address records cached locally MUST have a limited TTL.  The initial
    TTL for locally-cached address records MUST be set to the minimum of
    the ANAME TTL and the TTLs of the intermediate and address records
-   retrieved during ANAME <> resolution.  The local TTL MUST count down,
-   just as it would in a conventional resolver cache.  Records with an
-   expired TTL MUST NOT be used to answer address queries until
-   refreshed with a new query to the ANAME <target>.
+   retrieved during ANAME <> resolution.  The TTL of the cached address
+   records MUST count down, just as it would in a conventional resolver
+   cache.  Address records with expired TTLs MUST NOT be used to answer
+   address queries until refreshed by sending a new query to the ANAME
+   <target>.
 
    If configured to do so, then the authoritative server MAY, when
    sending queries to the ANAME <target>, include an EDNS CLIENT-SUBNET
@@ -272,8 +273,7 @@ Internet-Draft                    aname                        July 2017
    than zero, the response SHOULD be cached with the ECS data and should
    only be used in response to queries from the same client subnet.
 
-   If resolution of the ANAME <target> yields no address records due to
-   NODATA or NXDOMAIN, then the authoritative server MUST return only
+
 
 
 
@@ -282,6 +282,8 @@ Hunt, et al.             Expires January 4, 2018                [Page 5]
 Internet-Draft                    aname                        July 2017
 
 
+   If resolution of the ANAME <target> yields no address records due to
+   NODATA or NXDOMAIN, then the authoritative server MUST return only
    the ANAME record.  If the query was for a specific address type, then
    the response MUST also include the SOA as in a normal NODATA
    response, along with NSEC or NSEC3 if applicable.
@@ -328,8 +330,6 @@ Internet-Draft                    aname                        July 2017
    Validating resolvers which do not yet implement ANAME will not be
    able to validate the A and AAAA responses included with an ANAME
    response unless those responses are validly signed by a DNSKEY at the
-   apex of the zone in which the ANAME resides.  Passing along the
-
 
 
 
@@ -338,6 +338,7 @@ Hunt, et al.             Expires January 4, 2018                [Page 6]
 Internet-Draft                    aname                        July 2017
 
 
+   apex of the zone in which the ANAME resides.  Passing along the
    RRSIGs associated with the original A and AAAA RRsets from the ANAME
    <target> will not be sufficient for DNSSEC validation.
 
@@ -384,7 +385,6 @@ Internet-Draft                    aname                        July 2017
    different answer than the authoritative server did.  (This
    requirement MAY be relaxed if both the ANAME <owner> and <target> are
    validly signed and provably in the same zone.)
-
 
 
 
