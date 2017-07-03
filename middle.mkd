@@ -258,7 +258,7 @@ PowerDNS [](https://powerdns.com) currently implements a similar
 authoritative-only feature using "ALIAS" records, which are expanded by the
 primary server and transfered as address records to secondaries.
 
-[TODO: Add discussion of DNSimple, DNS Made Easy, EasyDNS, Cloudflare,
+[TODO: Add discussion of DNSimple, DNS Made Easy, EasyDNS, Cloudflare, Amazon,
 and Akamai.]
 
 # Security Considerations
