@@ -73,15 +73,15 @@ Table of Contents
      3.3.  DNSSEC signing  . . . . . . . . . . . . . . . . . . . . .   6
    4.  Recursive Server Behavior . . . . . . . . . . . . . . . . . .   8
    5.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .   8
-   6.  Operational Considerations  . . . . . . . . . . . . . . . . .   8
-   7.  Implementation Status . . . . . . . . . . . . . . . . . . . .   9
-   8.  Security Considerations . . . . . . . . . . . . . . . . . . .   9
-   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  10
-   10. Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  10
-   11. References  . . . . . . . . . . . . . . . . . . . . . . . . .  10
-     11.1.  Normative References . . . . . . . . . . . . . . . . . .  10
-     11.2.  Informative References . . . . . . . . . . . . . . . . .  10
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  11
+   6.  Operational Considerations  . . . . . . . . . . . . . . . . .   9
+   7.  Implementation Status . . . . . . . . . . . . . . . . . . . .  10
+   8.  Security Considerations . . . . . . . . . . . . . . . . . . .  10
+   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  11
+   10. Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  11
+   11. References  . . . . . . . . . . . . . . . . . . . . . . . . .  11
+     11.1.  Normative References . . . . . . . . . . . . . . . . . .  11
+     11.2.  Informative References . . . . . . . . . . . . . . . . .  11
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  12
 
 1.  Introduction
 
@@ -156,7 +156,7 @@ Internet-Draft                    aname                     January 2018
    "Address type" refers to a DNS RR type that encodes a network
    address.  Currently the set of address types consists of A and AAAA.
    (This is not an exclusive list; in the event that any new address
-   types are are standardized in the future, they will be included.)
+   types are standardized in the future, they will be included.)
 
    "Address query" refers to a DNS query for any address type.
 
@@ -420,13 +420,67 @@ Internet-Draft                    aname                     January 2018
 
 5.  Examples
 
+   Given the following zone:
+
    $ORIGIN example.com.
-   @   IN SOA   ...
+   @   IN SOA   example.com hostmaster.example.com 1 7200 600 1209600 60
    @   IN NS    ns1
    @   IN ANAME example.com.my-cdn.example.net.
    www IN CNAME example.com.my-cdn.example.net.
 
-   [TODO: add example query output etc.]
+   A query for example.com/A would return the following:
+
+;; QUESTION SECTION:
+;example.com.                   IN      A
+
+;; ANSWER SECTION:
+example.com.            5       IN      ANAME   example.com.my-cdn.example.net.
+example.com.            5       IN      A       192.0.2.1
+
+;; ADDITIONAL SECTION:
+example.com.            5       IN      AAAA    2001:db8::1
+
+   Similarly, for example.com/AAAA:
+
+
+
+
+Hunt, et al.              Expires July 15, 2018                 [Page 8]
+
+Internet-Draft                    aname                     January 2018
+
+
+;; QUESTION SECTION:
+;example.com.                   IN      AAAA
+
+;; ANSWER SECTION:
+example.com.            5       IN      ANAME   example.com.my-cdn.example.net.
+example.com.            5       IN      AAAA    2001:db8::1
+
+;; ADDITIONAL SECTION:
+example.com.            5       IN      A       192.0.2.1
+
+   A query for example.com/AANME would receive only the ANAME in the
+   answer section, with the addresses for example.com.my-cdn.example.net
+   expanded in the additional section:
+
+;; QUESTION SECTION:
+;example.com.                   IN      ANAME
+
+;; ANSWER SECTION:
+example.com.            5       IN      ANAME   example.com.my-cdn.example.net.
+
+;; ADDITIONAL SECTION:
+example.com.my-cdn.example.net. 5 IN    A       192.0.2.1
+example.com.my-cdn.example.net. 5 IN    AAAA    2001:db8::1
+
+   Meanwhile, a query for a non-address type would be returned normally:
+
+   ;; QUESTION SECTION:
+   ;example.com.                   IN      NS
+
+   ;; ANSWER SECTION:
+   example.com.            5       IN      NS      ns1.example.com.
 
 6.  Operational Considerations
 
@@ -445,7 +499,9 @@ Internet-Draft                    aname                     January 2018
 
 
 
-Hunt, et al.              Expires July 15, 2018                 [Page 8]
+
+
+Hunt, et al.              Expires July 15, 2018                 [Page 9]
 
 Internet-Draft                    aname                     January 2018
 
@@ -501,7 +557,7 @@ Internet-Draft                    aname                     January 2018
 
 
 
-Hunt, et al.              Expires July 15, 2018                 [Page 9]
+Hunt, et al.              Expires July 15, 2018                [Page 10]
 
 Internet-Draft                    aname                     January 2018
 
@@ -557,7 +613,7 @@ Internet-Draft                    aname                     January 2018
 
 
 
-Hunt, et al.              Expires July 15, 2018                [Page 10]
+Hunt, et al.              Expires July 15, 2018                [Page 11]
 
 Internet-Draft                    aname                     January 2018
 
@@ -613,4 +669,4 @@ Authors' Addresses
 
 
 
-Hunt, et al.              Expires July 15, 2018                [Page 11]
+Hunt, et al.              Expires July 15, 2018                [Page 12]
