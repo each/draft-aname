@@ -152,8 +152,8 @@ option [](#RFC7871), either forwarding an ECS option that was sent
 to it by the querying resolver, or generating a new ECS option from the
 querying resolver's address.  If a response from the ANAME \<target\>
 includes an ECS option with a SCOPE PREFIX-LENGTH greater than zero, the
-response SHOULD be cached with the ECS data and should only be used in
-response to queries from the same client subnet.
+response SHOULD be cached in such a way that it would subsequently only be
+used in response to queries from the same client subnet.
 
 If resolution of the ANAME \<target\> yields no address records due
 to NODATA or NXDOMAIN, then the authoritative server MUST return only
@@ -254,8 +254,8 @@ If configured to do so, the resolver MAY include an EDNS CLIENT-SUBNET
 option [](#RFC7871) both when sending the initial query to the ANAME
 \<owner\> and when re-querying for the ANAME \<target\>. If the response
 includes a SCOPE PREFIX-LENGTH greater than zero, the response SHOULD be
-cached with the ECS data and should only be used in response to queries
-from the same client subnet.
+cached in such a way that it would subsequently only be used in response
+to queries from the same client subnet.
 
 # Examples
 
@@ -307,7 +307,7 @@ lives outside of such critical network sections.
 A validating resolver that does not understand ANAME will not be able to
 validate A and AAAA records unless they are signed.
 
-Both authoritative servers and resolvers that implement ANAME should
+Both authoritative servers and resolvers that implement ANAME SHOULD
 carefully check for loops and treat them as an error condition. One
 possible approach is to implement a hop counter and stop resolution
 when a maximum hop count is reached.

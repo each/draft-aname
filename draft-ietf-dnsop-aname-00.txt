@@ -71,17 +71,17 @@ Table of Contents
      3.1.  Address records returned with ANAME . . . . . . . . . . .   5
      3.2.  Coexistence with other types  . . . . . . . . . . . . . .   6
      3.3.  DNSSEC signing  . . . . . . . . . . . . . . . . . . . . .   6
-   4.  Recursive Server Behavior . . . . . . . . . . . . . . . . . .   7
+   4.  Recursive Server Behavior . . . . . . . . . . . . . . . . . .   8
    5.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .   8
    6.  Operational Considerations  . . . . . . . . . . . . . . . . .   8
-   7.  Implementation Status . . . . . . . . . . . . . . . . . . . .   8
+   7.  Implementation Status . . . . . . . . . . . . . . . . . . . .   9
    8.  Security Considerations . . . . . . . . . . . . . . . . . . .   9
-   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   9
+   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  10
    10. Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  10
    11. References  . . . . . . . . . . . . . . . . . . . . . . . . .  10
      11.1.  Normative References . . . . . . . . . . . . . . . . . .  10
      11.2.  Informative References . . . . . . . . . . . . . . . . .  10
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  10
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  11
 
 1.  Introduction
 
@@ -285,8 +285,9 @@ Internet-Draft                    aname                     January 2018
    to it by the querying resolver, or generating a new ECS option from
    the querying resolver's address.  If a response from the ANAME
    <target> includes an ECS option with a SCOPE PREFIX-LENGTH greater
-   than zero, the response SHOULD be cached with the ECS data and should
-   only be used in response to queries from the same client subnet.
+   than zero, the response SHOULD be cached in such a way that it would
+   subsequently only be used in response to queries from the same client
+   subnet.
 
    If resolution of the ANAME <target> yields no address records due to
    NODATA or NXDOMAIN, then the authoritative server MUST return only
@@ -329,7 +330,6 @@ Internet-Draft                    aname                     January 2018
    If the server does not have access to the private zone-signing key
    then it MAY return unsigned address records, but this is NOT
    RECOMMENDED unless every resolver with access to the zone is known to
-   support ANAME (as might be the case in a split-horizon deployment
 
 
 
@@ -338,6 +338,7 @@ Hunt, et al.              Expires July 15, 2018                 [Page 6]
 Internet-Draft                    aname                     January 2018
 
 
+   support ANAME (as might be the case in a split-horizon deployment
    where ANAME records are only served to an internal network with its
    own resolvers).
 
@@ -381,11 +382,10 @@ Internet-Draft                    aname                     January 2018
    being resolved.  The type bit map SHOULD only include address types
    which are known to exist at the <target>.
 
-4.  Recursive Server Behavior
 
-   When a recursive resolver sends a query of type A or AAAA and
-   receives a response with an ANAME RRset in the answer section, it
-   MUST re-query for the ANAME <target>.  This is necessary because, in
+
+
+
 
 
 
@@ -394,6 +394,11 @@ Hunt, et al.              Expires July 15, 2018                 [Page 7]
 Internet-Draft                    aname                     January 2018
 
 
+4.  Recursive Server Behavior
+
+   When a recursive resolver sends a query of type A or AAAA and
+   receives a response with an ANAME RRset in the answer section, it
+   MUST re-query for the ANAME <target>.  This is necessary because, in
    some cases, the address received will be dependent on network
    topology and other considerations, and the resolver may find a
    different answer than the authoritative server did.  (This
@@ -410,8 +415,8 @@ Internet-Draft                    aname                     January 2018
    SUBNET option [RFC7871] both when sending the initial query to the
    ANAME <owner> and when re-querying for the ANAME <target>.  If the
    response includes a SCOPE PREFIX-LENGTH greater than zero, the
-   response SHOULD be cached with the ECS data and should only be used
-   in response to queries from the same client subnet.
+   response SHOULD be cached in such a way that it would subsequently
+   only be used in response to queries from the same client subnet.
 
 5.  Examples
 
@@ -435,12 +440,7 @@ Internet-Draft                    aname                     January 2018
    is able to expand the ANAME with the related address RRsets during
    the zone transfer.
 
-7.  Implementation Status
 
-   PowerDNS <https://powerdns.com> currently implements a similar
-   authoritative-only feature using "ALIAS" records, which are expanded
-   by the primary server and transfered as address records to
-   secondaries.
 
 
 
@@ -449,6 +449,13 @@ Hunt, et al.              Expires July 15, 2018                 [Page 8]
 
 Internet-Draft                    aname                     January 2018
 
+
+7.  Implementation Status
+
+   PowerDNS <https://powerdns.com> currently implements a similar
+   authoritative-only feature using "ALIAS" records, which are expanded
+   by the primary server and transfered as address records to
+   secondaries.
 
    [TODO: Add discussion of DNSimple, DNS Made Easy, EasyDNS,
    Cloudflare, Amazon, and Akamai.]
@@ -471,7 +478,7 @@ Internet-Draft                    aname                     January 2018
    A validating resolver that does not understand ANAME will not be able
    to validate A and AAAA records unless they are signed.
 
-   Both authoritative servers and resolvers that implement ANAME should
+   Both authoritative servers and resolvers that implement ANAME SHOULD
    carefully check for loops and treat them as an error condition.  One
    possible approach is to implement a hop counter and stop resolution
    when a maximum hop count is reached.
@@ -488,6 +495,17 @@ Internet-Draft                    aname                     January 2018
    Authoritative servers MAY refuse to expand ANAME records unless the
    <target> node is both signed and validated.
 
+
+
+
+
+
+
+Hunt, et al.              Expires July 15, 2018                 [Page 9]
+
+Internet-Draft                    aname                     January 2018
+
+
 9.  IANA Considerations
 
    IANA is requested to assign a DNS RR data type value for the ANAME RR
@@ -497,14 +515,6 @@ Internet-Draft                    aname                     January 2018
    IANA may wish to consider the creation of a registry of address
    types; addition of new types to such a registry would then implicitly
    update this specification.
-
-
-
-
-Hunt, et al.              Expires July 15, 2018                 [Page 9]
-
-Internet-Draft                    aname                     January 2018
-
 
 10.  Acknowledgments
 
@@ -543,6 +553,15 @@ Internet-Draft                    aname                     January 2018
               DOI 10.17487/RFC7871, May 2016,
               <http://www.rfc-editor.org/info/rfc7871>.
 
+
+
+
+
+Hunt, et al.              Expires July 15, 2018                [Page 10]
+
+Internet-Draft                    aname                     January 2018
+
+
 Authors' Addresses
 
    Evan Hunt
@@ -552,14 +571,6 @@ Authors' Addresses
    USA
 
    Email: each@isc.org
-
-
-
-
-
-Hunt, et al.              Expires July 15, 2018                [Page 10]
-
-Internet-Draft                    aname                     January 2018
 
 
    Peter van Dijk
@@ -577,17 +588,6 @@ Internet-Draft                    aname                     January 2018
 
    Email: anthony.eden@dnsimple.com
    URI:   https://dnsimple.com/
-
-
-
-
-
-
-
-
-
-
-
 
 
 
