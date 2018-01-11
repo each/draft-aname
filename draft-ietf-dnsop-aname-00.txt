@@ -187,8 +187,8 @@ Internet-Draft                    aname                     January 2018
    The wire format is also identical to CNAME, except that name
    compression is not permitted in ANAME RDATA, per [RFC3597].
 
-   No more than one ANAME resource record SHALL be present at any DNS
-   node.
+   Only one ANAME <target> can be defined per <owner>.  An ANAME RRset
+   MUST NOT contain more than one resource record.
 
 3.  Authoritative Server Behavior
 
