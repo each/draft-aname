@@ -531,8 +531,15 @@ Internet-Draft                    aname                     January 2018
    mitigation for this is to make sure the resolver being used during
    ANAME resolution lives outside of such critical network sections.
 
-   A validating resolver that does not understand ANAME will not be able
-   to validate A and AAAA records unless they are signed.
+   If ANAME is used in a signed zone, validating resolvers that do not
+   understand ANAME will not be able to valudate the A and AAAA records
+   included in the response, unless the responding server has added
+   signatures for those records.  Merely passing along signatures from
+   the <target> is not sufficient.  An authoritative server hosting a
+   secure domain that includes ANAME SHOULD therefore have access to the
+   private zone-signing key for that domain; otherwise, the operator
+   must accept that validation failures will be common until ANAME is
+   widly deployed.
 
    Both authoritative servers and resolvers that implement ANAME SHOULD
    carefully check for loops and treat them as an error condition.  One
@@ -547,13 +554,6 @@ Internet-Draft                    aname                     January 2018
    promoting an insecure response from the ANAME <target> to a signed
    response from the <owner>, which may then appear to clients to be
    more trustworthy than it should.  To mitigate harm from this, DNSSEC
-   validation SHOULD be used when resolving the ANAME <target>.
-   Authoritative servers MAY refuse to expand ANAME records unless the
-   <target> node is both signed and validated.
-
-
-
-
 
 
 
@@ -561,6 +561,10 @@ Hunt, et al.              Expires July 15, 2018                [Page 10]
 
 Internet-Draft                    aname                     January 2018
 
+
+   validation SHOULD be used when resolving the ANAME <target>.
+   Authoritative servers MAY refuse to expand ANAME records unless the
+   <target> node is both signed and validated.
 
 9.  IANA Considerations
 
@@ -604,10 +608,6 @@ Internet-Draft                    aname                     January 2018
    [RFC6672]  Rose, S. and W. Wijngaards, "DNAME Redirection in the
               DNS", RFC 6672, June 2012.
 
-   [RFC7871]  Contavalli, C., van der Gaast, W., Lawrence, D., and W.
-              Kumari, "Client Subnet in DNS Queries", RFC 7871,
-              DOI 10.17487/RFC7871, May 2016,
-              <http://www.rfc-editor.org/info/rfc7871>.
 
 
 
@@ -617,6 +617,11 @@ Hunt, et al.              Expires July 15, 2018                [Page 11]
 
 Internet-Draft                    aname                     January 2018
 
+
+   [RFC7871]  Contavalli, C., van der Gaast, W., Lawrence, D., and W.
+              Kumari, "Client Subnet in DNS Queries", RFC 7871,
+              DOI 10.17487/RFC7871, May 2016,
+              <http://www.rfc-editor.org/info/rfc7871>.
 
 Authors' Addresses
 
@@ -644,11 +649,6 @@ Authors' Addresses
 
    Email: anthony.eden@dnsimple.com
    URI:   https://dnsimple.com/
-
-
-
-
-
 
 
 

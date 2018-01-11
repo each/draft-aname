@@ -360,8 +360,14 @@ limiting access to the original ANAME \<target\>. One possible mitigation
 for this is to make sure the resolver being used during ANAME resolution
 lives outside of such critical network sections.
  
-A validating resolver that does not understand ANAME will not be able to
-validate A and AAAA records unless they are signed.
+If ANAME is used in a signed zone, validating resolvers that do not
+understand ANAME will not be able to valudate the A and AAAA records
+included in the response, unless the responding server has added signatures
+for those records.  Merely passing along signatures from the \<target\> is
+not sufficient.  An authoritative server hosting a secure domain that
+includes ANAME SHOULD therefore have access to the private zone-signing key
+for that domain; otherwise, the operator must accept that validation
+failures will be common until ANAME is widly deployed.
 
 Both authoritative servers and resolvers that implement ANAME SHOULD
 carefully check for loops and treat them as an error condition. One
