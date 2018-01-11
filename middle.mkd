@@ -40,6 +40,7 @@ AAAA).  The ANAME record can be present at any DNS node, and can coexist
 with most other RR types, enabling it to be present at a zone apex,
 or any other place where the presence of other records prevents the use
 of CNAME.
+
 Authoritative servers configured with ANAME records will answer address
 queries for the ANAME owner with addresses found at the ANAME's target, and
 also with the ANAME itself. Recursive resolvers which understand ANAME can
@@ -57,7 +58,9 @@ to follow the redirection chain itself.
 ## Terminology
 
 "Address type" refers to a DNS RR type that encodes a network address.
-Currently the set of address types consists of A and AAAA.
+Currently the set of address types consists of A and AAAA. (This is
+not an exclusive list; in the event that any new address types are
+are standardized in the future, they will be included.)
 
 "Address query" refers to a DNS query for any address type.
 
@@ -325,6 +328,10 @@ records unless the \<target\> node is both signed and validated.
 IANA is requested to assign a DNS RR data type value for the ANAME RR type
 under the "Resource Record (RR) TYPEs" subregistry under the "Domain Name
 System (DNS) Parameters" registry.
+
+IANA may wish to consider the creation of a registry of address types;
+addition of new types to such a registry would then implicitly update
+this specification.
 
 # Acknowledgments
 
