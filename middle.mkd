@@ -60,7 +60,7 @@ to follow the redirection chain itself.
 "Address type" refers to a DNS RR type that encodes a network address.
 Currently the set of address types consists of A and AAAA. (This is
 not an exclusive list; in the event that any new address types are
-are standardized in the future, they will be included.)
+standardized in the future, they will be included.)
 
 "Address query" refers to a DNS query for any address type.
 
@@ -260,15 +260,70 @@ to queries from the same client subnet.
 
 # Examples
 
+Given the following zone:
+
 ```
 $ORIGIN example.com.
-@   IN SOA   ...
+@   IN SOA   example.com hostmaster.example.com 1 7200 600 1209600 60
 @   IN NS    ns1
 @   IN ANAME example.com.my-cdn.example.net.
 www IN CNAME example.com.my-cdn.example.net.
 ```
 
-[TODO: add example query output etc.]
+A query for example.com/A would return the following:
+
+```
+;; QUESTION SECTION:
+;example.com.                   IN      A
+
+;; ANSWER SECTION:
+example.com.            5       IN      ANAME   example.com.my-cdn.example.net.
+example.com.            5       IN      A       192.0.2.1
+
+;; ADDITIONAL SECTION:
+example.com.            5       IN      AAAA    2001:db8::1
+```
+
+Similarly, for example.com/AAAA:
+
+```
+;; QUESTION SECTION:
+;example.com.                   IN      AAAA
+
+;; ANSWER SECTION:
+example.com.            5       IN      ANAME   example.com.my-cdn.example.net.
+example.com.            5       IN      AAAA    2001:db8::1
+
+;; ADDITIONAL SECTION:
+example.com.            5       IN      A       192.0.2.1
+```
+
+
+A query for example.com/AANME would receive only the ANAME in the
+answer section, with the addresses for example.com.my-cdn.example.net
+expanded in the additional section:
+
+```
+;; QUESTION SECTION:
+;example.com.                   IN      ANAME
+
+;; ANSWER SECTION:
+example.com.            5       IN      ANAME   example.com.my-cdn.example.net.
+
+;; ADDITIONAL SECTION:
+example.com.my-cdn.example.net. 5 IN    A       192.0.2.1
+example.com.my-cdn.example.net. 5 IN    AAAA    2001:db8::1
+```
+
+Meanwhile, a query for a non-address type would be returned normally:
+
+```
+;; QUESTION SECTION:
+;example.com.                   IN      NS
+
+;; ANSWER SECTION:
+example.com.            5       IN      NS      ns1.example.com.
+```
 
 # Operational Considerations
 
