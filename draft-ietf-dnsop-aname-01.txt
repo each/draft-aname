@@ -12,7 +12,7 @@ Expires: July 15, 2018                                          PowerDNS
 
 
              Address-specific DNS Name Redirection (ANAME)
-                       draft-ietf-dnsop-aname-00
+                       draft-ietf-dnsop-aname-01
 
 Abstract
 
