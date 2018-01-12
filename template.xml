@@ -4,7 +4,7 @@
 <!ENTITY pandocMiddle PUBLIC '' 'middle.xml'>
 <!ENTITY pandocBack   PUBLIC '' 'back.xml'>
 ]>
-<rfc ipr="trust200902" category="std" docName="draft-ietf-dnsop-aname-00">
+<rfc ipr="trust200902" category="std" docName="draft-ietf-dnsop-aname-01">
 <?rfc toc="yes"?>         <!-- generate a table of contents -->
 <?rfc symrefs="yes"?>     <!-- use anchors instead of numbers for references -->
 <?rfc sortrefs="yes" ?>   <!-- alphabetize the references -->
