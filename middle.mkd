@@ -205,7 +205,7 @@ for DNSSEC validation.
 
 Implementers MAY allow address records associated with the ANAME to be
 populated and signed by the primary server, then sent along with their
-RRSIGs to secondaries via zone transfer. In this case, the master server
+RRSIGs to secondaries via zone transfer. In this case, the primary server
 MUST respect the TTLs of the address records, MUST refresh the address
 records by re-resolving the ANAME \<target\> when their TTLs expire,
 SHOULD respond to address queries with TTLs that count down as they would
