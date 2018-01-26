@@ -299,7 +299,7 @@ example.com.            5       IN      A       192.0.2.1
 ```
 
 
-A query for example.com/AANME would receive only the ANAME in the
+A query for example.com/ANAME would receive only the ANAME in the
 answer section, with the addresses for example.com.my-cdn.example.net
 expanded in the additional section:
 
