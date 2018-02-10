@@ -72,6 +72,7 @@
     <?rfc include="bib/reference.RFC.1033.xml"?>
     <?rfc include="bib/reference.RFC.3597.xml"?>
     <?rfc include="bib/reference.RFC.4034.xml"?>
+    <?rfc include="reference.I-D.draft-ietf-dnsop-serve-stale-00.xml"?>
   </references>
   <references title="Informative References">
     <?rfc include="bib/reference.RFC.2119.xml"?>

@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<reference anchor='I-D.ietf-dnsop-serve-stale'>
+<front>
+<title>Serving Stale Data to Improve DNS Resiliency</title>
+
+<author initials='D' surname='Lawrence' fullname='David Lawrence'>
+    <organization />
+</author>
+
+<author initials='W' surname='Kumari' fullname='Warren Kumari'>
+    <organization />
+</author>
+
+<date month='October' day='30' year='2017' />
+
+<abstract><t>This draft defines a method for recursive resolvers to use stale DNS data to avoid outages when authoritative nameservers cannot be reached to refresh expired data.</t></abstract>
+
+</front>
+
+<seriesInfo name='Internet-Draft' value='draft-ietf-dnsop-serve-stale-00' />
+<format type='TXT'
+        target='http://www.ietf.org/internet-drafts/draft-ietf-dnsop-serve-stale-00.txt' />
+</reference>

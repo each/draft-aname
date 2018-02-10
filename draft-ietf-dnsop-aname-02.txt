@@ -71,7 +71,7 @@ Table of Contents
      3.1.  Address records returned with ANAME . . . . . . . . . . .   5
      3.2.  Coexistence with other types  . . . . . . . . . . . . . .   6
      3.3.  DNSSEC signing  . . . . . . . . . . . . . . . . . . . . .   6
-   4.  Recursive Server Behavior . . . . . . . . . . . . . . . . . .   7
+   4.  Recursive Server Behavior . . . . . . . . . . . . . . . . . .   8
    5.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .   8
    6.  Operational Considerations  . . . . . . . . . . . . . . . . .   9
    7.  Implementation Status . . . . . . . . . . . . . . . . . . . .  10
@@ -155,11 +155,11 @@ Internet-Draft                    aname                    February 2018
 
    "Address type" refers to a DNS RR type that encodes a network
    address.  Currently the set of address types consists of A and AAAA.
-   (This is not an exclusive list; in the event that any new address
-   types are standardized in the future, they will be included.)
+   (This is not meant to be an exclusive list: in the event that any new
+   address types are standardized in the future, this specification will
+   cover them as well.)
 
    "Address query" refers to a DNS query for any address type.
-
 
 
 
@@ -196,7 +196,7 @@ Internet-Draft                    aname                    February 2018
    by an authoritative server for type A or AAAA, the authoritative
    server MUST return the ANAME RR in the answer section.
 
-   Because not all querying resolvers understand ANAME, the
+   Because not all querying resolvers will understand ANAME, the
    authoritative server MUST also return address records, as described
    below, if it is able to retrieve them.  This is conceptually similar
    to the synthesized CNAME record included with DNAME responses
@@ -204,19 +204,19 @@ Internet-Draft                    aname                    February 2018
 
    Authoritative servers implementing ANAME MUST be equipped to resolve
    the ANAME <target> on the querying resolver's behalf, either by
-   sending queries to an external recursive resolver or by implementing
-   recursive resolution logic internally, so that address records can be
-   expanded when the ANAME <target> is in a separate zone from <owner>.
+   sending queries to an external caching resolver or by implementing
+   recursive resolution logic and a DNS cache internally, so that
+   address records can be expanded when the ANAME <target> is in a
+   separate zone from <owner>.
 
    If a query for the ANAME <target> returns a chaining response (i.e.,
    CNAME, DNAME, or another ANAME), then the authoritative server (or
    the resolver tasked with resolving the ANAME <target> on its behalf)
    MUST attempt to follow the chain until it is able to resolve a final
-   address response, or until resolution fails.  Intermediate ANAMEs,
-   CNAMEs, and DNAMEs MUST be omitted from the response.
-
-
-
+   address response, or until resolution fails.  However, the
+   intermediate ANAMEs, CNAMEs, and DNAMEs encountered during this
+   resolution process MUST NOT be included in the final response
+   returned to the client.
 
 
 
@@ -238,42 +238,42 @@ Internet-Draft                    aname                    February 2018
 
    Similarly, if the original query was for type AAAA, and an AAAA RRset
    exists at the final ANAME <target>, then it is appended to the answer
-   section (with <owner> changed), and if an A RRset also exists at the
+   section (with <owner> changed).  If an A RRset also exists at the
    final ANAME <target> then it MAY be appended to the additional
    section.
 
-   If the original query is for type ANAME, A and AAAA records MAY be
-   returned in the additional section.
+   If the address type originally queried is not present at the ANAME
+   <target>, then the answer section of the response MUST include only
+   the ANAME.  The response MUST also include the SOA, as it would in a
+   NODATA response, along with NSEC or NSEC3 if applicable.  If another
+   address type is present at the ANAME <target>, then it MAY be
+   included in the additional section.
 
-   If the original query is for type ANY and access to ANY query
+   If the original query is for type ANAME, both A and AAAA records MAY
+   be returned in the additional section.
+
+   If the original query is for type ANY, and if access to ANY query
    processing is not restricted, then the answer section MUST contain
-   both the ANAME and the A and AAAA RRsets, if present and successfully
-   resolved at the ANAME <target>.
+   both the ANAME and the A and AAAA RRsets, if successfully resolved at
+   the ANAME <target>.
 
-   How and when an authoritative server resolves the A and AAAA
-   responses from the ANAME <target> (when it is not itself
-   authoritative for <target>) is unspecified.  If the authoritative
-   server is capable of performing recursive resolution, then it MAY
-   resolve the query itself, or it MAY send address queries to an
-   external resolver.  It MAY send address queries to the ANAME <target>
-   when loading the zone and cache the responses locally, or it MAY
-   delay resolution of the address records until a query is received for
-   the ANAME <owner>.  In either case, for performance reasons, it is
-   RECOMMENDED that address records be cached locally by the
-   authoritative server.
+   How and when an authoritative server resolves the address responses
+   from the ANAME <target> (when it is not itself authoritative for
+   <target>) is unspecified.  If the authoritative server is capable of
+   performing recursive resolution, then it MAY resolve the query
+   itself, or it MAY send address queries to an external resolver.  It
+   MAY send address queries to the ANAME <target> when initially loading
+   the zone, cache the responses locally, and refresh them periodically
+   according to their TTLs, or it MAY delay resolution of address
+   records until a query is received for the ANAME <owner>.  In either
+   case, for performance reasons, it is RECOMMENDED that address records
+   be cached locally by the authoritative server.
 
-   Address records cached locally MUST have a limited TTL.  The initial
-   TTL for locally-cached address records MUST be set to the minimum of
-   the ANAME TTL and the TTLs of the intermediate and address records
-   retrieved during ANAME <> resolution.  The TTL of the cached address
-   records MUST count down, just as it would in a conventional resolver
-   cache.  Address records with expired TTLs MUST NOT be used to answer
-   address queries until refreshed by sending a new query to the ANAME
-   <target>.
-
-   If configured to do so, then the authoritative server MAY, when
-   sending queries to the ANAME <target>, include an EDNS CLIENT-SUBNET
-   (ECS) option [RFC7871], either forwarding an ECS option that was sent
+   Address records that are cached locally MUST have a limited TTL.  The
+   initial TTL for locally-cached address records MUST not exceed the
+   minimum of the ANAME TTL, the TTLs of the address records retrieved
+   during ANAME <> resolution, and the TTLs of any intermediate ANAME,
+   CNAME, or DNAME records.  The TTL of the cached address records MUST
 
 
 
@@ -282,23 +282,26 @@ Hunt, et al.             Expires August 13, 2018                [Page 5]
 Internet-Draft                    aname                    February 2018
 
 
-   to it by the querying resolver, or generating a new ECS option from
-   the querying resolver's address.  If a response from the ANAME
+   count down, just as it would in a conventional resolver cache.
+   Address records with expired TTLs MUST NOT be used to answer address
+   queries until refreshed by sending a new query to the ANAME <target>,
+   unless the server is configured to allow the use of stale data as
+   described in [I-D.ietf-dnsop-serve-stale].
+
+   If the original query is for a specific address type, resolution of
+   address records at the ANAME <target> fails for any reason other than
+   NXDOMAIN or NODATA, and cached data cannot be used, then the response
+   MUST include the ANAME record and set the RCODE to SERVFAIL.
+
+   If configured to do so, then the authoritative server MAY, when
+   sending queries to the ANAME <target>, include an EDNS CLIENT-SUBNET
+   (ECS) option [RFC7871], either forwarding an ECS option that was sent
+   to it by the querying resolver, or by generating a new ECS option
+   from the querying resolver's address.  If a response from the ANAME
    <target> includes an ECS option with a SCOPE PREFIX-LENGTH greater
    than zero, the response SHOULD be cached in such a way that it would
    subsequently only be used in response to queries from the same client
    subnet.
-
-   If resolution of the ANAME <target> yields no address records due to
-   NODATA or NXDOMAIN, then the authoritative server MUST return only
-   the ANAME record.  If the query was for a specific address type, then
-   the response MUST also include the SOA as in a normal NODATA
-   response, along with NSEC or NSEC3 if applicable.
-
-   If resolution of the ANAME <target> yields no address records due to
-   some other failure, and the query was for a specific address type,
-   the response MUST include the ANAME record and set the RCODE to
-   SERVFAIL.
 
 3.2.  Coexistence with other types
 
@@ -327,9 +330,6 @@ Internet-Draft                    aname                    February 2018
    AAAA answers for the ANAME records, or "on the fly" when responding
    to a query.
 
-   Because validating resolvers which do not yet implement ANAME will
-   not be aware that this is an alias response, they will attempt to
-   validate the A and AAAA responses included with an ANAME response as
 
 
 
@@ -338,6 +338,9 @@ Hunt, et al.             Expires August 13, 2018                [Page 6]
 Internet-Draft                    aname                    February 2018
 
 
+   Because validating resolvers which do not yet implement ANAME will
+   not be aware that this is an alias response, they will attempt to
+   validate the A and AAAA responses included with an ANAME response as
    if they had originated from the ANAME <owner>.  Passing along the
    RRSIGs associated with the original A and AAAA RRsets from the ANAME
    <target> will not be sufficient for DNSSEC validation.  Consequently,
@@ -381,11 +384,8 @@ Internet-Draft                    aname                    February 2018
    being resolved.  The type bit map SHOULD only include address types
    which are known to exist at the <target>.
 
-4.  Recursive Server Behavior
 
-   When a recursive resolver sends a query of type A or AAAA and
-   receives a response with an ANAME RRset in the answer section, it
-   MUST re-query for the ANAME <target>.  This is necessary because, in
+
 
 
 
@@ -394,6 +394,11 @@ Hunt, et al.             Expires August 13, 2018                [Page 7]
 Internet-Draft                    aname                    February 2018
 
 
+4.  Recursive Server Behavior
+
+   When a recursive resolver sends a query of type A or AAAA and
+   receives a response with an ANAME RRset in the answer section, it
+   MUST re-query for the ANAME <target>.  This is necessary because, in
    some cases, the address received will be dependent on network
    topology and other considerations, and the resolver may find a
    different answer than the authoritative server did.  (This
@@ -436,11 +441,6 @@ example.com.            5       IN      A       192.0.2.1
 example.com.            5       IN      AAAA    2001:db8::1
 
    Similarly, for example.com/AAAA:
-
-
-
-
-
 
 
 
@@ -580,11 +580,17 @@ Internet-Draft                    aname                    February 2018
 
    Thanks to Mukund Sivaraman, Stephen Morris, Ray Bellis, Mark Andrews,
    Richard Salts, Job Snijders, Richard Gibson, Hakan Lindqvist, Jan
-   Vcelak, Tatuya JINMEI, and Tony Finch for discussion and feedback.
+   Vcelak, Tatuya JINMEI, Duane Wessels, Stefan Buehler, Bjorn Mott, and
+   Tony Finch for discussion and feedback.
 
 11.  References
 
 11.1.  Normative References
+
+   [I-D.ietf-dnsop-serve-stale]
+              Lawrence, D. and W. Kumari, "Serving Stale Data to Improve
+              DNS Resiliency", draft-ietf-dnsop-serve-stale-00 (work in
+              progress), October 2017.
 
    [RFC1033]  Lottor, M., "Domain administrators operations guide",
               RFC 1033, November 1987.
@@ -605,18 +611,15 @@ Internet-Draft                    aname                    February 2018
               Security (DNSSEC) Hashed Authenticated Denial of
               Existence", RFC 5155, March 2008.
 
-   [RFC6672]  Rose, S. and W. Wijngaards, "DNAME Redirection in the
-              DNS", RFC 6672, June 2012.
-
-
-
-
 
 
 Hunt, et al.             Expires August 13, 2018               [Page 11]
 
 Internet-Draft                    aname                    February 2018
 
+
+   [RFC6672]  Rose, S. and W. Wijngaards, "DNAME Redirection in the
+              DNS", RFC 6672, June 2012.
 
    [RFC7871]  Contavalli, C., van der Gaast, W., Lawrence, D., and W.
               Kumari, "Client Subnet in DNS Queries", RFC 7871,
@@ -649,9 +652,6 @@ Authors' Addresses
 
    Email: anthony.eden@dnsimple.com
    URI:   https://dnsimple.com/
-
-
-
 
 
 
