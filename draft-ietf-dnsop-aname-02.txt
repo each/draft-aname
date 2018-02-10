@@ -5,14 +5,14 @@
 Network Working Group                                            E. Hunt
 Internet-Draft                                                       ISC
 Intended status: Standards Track                             P. van Dijk
-Expires: July 15, 2018                                          PowerDNS
+Expires: August 13, 2018                                        PowerDNS
                                                                  A. Eden
                                                                 DNSimple
-                                                        January 11, 2018
+                                                        February 9, 2018
 
 
              Address-specific DNS Name Redirection (ANAME)
-                       draft-ietf-dnsop-aname-01
+                       draft-ietf-dnsop-aname-02
 
 Abstract
 
@@ -37,7 +37,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on July 15, 2018.
+   This Internet-Draft will expire on August 13, 2018.
 
 Copyright Notice
 
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Hunt, et al.              Expires July 15, 2018                 [Page 1]
+Hunt, et al.             Expires August 13, 2018                [Page 1]
 
-Internet-Draft                    aname                     January 2018
+Internet-Draft                    aname                    February 2018
 
 
    include Simplified BSD License text as described in Section 4.e of
@@ -71,7 +71,7 @@ Table of Contents
      3.1.  Address records returned with ANAME . . . . . . . . . . .   5
      3.2.  Coexistence with other types  . . . . . . . . . . . . . .   6
      3.3.  DNSSEC signing  . . . . . . . . . . . . . . . . . . . . .   6
-   4.  Recursive Server Behavior . . . . . . . . . . . . . . . . . .   8
+   4.  Recursive Server Behavior . . . . . . . . . . . . . . . . . .   7
    5.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .   8
    6.  Operational Considerations  . . . . . . . . . . . . . . . . .   9
    7.  Implementation Status . . . . . . . . . . . . . . . . . . . .  10
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Hunt, et al.              Expires July 15, 2018                 [Page 2]
+Hunt, et al.             Expires August 13, 2018                [Page 2]
 
-Internet-Draft                    aname                     January 2018
+Internet-Draft                    aname                    February 2018
 
 
    DNAME [RFC6672] is also not a solution, as its function is to
@@ -165,9 +165,9 @@ Internet-Draft                    aname                     January 2018
 
 
 
-Hunt, et al.              Expires July 15, 2018                 [Page 3]
+Hunt, et al.             Expires August 13, 2018                [Page 3]
 
-Internet-Draft                    aname                     January 2018
+Internet-Draft                    aname                    February 2018
 
 
    The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
@@ -194,12 +194,13 @@ Internet-Draft                    aname                     January 2018
 
    When an ANAME record is present at a DNS node and a query is received
    by an authoritative server for type A or AAAA, the authoritative
-   server returns the ANAME RR in the answer section.
+   server MUST return the ANAME RR in the answer section.
 
    Because not all querying resolvers understand ANAME, the
    authoritative server MUST also return address records, as described
-   below.  This is conceptually similar to the synthesized CNAME record
-   included with DNAME responses [RFC6672].
+   below, if it is able to retrieve them.  This is conceptually similar
+   to the synthesized CNAME record included with DNAME responses
+   [RFC6672].
 
    Authoritative servers implementing ANAME MUST be equipped to resolve
    the ANAME <target> on the querying resolver's behalf, either by
@@ -220,10 +221,9 @@ Internet-Draft                    aname                     January 2018
 
 
 
-
-Hunt, et al.              Expires July 15, 2018                 [Page 4]
+Hunt, et al.             Expires August 13, 2018                [Page 4]
 
-Internet-Draft                    aname                     January 2018
+Internet-Draft                    aname                    February 2018
 
 
 3.1.  Address records returned with ANAME
@@ -277,9 +277,9 @@ Internet-Draft                    aname                     January 2018
 
 
 
-Hunt, et al.              Expires July 15, 2018                 [Page 5]
+Hunt, et al.             Expires August 13, 2018                [Page 5]
 
-Internet-Draft                    aname                     January 2018
+Internet-Draft                    aname                    February 2018
 
 
    to it by the querying resolver, or generating a new ECS option from
@@ -327,32 +327,31 @@ Internet-Draft                    aname                     January 2018
    AAAA answers for the ANAME records, or "on the fly" when responding
    to a query.
 
-   If the server does not have access to the private zone-signing key
-   then it MAY return unsigned address records, but this is NOT
-   RECOMMENDED unless every resolver with access to the zone is known to
+   Because validating resolvers which do not yet implement ANAME will
+   not be aware that this is an alias response, they will attempt to
+   validate the A and AAAA responses included with an ANAME response as
 
 
 
-Hunt, et al.              Expires July 15, 2018                 [Page 6]
+Hunt, et al.             Expires August 13, 2018                [Page 6]
 
-Internet-Draft                    aname                     January 2018
+Internet-Draft                    aname                    February 2018
 
 
-   support ANAME (as might be the case in a split-horizon deployment
-   where ANAME records are only served to an internal network with its
-   own resolvers).
-
-   Validating resolvers which do not yet implement ANAME will not be
-   able to validate the A and AAAA responses included with an ANAME
-   response unless those responses are validly signed by a DNSKEY at the
-   apex of the zone in which the ANAME resides.  Passing along the
+   if they had originated from the ANAME <owner>.  Passing along the
    RRSIGs associated with the original A and AAAA RRsets from the ANAME
-   <target> will not be sufficient for DNSSEC validation.
+   <target> will not be sufficient for DNSSEC validation.  Consequently,
+   if the server does not have access to the private zone-signing key,
+   then it SHOULD NOT return unsigned address records unless every
+   resolver with access to the zone is known to support ANAME.  (For
+   instance, this might be the case in a split-horizon deployment where
+   ANAME records are only served to an internal network with its own
+   resolvers.)
 
    Implementers MAY allow address records associated with the ANAME to
    be populated and signed by the primary server, then sent along with
    their RRSIGs to secondaries via zone transfer.  In this case, the
-   master server MUST respect the TTLs of the address records, MUST
+   primary server MUST respect the TTLs of the address records, MUST
    refresh the address records by re-resolving the ANAME <target> when
    their TTLs expire, SHOULD respond to address queries with TTLs that
    count down as they would when answering from a normal DNS cache, and
@@ -382,23 +381,19 @@ Internet-Draft                    aname                     January 2018
    being resolved.  The type bit map SHOULD only include address types
    which are known to exist at the <target>.
 
-
-
-
-
-
-
-
-Hunt, et al.              Expires July 15, 2018                 [Page 7]
-
-Internet-Draft                    aname                     January 2018
-
-
 4.  Recursive Server Behavior
 
    When a recursive resolver sends a query of type A or AAAA and
    receives a response with an ANAME RRset in the answer section, it
    MUST re-query for the ANAME <target>.  This is necessary because, in
+
+
+
+Hunt, et al.             Expires August 13, 2018                [Page 7]
+
+Internet-Draft                    aname                    February 2018
+
+
    some cases, the address received will be dependent on network
    topology and other considerations, and the resolver may find a
    different answer than the authoritative server did.  (This
@@ -445,9 +440,14 @@ example.com.            5       IN      AAAA    2001:db8::1
 
 
 
-Hunt, et al.              Expires July 15, 2018                 [Page 8]
+
+
+
+
+
+Hunt, et al.             Expires August 13, 2018                [Page 8]
 
-Internet-Draft                    aname                     January 2018
+Internet-Draft                    aname                    February 2018
 
 
 ;; QUESTION SECTION:
@@ -460,7 +460,7 @@ example.com.            5       IN      AAAA    2001:db8::1
 ;; ADDITIONAL SECTION:
 example.com.            5       IN      A       192.0.2.1
 
-   A query for example.com/AANME would receive only the ANAME in the
+   A query for example.com/ANAME would receive only the ANAME in the
    answer section, with the addresses for example.com.my-cdn.example.net
    expanded in the additional section:
 
@@ -501,9 +501,9 @@ example.com.my-cdn.example.net. 5 IN    AAAA    2001:db8::1
 
 
 
-Hunt, et al.              Expires July 15, 2018                 [Page 9]
+Hunt, et al.             Expires August 13, 2018                [Page 9]
 
-Internet-Draft                    aname                     January 2018
+Internet-Draft                    aname                    February 2018
 
 
 7.  Implementation Status
@@ -532,7 +532,7 @@ Internet-Draft                    aname                     January 2018
    ANAME resolution lives outside of such critical network sections.
 
    If ANAME is used in a signed zone, validating resolvers that do not
-   understand ANAME will not be able to valudate the A and AAAA records
+   understand ANAME will not be able to validate the A and AAAA records
    included in the response, unless the responding server has added
    signatures for those records.  Merely passing along signatures from
    the <target> is not sufficient.  An authoritative server hosting a
@@ -557,9 +557,9 @@ Internet-Draft                    aname                     January 2018
 
 
 
-Hunt, et al.              Expires July 15, 2018                [Page 10]
+Hunt, et al.             Expires August 13, 2018               [Page 10]
 
-Internet-Draft                    aname                     January 2018
+Internet-Draft                    aname                    February 2018
 
 
    validation SHOULD be used when resolving the ANAME <target>.
@@ -613,9 +613,9 @@ Internet-Draft                    aname                     January 2018
 
 
 
-Hunt, et al.              Expires July 15, 2018                [Page 11]
+Hunt, et al.             Expires August 13, 2018               [Page 11]
 
-Internet-Draft                    aname                     January 2018
+Internet-Draft                    aname                    February 2018
 
 
    [RFC7871]  Contavalli, C., van der Gaast, W., Lawrence, D., and W.
@@ -669,4 +669,4 @@ Authors' Addresses
 
 
 
-Hunt, et al.              Expires July 15, 2018                [Page 12]
+Hunt, et al.             Expires August 13, 2018               [Page 12]

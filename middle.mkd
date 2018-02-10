@@ -86,13 +86,13 @@ RRset MUST NOT contain more than one resource record.
 # Authoritative Server Behavior
 
 When an ANAME record is present at a DNS node and a query is received by an
-authoritative server for type A or AAAA, the authoritative server returns
+authoritative server for type A or AAAA, the authoritative server MUST return
 the ANAME RR in the answer section.
 
 Because not all querying resolvers understand ANAME, the authoritative
-server MUST also return address records, as described below.  This is
-conceptually similar to the synthesized CNAME record included with DNAME
-responses [](#RFC6672).
+server MUST also return address records, as described below, if it is
+able to retrieve them.  This is conceptually similar to the synthesized
+CNAME record included with DNAME responses [](#RFC6672).
 
 Authoritative servers implementing ANAME MUST be equipped to resolve the
 ANAME \<target\> on the querying resolver's behalf, either by sending
@@ -190,18 +190,17 @@ has access to its private zone-signing key, then the A and AAAA RRsets MUST
 be signed, either in advance when populating the A/AAAA answers for the
 ANAME records, or "on the fly" when responding to a query.
 
-If the server does not have access to the private zone-signing key then it
-MAY return unsigned address records, but this is NOT RECOMMENDED unless
-every resolver with access to the zone is known to support ANAME (as might
-be the case in a split-horizon deployment where ANAME records are only
-served to an internal network with its own resolvers).
-
-Validating resolvers which do not yet implement ANAME will not be able to
-validate the A and AAAA responses included with an ANAME response unless
-those responses are validly signed by a DNSKEY at the apex of the zone in
-which the ANAME resides.  Passing along the RRSIGs associated with the
-original A and AAAA RRsets from the ANAME \<target\> will not be sufficient
-for DNSSEC validation.
+Because validating resolvers which do not yet implement ANAME will not be
+aware that this is an alias response, they will attempt to validate the A
+and AAAA responses included with an ANAME response as if they had
+originated from the ANAME \<owner\>.  Passing along the RRSIGs associated
+with the original A and AAAA RRsets from the ANAME \<target\> will not be
+sufficient for DNSSEC validation.  Consequently, if the server does not
+have access to the private zone-signing key, then it SHOULD NOT return
+unsigned address records unless every resolver with access to the zone is
+known to support ANAME. (For instance, this might be the case in a
+split-horizon deployment where ANAME records are only served to an internal
+network with its own resolvers.)
 
 Implementers MAY allow address records associated with the ANAME to be
 populated and signed by the primary server, then sent along with their
