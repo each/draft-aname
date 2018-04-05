@@ -190,40 +190,59 @@ both the owner name (via ANAME) and everything under it (via DNAME).
 
 ANAME can freely coexist at the same owner name with any other RR type.
 
+## Zone transfer
+
+By default, there is no special consideration for doing zone transfers that
+contain ANAME: The ANAME, A, and AAAA records that are in the zone will
+be transferred just like any other zone records.
+
+However, if in a deployment the ANAME resolution is performed at the master,
+but not at the secondaries, the master should have a mechanism to transfer the
+expanded ANAME.
+
+### ANAME expansion
+
+A server that performas ANAME resolution MAY expand the ANAME in a zone
+transfer.  When ANAME expansion is done, all A and AAAA records on the same
+\<owner\> name MUST be replaced with the ANAME-resolved A and AAAA records.
+
+This has the disadvantage that the zone contents at the secondaries differ
+than the zone contents at the master.  But it is the desired behavior for
+serving ANAME-based responses because the master and its secondaries will
+respond with the same answer for received address queries.
+
+Another thing to consider when doing ANAME expansion is the limited TTL of the
+expanded RRset. An expanded record MUST NOT be used if its TTL exceeds.  In
+setups where the limited TTL is short this may result in more zone transfers,
+as if the zone contents would change rapidly.  So even if the ANAME record
+has a long TTL, the target may have a short TTL and the expanded records have
+to be transferred frequently.
+
+With these disadvantages in mind, it is NOT RECOMMENDED to have a deployment
+of ANAME in zones that are transferred to servers that do not do ANAME
+resolution.  In other words ANAME expansion in zone transfer is NOT
+RECOMMENDED.
+
 ## DNSSEC signing
 
 If the zone in which the ANAME resides is DNSSEC-signed, and if the server
 has access to its private zone-signing key, then the A and AAAA RRsets MUST
 be signed, either in advance when populating the A/AAAA answers for the
-ANAME records, or "on the fly" when responding to a query.
+ANAME records, or "on the fly" when responding to a query or a zone transfer.
 
-Because validating resolvers which do not yet implement ANAME will not be
-aware that this is an alias response, they will attempt to validate the A
-and AAAA responses included with an ANAME response as if they had
-originated from the ANAME \<owner\>.  Passing along the RRSIGs associated
-with the original A and AAAA RRsets from the ANAME \<target\> will not be
-sufficient for DNSSEC validation.  Consequently, if the server does not
-have access to the private zone-signing key, then it SHOULD NOT return
-unsigned address records unless every resolver with access to the zone is
-known to support ANAME. (For instance, this might be the case in a
-split-horizon deployment where ANAME records are only served to an internal
-network with its own resolvers.)
+In the case that resolved A/AAAA RRsets are signed, the server MUST respect
+the TTLs of the address records, MUST refresh the address records by
+re-resolving the ANAME \<target\> when their TTLs expire, SHOULD respond to
+address queries with TTLs that count down as they would when answering from a
+normal DNS cache, and MUST inform secondary servers via DNS NOTIFY they need
+to refresh the zone when address records have been updated.
 
-Implementers MAY allow address records associated with the ANAME to be
-populated and signed by the primary server, then sent along with their
-RRSIGs to secondaries via zone transfer. In this case, the primary server
-MUST respect the TTLs of the address records, MUST refresh the address
-records by re-resolving the ANAME \<target\> when their TTLs expire,
-SHOULD respond to address queries with TTLs that count down as they would
-when answering from a normal DNS cache, and MUST inform secondary servers
-via DNS NOTIFY they need to refresh the zone when address records have been
-updated.  A secondary server SHOULD store address records and associated
-RRSIGs supplied via zone transfer in such a way that their TTLs will count
-down, as they would in a normal DNS cache, and ultimately trigger a zone
-refresh query upon reaching zero. When a secondary server is responding to
-an address query, it SHOULD answer with the reduced TTL, but when
-responding to a zone transfer request, it MUST answer with the original
-TTL received from the primary.
+A secondary server SHOULD store address records and associated RRSIGs supplied
+via zone transfer in such a way that their TTLs will count down, as they would
+in a normal DNS cache, and ultimately trigger a zone refresh query upon
+reaching zero. When a secondary server is responding to an address query, it
+SHOULD answer with the reduced TTL, but when responding to a zone transfer
+request, it MUST answer with the original TTL received from the primary.
 
 If this address record expansion and signing during zone transfer is not
 supported, then every authoritative server providing ANAME responses
@@ -239,6 +258,18 @@ well as ANAME. This is for the benefit of validating resolvers not
 implementing ANAME which may use a signed proof of nonexistence for type A
 and AAAA to prevent address queries from being resolved. The type bit map
 SHOULD only include address types which are known to exist at the \<target\>.
+
+Because validating resolvers which do not yet implement ANAME will not be
+aware that this is an alias response, they will attempt to validate the A
+and AAAA responses included with an ANAME response as if they had
+originated from the ANAME \<owner\>.  Passing along the RRSIGs associated
+with the original A and AAAA RRsets from the ANAME \<target\> will not be
+sufficient for DNSSEC validation.  Consequently, if the server does not
+have access to the private zone-signing key, then it SHOULD NOT return
+unsigned address records unless every resolver with access to the zone is
+known to support ANAME. (For instance, this might be the case in a
+split-horizon deployment where ANAME records are only served to an internal
+network with its own resolvers.)
 
 # Recursive Server Behavior
 
