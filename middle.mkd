@@ -441,7 +441,8 @@ this specification.
 
 # Acknowledgments
 
-Thanks to Mukund Sivaraman, Stephen Morris, Ray Bellis, Mark Andrews,
-Richard Salts, Job Snijders, Richard Gibson, Hakan Lindqvist, Jan Vcelak,
-Tatuya JINMEI, Duane Wessels, Stefan Buehler, Bjorn Mott, and Tony Finch
-for discussion and feedback.
+Mattijs Mekking provided substantial input and suggested text. Thanks to
+Mukund Sivaraman, Stephen Morris, Ray Bellis, Mark Andrews, Richard Salts,
+Job Snijders, Richard Gibson, Hakan Lindqvist, Jan Vcelak, Tatuya JINMEI,
+Duane Wessels, Stefan Buehler, Bjorn Mott, and Tony Finch for discussion
+and feedback.
