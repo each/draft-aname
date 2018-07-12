@@ -380,7 +380,7 @@ carefully check for loops and treat them as an error condition. One
 possible approach is to implement a hop counter and stop resolution
 when a maximum hop count is reached.
 
-An authoritative resolver returning address records which were obtained by
+An authoritative server returning address records which were obtained by
 resolving the ANAME \<target\> is supplying its own best information to
 clients as to the correct answer. The response may be signed by the
 authoritative server, but that is not a guarantee of the actual correctness
