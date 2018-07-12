@@ -109,6 +109,11 @@ address response, or until resolution fails.  However, the intermediate
 ANAMEs, CNAMEs, and DNAMEs encountered during this resolution process
 MUST NOT be included in the final response returned to the client.
 
+Authoritative servers that understand ANAME but do not implement ANAME
+resolution MUST return the ANAME RR in the answer section and the A or
+AAAA records (depending on the QTYPE) on the same \<owner\> name.  These
+records are considered fallback records.
+
 ## Address records returned with ANAME
 
 If the original query is for type A, and an RRset of type A exists at the
@@ -160,9 +165,12 @@ a new query to the ANAME \<target\>, unless the server is configured to
 allow the use of stale data as described in [](#I-D.ietf-dnsop-serve-stale).
 
 If the original query is for a specific address type, resolution of address
-records at the ANAME \<target\> fails for any reason other than NXDOMAIN or
-NODATA, and cached data cannot be used, then the response MUST include the
-ANAME record and set the RCODE to SERVFAIL.
+records at the ANAME \<target\> fails, then the server MAY use fallback
+records instead.  If the server decides not to use the fallback records, or no
+fallback records are available, it checks the response.  If the resolution
+resulted in NXDOMAIN or NODATA, the server MUST return a NODATA response.
+In any other error case, and cached data cannot be used, then the server MUST
+include the ANAME record and set the RCODE to SERVFAIL.
 
 If configured to do so, then the authoritative server MAY, when sending
 queries to the ANAME \<target\>, include an EDNS CLIENT-SUBNET (ECS)
@@ -175,11 +183,10 @@ used in response to queries from the same client subnet.
 
 ## Coexistence with other types
 
-If the zone is configured with an A or AAAA RRset at the same DNS node as
-ANAME, then the ANAME is considered to have already been expanded.  If
-during query processing any address records are found at the same node as
-an ANAME RR, then the ANAME RR MUST NOT be further expanded by the
-authoritative server.
+A zone may be configured with an A and AAAA RRset at the same \<owner\>
+name as the ANAME. If this is the case, the A and AAAA RRset are considered
+to be fallback address records: if ANAME resolution fails these records may
+be used instead.
 
 ANAME MUST NOT coexist with CNAME or any other RR type that restricts
 the types with which it can itself coexist.
