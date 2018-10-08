@@ -12,5 +12,8 @@ ${DRAFT}.html: ${DRAFT}.md
 ${DRAFT}.xml: ${DRAFT}.md
 	${MMARK} ${DRAFT}.md >${DRAFT}.xml
 
+stamp:
+	./util/stamp ${DRAFT}.md
+
 clean:
 	rm -f ${OUT}
