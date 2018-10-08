@@ -2,7 +2,7 @@ MMARK=~/go/bin/mmark
 
 DRAFT=draft-fanf-dnsop-aname
 
-OUT= ${DRAFT}.xml ${DRAFT}.html
+OUT= ${DRAFT}.html ${DRAFT}.xml ${DRAFT}.txt
 
 all: ${OUT}
 
@@ -10,7 +10,10 @@ ${DRAFT}.html: ${DRAFT}.md
 	${MMARK} -html ${DRAFT}.md >${DRAFT}.html
 
 ${DRAFT}.xml: ${DRAFT}.md
-	${MMARK} ${DRAFT}.md >${DRAFT}.xml
+	${MMARK} -2 ${DRAFT}.md >${DRAFT}.xml
+
+${DRAFT}.txt: ${DRAFT}.xml
+	xml2rfc -o ${DRAFT}.txt ${DRAFT}.xml
 
 stamp:
 	./util/stamp ${DRAFT}.md
