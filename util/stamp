@@ -10,6 +10,5 @@ sed '/^%%%/,/^%%%/s/\(^date[	 ]*=[	 ]*\).*/\1'$date'/' \
 
 if ! diff -u $draft $draft.stamp
 then mv $draft.stamp $draft
+else rm $draft.stamp
 fi
-
-rm $draft.stamp
