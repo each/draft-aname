@@ -112,31 +112,29 @@ hosted mail and web servers.
 Redirecting website lookups to an alternate domain name via SRV or URI
 resource records would be an effective solution from the DNS point of
 view, but to date this approach has not been accepted by browser
-implementations. In addition, it is not possible to use SRV records
-with wildcard names.
+implementations.
 
-As a result of the above, the only widely supported and
-standards-compliant way to publish a web site at a bare domain is to
-place A and/or AAAA records at the zone apex. The flexibility afforded
-by CNAME is not available.
+As a result, the only widely supported and standards-compliant way to
+publish a web site at a bare domain is to place A and/or AAAA records
+at the zone apex. The flexibility afforded by CNAME is not available.
 
 This document specifies a new RR type "ANAME", which provides similar
 functionality to CNAME, but only for address queries (i.e., for type A
-or AAAA). The basic idea is that address records at the same owner
-name as an ANAME record are automatically copied and kept in sync with
-the ANAME target address records. The ANAME record can be present at
-any DNS node, and can coexist with most other RR types, enabling it to
-be present at a zone apex, or any other name where the presence of
-other records prevents the use of CNAME.
+or AAAA). The basic idea is that the address records next to an ANAME
+record are automatically copied from and kept in sync with the ANAME
+target's address records. The ANAME record can be present at any DNS
+node, and can coexist with most other RR types, enabling it to be
+present at a zone apex, or any other name where the presence of other
+records prevents the use of CNAME.
 
 Similar authoritative functionality has been implemented and deployed
 by a number of DNS software vendors and service providers, using names
 such as ALIAS, ANAME, apex CNAME, CNAME flattening, and top level
-redirection. These proprietary mechanisms hinder the ability of
-hostmasters to serve the same zone data from multiple providers, or
-move service between providers. None of these proprietary versions
-include a mechanism for resolvers to follow the redirection chain
-themselves.
+redirection. These mechanisms are proprietary, which hinders the
+ability of hostmasters to serve the same zone data from multiple
+providers, or move service between providers. None of these
+proprietary versions include a mechanism for resolvers to follow the
+redirection chain themselves.
 
 Overview
 --------
@@ -168,20 +166,20 @@ improve latency or load balancing.
     rather than to the zone's primary server.
 
 Resolver support for ANAME is not necessary, since ANAME-oblivious
-resolvers will get working answers from the authoritative servers.
-It's just an optimization that can be rolled out incrementally, and
-which will help ANAME to work better the more widely it is deployed.
+resolvers will get working answers from authoritative servers. It's
+just an optimization that can be rolled out incrementally, and that
+will help ANAME to work better the more widely it is deployed.
 
 Terminology
 -----------
 
 An "address record" is a DNS resource record whose type is A or AAAA.
-These are referred to as "address types".
-
-"Address query" refers to a DNS query for any address type.
+These are referred to as "address types". "Address query" refers to a
+DNS query for any address type.
 
 The "sibling address records" of an ANAME record are the address
-records at the same owner name as the ANAME.
+records at the same owner name as the ANAME, which are subject to
+ANAME substitution.
 
 The "target address records" of an ANAME record are the address
 records obtained by resolving the ultimate target of the ANAME (see
@@ -291,11 +289,17 @@ Substituting ANAME sibling address records {#subst}
 This process is used by both primary servers (see (#primary)) and
 resolvers (see (#resolver)).
 
-The following steps are performed for each address type:
+The following steps MUST be performed for each address type:
 
-  * Resolve the target address records; stop if resolution fails.
-    (Note that NXDOMAIN and NODATA count as successfully resolving
-    zero records.)
+  * Starting at the ANAME owner, follow the chain of ANAME and/or
+    CNAME records as far as possible to find the ultimate target.
+
+  * If a loop is detected, continue with an empty RRset, otherwise get
+    the ultimate target's address records. (Ignore any sibling address
+    records of intermediate ANAMEs.)
+
+  *	Stop if resolution failed. (Note that NXDOMAIN and NODATA count as
+    successfully resolving an empty RRset.)
 
   * Replace the owner of the target address records with the owner of
     the ANAME record. Drop any RRSIG records.
@@ -315,7 +319,7 @@ is explained in more detail in the following sections.
 ANAME processing by primary servers {#primary}
 ===================================
 
-SPONG
+
 
 
 ANAME processing by resolvers {#resolver}
@@ -324,7 +328,7 @@ ANAME processing by resolvers {#resolver}
 WIBBLE
 
 
-IANA Considerations
+IANA considerations
 ===================
 
 IANA is requested to assign a DNS RR TYPE value for ANAME resource
@@ -336,20 +340,49 @@ addition of new types to such a registry would then implicitly update
 this specification.
 
 
+Security considerations
+=======================
+
+When a primary server updates an ANAME's sibling address records to
+match its target address records, it is uses its own best information
+as to the correct answer. The updated records may be signed by the
+primary server, but that is not a guarantee of the actual correctness
+of the answer. This can have the effect of promoting an insecure
+response from the ANAME \<target\> to a signed response from the
+\<owner\>, which may then appear to clients to be more trustworthy
+than it should. To mitigate harm from this, DNSSEC validation SHOULD
+be used when resolving the ANAME \<target\>. Primary servers MAY
+refuse to substitute ANAME sibling address records unless the
+\<target\> node is both signed and validated.
+
+When a resolver substitutes an ANAME's sibling address records, it can
+find that the sibling address records are secure but the target
+address records are insecure. Going ahead with the substitution will
+downgrade a secure answer to an insecure one. But this is likely to be
+the counterpart of the situation described in the previous paragraph,
+so the resolver is downgrading an answer that the ANAME's primary
+upgraded. A resolver will only downgrade an answer in this way when
+its client is security-oblivious; however the client's path to the
+resolver is likely to be practically safer than the resolver's path to
+the ANAME target's servers. Resolvers MAY choose not to substitute
+sibling address records when they are more secure than the target
+address records.
+
+
 {backmatter}
 
 
 Acknowledgments
 ===============
 
-Mattijs Mekking provided substantial input and suggested text. Thanks
-to Mark Andrews, Ray Bellis, Stefan Buehler, Paul Ebersman, Richard
-Gibson, Tatuya JINMEI, Hakan Lindqvist, Stephen Morris, Bjorn Mott,
-Richard Salts, Mukund Sivaraman, Job Snijders, Jan Vcelak, Paul Vixie,
-Duane Wessels, and Paul Wouters for discussion and feedback.
+Thanks to Mark Andrews, Ray Bellis, Stefan Buehler, Paul Ebersman,
+Richard Gibson, Tatuya JINMEI, Hakan Lindqvist, Mattijs Mekking,
+Stephen Morris, Bjorn Mott, Richard Salts, Mukund Sivaraman, Job
+Snijders, Jan Vcelak, Paul Vixie, Duane Wessels, and Paul Wouters for
+discussion and feedback.
 
 
-Implementation Status
+Implementation status
 =====================
 
 PowerDNS currently implements a similar authoritative-only feature
