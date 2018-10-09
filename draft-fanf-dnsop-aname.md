@@ -163,7 +163,7 @@ improve latency or load balancing.
 
   * Resolvers can use this ANAME information as described in
     (#resolver) to obtain answers that are tailored to the resolver
-    rather than to the zone's primary server.
+    rather than to the zone's primary master.
 
 Resolver support for ANAME is not necessary, since ANAME-oblivious
 resolvers will get working answers from authoritative servers. It's
@@ -286,7 +286,7 @@ records if the zone is signed.
 Substituting ANAME sibling address records {#subst}
 ==========================================
 
-This process is used by both primary servers (see (#primary)) and
+This process is used by both primary masters (see (#primary)) and
 resolvers (see (#resolver)).
 
 The following steps MUST be performed for each address type:
@@ -310,16 +310,16 @@ The following steps MUST be performed for each address type:
   * Delete the sibling address RRset and replace it with the modified
     RRset.
 
-At this point the substituted RRset is not signed; a primary server
+At this point the substituted RRset is not signed; a primary master
 will proceed to sign the sibstituted RRset, whereas resolvers can only
 use the substituted RRset when an unsigned answer is appropriate. This
 is explained in more detail in the following sections.
 
 
-ANAME processing by primary servers {#primary}
+ANAME processing by primary masters {#primary}
 ===================================
 
-
+Each ANAME record is SPONG
 
 
 ANAME processing by resolvers {#resolver}
@@ -343,15 +343,15 @@ this specification.
 Security considerations
 =======================
 
-When a primary server updates an ANAME's sibling address records to
+When a primary master updates an ANAME's sibling address records to
 match its target address records, it is uses its own best information
 as to the correct answer. The updated records may be signed by the
-primary server, but that is not a guarantee of the actual correctness
+primary master, but that is not a guarantee of the actual correctness
 of the answer. This can have the effect of promoting an insecure
 response from the ANAME \<target\> to a signed response from the
 \<owner\>, which may then appear to clients to be more trustworthy
 than it should. To mitigate harm from this, DNSSEC validation SHOULD
-be used when resolving the ANAME \<target\>. Primary servers MAY
+be used when resolving the ANAME \<target\>. Primary masters MAY
 refuse to substitute ANAME sibling address records unless the
 \<target\> node is both signed and validated.
 
@@ -361,12 +361,12 @@ address records are insecure. Going ahead with the substitution will
 downgrade a secure answer to an insecure one. But this is likely to be
 the counterpart of the situation described in the previous paragraph,
 so the resolver is downgrading an answer that the ANAME's primary
-upgraded. A resolver will only downgrade an answer in this way when
-its client is security-oblivious; however the client's path to the
-resolver is likely to be practically safer than the resolver's path to
-the ANAME target's servers. Resolvers MAY choose not to substitute
-sibling address records when they are more secure than the target
-address records.
+master upgraded. A resolver will only downgrade an answer in this way
+when its client is security-oblivious; however the client's path to
+the resolver is likely to be practically safer than the resolver's
+path to the ANAME target's servers. Resolvers MAY choose not to
+substitute sibling address records when they are more secure than the
+target address records.
 
 
 {backmatter}
@@ -403,8 +403,8 @@ queries for un-cached records at that name in the usual way; once it
 had cached a CNAME record for a name, it would resolve queries for
 un-cached records using CNAME target instead.
 
-For example, given the zone contents below, the ooriginal CNAME
-behaviour meant if you asked for `alias.example.com TXT` first,
+For example, given the zone contents below, the original CNAME
+behaviour meant that if you asked for `alias.example.com TXT` first,
 you would get the answer "owner", but if you asked for
 `alias.example.com A` then `alias.example.com TXT` you would get the
 answer "target".
