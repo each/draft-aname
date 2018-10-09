@@ -13,7 +13,7 @@ ${DRAFT}.xml: ${DRAFT}.md
 	${MMARK} -2 ${DRAFT}.md >${DRAFT}.xml
 
 ${DRAFT}.txt: ${DRAFT}.xml
-	xml2rfc -o ${DRAFT}.txt ${DRAFT}.xml
+	xml2rfc --raw -o ${DRAFT}.txt ${DRAFT}.xml
 
 stamp:
 	./util/stamp ${DRAFT}.md
