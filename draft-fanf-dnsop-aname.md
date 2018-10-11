@@ -287,7 +287,8 @@ Substituting ANAME sibling address records {#subst}
 ==========================================
 
 This process is used by both primary masters (see (#primary)) and
-resolvers (see (#resolver)).
+resolvers (see (#resolver)), though they vary in how they apply the
+edit described in the final step.
 
 The following steps MUST be performed for each address type:
 
@@ -319,7 +320,37 @@ is explained in more detail in the following sections.
 ANAME processing by primary masters {#primary}
 ===================================
 
-Each ANAME record is SPONG
+Each ANAME's sibling address records are kept up-to-date as if by the
+following process, for each address type:
+
+  * Perform ANAME sibling address record substitution as described in
+    (#subst). Any edit performed in the final step is applied to the
+    ANAME's zone in the same manner as a DNS UPDATE [@!RFC2136].
+
+  * If resolution failed, wait for a period before trying again. This
+    retry time SHOULD be configurable.
+
+  * Otherwise, wait until the target address record TTL has expired,
+    then repeat.
+
+Implications
+------------
+
+SPONG
+
+Alternatives
+------------
+
+The process at the start of this section is specified using the mighty
+weasel words "as if", which are intended to allow a great deal of
+latitude to implementers so long as the observed behaviour is
+compatible.
+
+For instance, it is likely to be more efficient to manage the polling
+per ANAME target rather than per ANAME as specified.
+
+[TODO: cloudflare style]
+
 
 
 ANAME processing by resolvers {#resolver}
@@ -440,6 +471,100 @@ authoritative servers which rely on coexisting CNAMEs will not
 interoperate well with older resolvers. Practical experiments show
 that the problems are particularly acute when CNAME and MX try to
 coexist.
+
+On preserving TTLs
+==================
+
+An ANAME's sibling address records are in an unusual situtation: they
+are authoritative data in the owner's zone, so from that point of view
+the owner has the last say over what their TTL should be; on the other
+hand, ANAMEs are supposed to act as aliases, in which case the target
+should control the address record TTLs.
+
+However there are some technical constraints that make it difficult to
+preserve the target address record TTLs.
+
+The conclusion of the following subsections is that the end-to-end TTL
+(from the authoritative servers for the target address records to
+end-user DNS caches) will be the target address record TTL plus the
+sibling address record TTL.
+
+Query bunching
+--------------
+
+If the times of end-user queries for a domain name are well
+distributed, then (normally) queries received by the authoritative
+servers for that domain are also well distributed. If the domain is
+popular, a recursive server will re-query for it once every TTL
+seconds, but the periodic queries from all the various recursive
+servers will not be aligned, so the queries remain well distributed.
+
+However, imagine that the TTLs of an ANAME's sibing address records
+are decremented in the same way as cache entries in recursive servers.
+Then all the recursive servers querying for the name will try to
+refresh their caches at the same time, when the TTL reaches zero. They
+will become synchronized and all the queries for the domain will be
+bunched into periodic spikes.
+
+This specification says that ANAME sibing address records have a
+normal fixed TTL derived from (e.g. equal or nearly equal to) the
+target address records' original TTL. There is no cache-like
+decrementing TTL, so there is no bunching of queries.
+
+Upstream caches
+---------------
+
+There are two straightforward ways to get an RRset's original TTL:
+
+  * by directly querying an authotitative server;
+
+  * using the original TTL field from the RRset's RRGIG record(s).
+
+However, not all zones are signed, and a primary master might not be
+able to directly query other authoritative servers (e.g. if it is a
+hidden primary behind a strict firewall). Instead it might have to
+obtain an ANAME's target address records via some other recursive
+server.
+
+Querying via a separate recursive server means the primary master
+cannot trivially obtain the target address records' original TTLs.
+Fortunately this is likely to be a self-correcting problem for similar
+reasons to the query-bunching discussed in the previous subsection.
+The primary master re-checks the target address records just after the
+TTL expires, when its upstream cache has just refreshed them, so the
+TTL will be nearly equal to the original TTL.
+
+A related consideration is that the primary master cannot in general
+refresh its copies of an ANAME's target address records more
+frequently than their TTL, without privileged control over its
+resolver cache.
+
+Combined with the requirement that sibling address records are served
+with a fixed TTL, this means that the end-to-end TTL will be the
+target address record TTL (which determines when the sibling address
+records are updated) plus the sibling address record TTL (which
+determines when end-user caches are updated).
+
+ANAME chains
+------------
+
+ANAME sibling address record substitution is made slightly more
+complicated by the requirement to follow chains of ANAME and/or CNAME
+records. This stops the end-to-end TTL from being inflated by each
+ANAME in the chain.
+
+TTLs and zone transfers
+-----------------------
+
+When things are working properly (with secondary nameservers
+responding to NOTIFY messages promptly) the authoritative servers will
+follow changes to ANAME target address records according to their
+TTLs. As a result the end-to-end TTL is unchanged from the previous
+subsection.
+
+If NOTIFY doesn't work, the TTLs can be stretched by the zone's SOA
+refresh timer. More serious breakage can stretch them up to the zone
+expiry time.
 
 
 Changes since the last revision
