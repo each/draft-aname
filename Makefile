@@ -1,4 +1,4 @@
-MMARK=~/go/bin/mmark
+MMARK=${GOPATH}/bin/mmark
 
 DRAFT=draft-fanf-dnsop-aname
 
