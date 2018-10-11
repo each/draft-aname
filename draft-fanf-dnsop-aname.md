@@ -5,7 +5,7 @@ workgroup		= "DNS Operations"
 area			= "Operations and Management"
 submissiontype	= "IETF"
 ipr				= "trust200902"
-date			= 2018-10-09
+date			= 2018-10-11T17:47:17Z
 keyword			= [
 	"DNS",
 	"RR",
@@ -89,8 +89,7 @@ standards compliant manner.
 {mainmatter}
 
 
-Introduction
-============
+# Introduction
 
 It is often desirable to provide web sites (and other services) at a
 bare domain name (such as `example.com`) as well as a service-specific
@@ -136,8 +135,8 @@ providers, or move service between providers. None of these
 proprietary versions include a mechanism for resolvers to follow the
 redirection chain themselves.
 
-Overview
---------
+
+## Overview
 
 The core functionality of this specification allows zone
 administrators to start using ANAME records unilaterally, without
@@ -170,8 +169,8 @@ resolvers will get working answers from authoritative servers. It's
 just an optimization that can be rolled out incrementally, and that
 will help ANAME to work better the more widely it is deployed.
 
-Terminology
------------
+
+## Terminology
 
 An "address record" is a DNS resource record whose type is A or AAAA.
 These are referred to as "address types". "Address query" refers to a
@@ -194,14 +193,12 @@ and **OPTIONAL** in this document are to be interpreted as described in
 [@!RFC2119].
 
 
-The ANAME resource record {#rdata}
-=========================
+# The ANAME resource record {#rdata}
 
 This document defines the "ANAME" DNS resource record type, with RR TYPE
 value [TBD].
 
-Presentation and wire format
-----------------------------
+## Presentation and wire format
 
 The ANAME presentation format is identical to that of CNAME [@!RFC1033]:
 
@@ -212,8 +209,8 @@ The ANAME presentation format is identical to that of CNAME [@!RFC1033]:
 The wire format is also identical to CNAME [@!RFC1035], except that
 name compression is not permitted in ANAME RDATA, per [@!RFC3597].
 
-Coexistence with other types {#coexistence}
-----------------------------
+
+## Coexistence with other types {#coexistence}
 
 Only one ANAME \<target\> can be defined per \<owner\>. An ANAME
 RRset MUST NOT contain more than one resource record.
@@ -233,8 +230,7 @@ redirect both the owner name (via ANAME) and everything under it (via
 DNAME).
 
 
-Additional section processing {#additional}
-=============================
+# Additional section processing {#additional}
 
 The requirements in this section apply to both recursive and
 authoritative servers.
@@ -243,8 +239,8 @@ An ANAME target MAY resolve to address records via a chain of CNAME
 and/or ANAME records; any CNAME/ANAME chain MUST be included when
 adding target address records to a response's additional section.
 
-Address queries
----------------
+
+## Address queries
 
 When a server receives an address query for a name that has an ANAME
 record, the response's additional section:
@@ -262,8 +258,8 @@ not be available if the server is authoritative and does not include
 out-of-zone or non-authoritative data in its answers, or if the server
 is recursive and the records are not in the cache.
 
-ANAME queries
--------------
+
+## ANAME queries
 
 There are three cases:
 
@@ -283,8 +279,7 @@ SHOULD include a DNSSEC proof of nonexistence for missing address
 records if the zone is signed.
 
 
-Substituting ANAME sibling address records {#subst}
-==========================================
+# Substituting ANAME sibling address records {#subst}
 
 This process is used by both primary masters (see (#primary)) and
 resolvers (see (#resolver)), though they vary in how they apply the
@@ -318,8 +313,7 @@ use the substituted RRset when an unsigned answer is appropriate. This
 is explained in more detail in the following sections.
 
 
-ANAME processing by primary masters {#primary}
-===================================
+# ANAME processing by primary masters {#primary}
 
 Each ANAME's sibling address records are kept up-to-date as if by the
 following process, for each address type:
@@ -334,13 +328,13 @@ following process, for each address type:
   * Otherwise, wait until the target address record TTL has expired,
     then repeat.
 
-Implications
-------------
+
+## Implications
 
 SPONG
 
-Alternatives
-------------
+
+## Alternatives
 
 The process at the start of this section is specified using the mighty
 weasel words "as if", which are intended to allow a great deal of
@@ -358,14 +352,12 @@ DNSSEC signatures, and so forth. This architecture
 
 
 
-ANAME processing by resolvers {#resolver}
-=============================
+# ANAME processing by resolvers {#resolver}
 
 WIBBLE
 
 
-IANA considerations
-===================
+# IANA considerations
 
 IANA is requested to assign a DNS RR TYPE value for ANAME resource
 records under the "Resource Record (RR) TYPEs" subregistry under the
@@ -376,8 +368,7 @@ addition of new types to such a registry would then implicitly update
 this specification.
 
 
-Security considerations
-=======================
+# Security considerations
 
 When a primary master updates an ANAME's sibling address records to
 match its target address records, it is uses its own best information
@@ -408,8 +399,7 @@ target address records.
 {backmatter}
 
 
-Acknowledgments
-===============
+# Acknowledgments
 
 Thanks to Mark Andrews, Ray Bellis, Stefan Buehler, Paul Ebersman,
 Richard Gibson, Tatuya JINMEI, Hakan Lindqvist, Mattijs Mekking,
@@ -418,8 +408,7 @@ Snijders, Jan Vcelak, Paul Vixie, Duane Wessels, and Paul Wouters for
 discussion and feedback.
 
 
-Implementation status
-=====================
+# Implementation status
 
 PowerDNS currently implements a similar authoritative-only feature
 using "ALIAS" records, which are expanded by the primary server and
@@ -429,8 +418,7 @@ transfered as address records to secondaries.
 and Akamai.]
 
 
-Historical note {#history}
-===============
+# Historical note {#history}
 
 In the early DNS [@?RFC0882], CNAME records were allowed to coexist
 with other records. However this led to coherency problems: if a
@@ -477,8 +465,8 @@ interoperate well with older resolvers. Practical experiments show
 that the problems are particularly acute when CNAME and MX try to
 coexist.
 
-On preserving TTLs
-==================
+
+# On preserving TTLs
 
 An ANAME's sibling address records are in an unusual situtation: they
 are authoritative data in the owner's zone, so from that point of view
@@ -494,8 +482,8 @@ The conclusion of the following subsections is that the end-to-end TTL
 end-user DNS caches) will be the target address record TTL plus the
 sibling address record TTL.
 
-Query bunching
---------------
+
+# Query bunching
 
 If the times of end-user queries for a domain name are well
 distributed, then (normally) queries received by the authoritative
@@ -516,8 +504,8 @@ normal fixed TTL derived from (e.g. equal or nearly equal to) the
 target address records' original TTL. There is no cache-like
 decrementing TTL, so there is no bunching of queries.
 
-Upstream caches
----------------
+
+## Upstream caches
 
 There are two straightforward ways to get an RRset's original TTL:
 
@@ -550,16 +538,16 @@ target address record TTL (which determines when the sibling address
 records are updated) plus the sibling address record TTL (which
 determines when end-user caches are updated).
 
-ANAME chains
-------------
+
+## ANAME chains
 
 ANAME sibling address record substitution is made slightly more
 complicated by the requirement to follow chains of ANAME and/or CNAME
 records. This stops the end-to-end TTL from being inflated by each
 ANAME in the chain.
 
-TTLs and zone transfers
------------------------
+
+## TTLs and zone transfers
 
 When things are working properly (with secondary nameservers
 responding to NOTIFY messages promptly) the authoritative servers will
@@ -572,8 +560,7 @@ refresh timer. More serious breakage can stretch them up to the zone
 expiry time.
 
 
-Changes since the last revision
-===============================
+# Changes since the last revision
 
   * Major revamp, so authoritative servers (other than primary
     masters) now do not do any special ANAME processing, just
