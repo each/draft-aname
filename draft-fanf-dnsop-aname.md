@@ -306,7 +306,8 @@ The following steps MUST be performed for each address type:
     the ANAME record. Drop any RRSIG records.
 
   * Stop if this modified RRset is the same as the sibling RRset
-    (ignoring any RRSIG records).
+    (ignoring any RRSIG records). The comparison MAY treat
+    nearly-equal TTLs as the same.
 
   * Delete the sibling address RRset and replace it with the modified
     RRset.
@@ -349,7 +350,11 @@ compatible.
 For instance, it is likely to be more efficient to manage the polling
 per ANAME target rather than per ANAME as specified.
 
-[TODO: cloudflare style]
+More radically, some existing ANAME-like implementations are based on
+a different DNS server architecture, in which the public authoritative
+servers all perform the duties of a primary master in a distributed
+manner: provisioning records from a non-DNS back-end store, refreshing
+DNSSEC signatures, and so forth. This architecture 
 
 
 
@@ -570,4 +575,6 @@ expiry time.
 Changes since the last revision
 ===============================
 
-* Adjusted discussion of coexistence with other types (#coexistence)
+  * Major revamp, so authoritative servers (other than primary
+    masters) now do not do any special ANAME processing, just
+    additional section processing.
