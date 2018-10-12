@@ -328,10 +328,35 @@ following process, for each address type:
   * Otherwise, wait until the target address record TTL has expired,
     then repeat.
 
+The following informative subsections explore the effects of this
+specification, to clarify how it can work in practice.
+
 
 ## Implications
 
-SPONG
+A zone containing ANAME records has to be a dynamic zone, similar to
+automatic DNSSEC signature maintenance.
+
+DNSSEC signatures on sibling address records are generated in the same
+way as for normal DNS UPDATEs.
+
+Sibling address records are committed to the zone and stored in
+nonvolatile storage. This allows a server to restart without delays
+due to ANAME processing.
+
+Sibling address records are served from authoritative servers with a
+fixed TTL. Normally this TTL is expected to be the same as the target
+address records' TTL; however the exact mechanism for obtaining the
+target is unspecified, so cache effects or deliberate policies might
+make the sibling TTL smaller. There is a longer discussion of TTL
+handling in {#ttls}.
+
+Secondary servers rely on zone transfers to obtain sibling address
+records, just like the rest of the zone, and serve them in the usual
+way (with (#additional) additional section processing if they support
+it). A working DNS NOTIFY [@?RFC1996] setup is necessary to avoid
+extra delays propagating updated sibling address records when they
+change.
 
 
 ## Alternatives
@@ -345,11 +370,21 @@ For instance, it is likely to be more efficient to manage the polling
 per ANAME target rather than per ANAME as specified.
 
 More radically, some existing ANAME-like implementations are based on
-a different DNS server architecture, in which the public authoritative
-servers all perform the duties of a primary master in a distributed
-manner: provisioning records from a non-DNS back-end store, refreshing
-DNSSEC signatures, and so forth. This architecture 
+a different DNS server architecture, in which a zone's published
+authoritative servers all perform the duties of a primary master in a
+distributed manner: provisioning records from a non-DNS back-end
+store, refreshing DNSSEC signatures, and so forth. This architecture
+does not use standard zone transfers, so there is no need for its
+ANAME implementation to poll the target address records to ensure that
+its secondary servers are up to date (because there are no secondary
+servers as such). Instead the authoritative servers can do ANAME
+sibling address substitution on demand.
 
+The exact mechanism for obtaining the target address records is
+unspecified; typically they will be resolved in the DNS in the usual
+way, but if an ANAME implementation has special knowledge of the
+target it can short-cut the substitution process, or use clever tricks
+such as client-depedent answers.
 
 
 # ANAME processing by resolvers {#resolver}
@@ -466,7 +501,7 @@ that the problems are particularly acute when CNAME and MX try to
 coexist.
 
 
-# On preserving TTLs
+# On preserving TTLs {#ttls}
 
 An ANAME's sibling address records are in an unusual situtation: they
 are authoritative data in the owner's zone, so from that point of view
@@ -483,7 +518,7 @@ end-user DNS caches) will be the target address record TTL plus the
 sibling address record TTL.
 
 
-# Query bunching
+## Query bunching
 
 If the times of end-user queries for a domain name are well
 distributed, then (normally) queries received by the authoritative
