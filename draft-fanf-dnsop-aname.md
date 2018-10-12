@@ -145,12 +145,12 @@ requiring secondary servers or resolvers to be upgraded.
   * The resource record definition in (#rdata) is intended to provide
     zone data portability between standards-compliant DNS servers and
     the common core functionality of existing proprietary
-    ANAME-alikes.
+    ANAME-like facilities.
 
   * The zone maintenance described in (#primary) behaves as if DNS
     UPDATE [@!RFC2136] is used to keep an ANAME's sibling address
     records in sync with the ANAME target, so it interoperates with
-    existing secondary servers and resolvers.
+    existing DNSSEC signers, secondary servers, and resolvers.
 
 This is enough to be useful by itself. However it can be less than
 optimal in certain situations, for instance when the ANAME target uses
@@ -389,7 +389,45 @@ such as client-depedent answers.
 
 # ANAME processing by resolvers {#resolver}
 
-WIBBLE
+When a resolver makes an address query in the usual way, it might
+receive a response containing ANAME information in the additional
+section, as described in (#additional). This informs the resolver that
+it MAY resolve the ANAME target address records to get answers that
+are tailored to the resolver rather than the ANAME's primary master.
+It SHOULD include the target address records in the additional section
+of its responses as described in (#additional).
+
+In order to provide tailored answers to clients that are
+ANAME-oblivious, the resolver MAY do its own sibling address record
+substitution in the following situations:
+
+  * The resolver's client queries with DO=0. (As discussed in
+    (#security-considerations), if the resolver finds it would
+    downgrade a secure answer to insecure, it MAY choose not to
+    substitute the sibling address records.)
+
+  * The resolver's client queries with DO=1 and the ANAME and sibling
+	address records are unsigned. (Note that this situation does not
+	apply when the records are signed but insecure: the resolver might
+	not be able to validate them because of a broken chain of trust,
+	but its client could have an extra trust anchor that does allow it
+	to validate them; if the resolver substitutes the sibling address
+	records they will become bogus.)
+
+In these first two cases, the resolver MAY perform ANAME sibling
+address record substitution as described in (#subst). Any edit
+performed in the final step is applied to response's answer section.
+The resolver SHOULD then perform additional section processing as
+described in (#additional).
+
+If the resolver's client is querying using an API such as
+`getaddrinfo` [@?RFC3493] that does not support DNSSEC validation, the
+resolver MAY perform ANAME sibling address record substitution as
+described in (#subst). Any edits performed in the final step are
+applied to the addresses returned by the API. (This case is for
+validating stub resolvers that query an upstream recursive server with
+DO=1, so they cannot rely on the recursive server to do ANAME
+substitution for them.)
 
 
 # IANA considerations
