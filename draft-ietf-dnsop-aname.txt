@@ -5,12 +5,12 @@
 DNS Operations                                                  T. Finch
 Internet-Draft                                   University of Cambridge
 Intended status: Standards Track                                 E. Hunt
-Expires: April 15, 2019                                              ISC
+Expires: April 16, 2019                                              ISC
                                                              P. van Dijk
                                                                 PowerDNS
                                                                  A. Eden
                                                                 DNSimple
-                                                        October 12, 2018
+                                                        October 13, 2018
 
 
                   Address-specific DNS aliases (ANAME)
@@ -39,7 +39,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on April 15, 2019.
+   This Internet-Draft will expire on April 16, 2019.
 
 Copyright Notice
 
