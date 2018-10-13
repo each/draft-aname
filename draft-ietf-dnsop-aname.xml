@@ -84,13 +84,13 @@ records prevents the use of CNAME.</t>
 by a number of DNS software vendors and service providers, using names
 such as ALIAS, ANAME, apex CNAME, CNAME flattening, and top level
 redirection. These mechanisms are proprietary, which hinders the
-ability of hostmasters to serve the same zone data from multiple
-providers, or move service between providers. None of these
-proprietary versions include a mechanism for resolvers to follow the
-redirection chain themselves.</t>
+ability of zone owners to have the same data served from multiple
+providers, to or move from one providers to another. None of these
+proprietary implementations include a mechanism for resolvers to
+follow the redirection chain themselves.</t>
 
 <section anchor="overview" title="Overview">
-<t>The core functionality of this specification allows zone
+<t>The core functionality of this mechanism allows zone
 administrators to start using ANAME records unilaterally, without
 requiring secondary servers or resolvers to be upgraded.</t>
 <t>
@@ -99,19 +99,19 @@ requiring secondary servers or resolvers to be upgraded.</t>
 zone data portability between standards-compliant DNS servers and
 the common core functionality of existing proprietary
 ANAME-like facilities.</t>
-<t>The zone maintenance described in <xref target="primary"></xref> behaves as if DNS
-UPDATE <xref target="RFC2136"></xref> is used to keep an ANAME's sibling address
-records in sync with the ANAME target, so it interoperates with
-existing DNSSEC signers, secondary servers, and resolvers.</t>
+<t>The zone maintenance mechanism described in <xref target="primary"></xref> behaves as if DNS
+UPDATE <xref target="RFC2136"></xref> were being used to keep an ANAME's sibling address
+records in sync with the ANAME target; this allows it to interoperate
+with existing DNSSEC signers, secondary servers, and resolvers.</t>
 </list>
 </t>
-<t>This is enough to be useful by itself. However it can be less than
-optimal in certain situations, for instance when the ANAME target uses
+<t>This is enough to be useful by itself. However, it can be less than
+optimal in certain situations: for instance, when the ANAME target uses
 clever tricks to provide different answers to different clients to
 improve latency or load balancing.</t>
 <t>
 <list style="symbols">
-<t>The additional section processing rules in <xref target="additional"></xref> inform
+<t>The Additional section processing rules in <xref target="additional"></xref> inform
 resolvers that an ANAME record is in play.</t>
 <t>Resolvers can use this ANAME information as described in
 <xref target="resolver"></xref> to obtain answers that are tailored to the resolver
@@ -179,15 +179,15 @@ DNAME).</t>
 authoritative servers.</t>
 <t>An ANAME target MAY resolve to address records via a chain of CNAME
 and/or ANAME records; any CNAME/ANAME chain MUST be included when
-adding target address records to a response's additional section.</t>
+adding target address records to a response's Additional section.</t>
 
 <section anchor="address-queries" title="Address queries">
 <t>When a server receives an address query for a name that has an ANAME
-record, the response's additional section:</t>
+record, the response's Additional section:</t>
 <t>
 <list style="symbols">
 <t>MUST contain the ANAME record;</t>
-<t>MAY contain the target address records that matching the query
+<t>MAY contain the target address records that match the query
 type (or the corresponding proof of nonexistence), if they are
 available and the target address RDATA fields differ from the
 sibling address RRset.</t>
@@ -201,22 +201,24 @@ is recursive and the records are not in the cache.</t>
 </section>
 
 <section anchor="aname-queries" title="ANAME queries">
-<t>There are three cases:</t>
+<t>When a server receives an query for type ANAME, there are three
+possibilities:</t>
 <t>
 <list style="symbols">
 <t>The query resolved to an ANAME record, and the server has the
 target address records; any target address records SHOULD be added
-to the additional section.</t>
+to the Additional section.</t>
 <t>The query resolved to an ANAME record, and the server does not
 have the target address records; any sibling address records
-SHOULD be added to the additional section.</t>
-<t>The query did not resolve to an ANAME record; any would-be sibling
-address records SHOULD be added to the additional section.</t>
+SHOULD be added to the Additional section.</t>
+<t>The query did not resolve to an ANAME record; any address records
+with the same owner name SHOULD be added to the Additional section
+of the NOERROR response.</t>
 </list>
 </t>
-<t>When adding address records to the additional section, the server
-SHOULD include a DNSSEC proof of nonexistence for missing address
-records if the zone is signed.</t>
+<t>When adding address records to the Additional section, if not all
+address types are present and the zone is signed, the server SHOULD
+include a DNSSEC proof of nonexistence for the missing address types.</t>
 </section>
 </section>
 
@@ -226,25 +228,25 @@ resolvers (see <xref target="resolver"></xref>), though they vary in how they ap
 edit described in the final step.</t>
 <t>The following steps MUST be performed for each address type:</t>
 <t>
-<list style="symbols">
+<list style="numbers">
 <t>Starting at the ANAME owner, follow the chain of ANAME and/or
-CNAME records as far as possible to find the ultimate target.</t>
+ CNAME records as far as possible to find the ultimate target.</t>
 <t>If a loop is detected, continue with an empty RRset, otherwise get
-the ultimate target's address records. (Ignore any sibling address
-records of intermediate ANAMEs.)</t>
+ the ultimate target's address records. (Ignore any sibling address
+ records of intermediate ANAMEs.)</t>
 <t>Stop if resolution failed. (Note that NXDOMAIN and NODATA count as
-successfully resolving an empty RRset.)</t>
+ successfully resolving an empty RRset.)</t>
 <t>Replace the owner of the target address records with the owner of
-the ANAME record. Drop any RRSIG records.</t>
+ the ANAME record. Drop any RRSIG records.</t>
 <t>Stop if this modified RRset is the same as the sibling RRset
-(ignoring any RRSIG records). The comparison MAY treat
-nearly-equal TTLs as the same.</t>
+ (ignoring any RRSIG records). The comparison MAY treat
+ nearly-equal TTLs as the same.</t>
 <t>Delete the sibling address RRset and replace it with the modified
-RRset.</t>
+ RRset.</t>
 </list>
 </t>
-<t>At this point the substituted RRset is not signed; a primary master
-will proceed to sign the sibstituted RRset, whereas resolvers can only
+<t>At this point, the substituted RRset is not signed. A primary master
+will proceed to sign the substituted RRset, whereas resolvers can only
 use the substituted RRset when an unsigned answer is appropriate. This
 is explained in more detail in the following sections.</t>
 </section>
@@ -282,7 +284,7 @@ make the sibling TTL smaller. There is a longer discussion of TTL
 handling in {#ttls}.</t>
 <t>Secondary servers rely on zone transfers to obtain sibling address
 records, just like the rest of the zone, and serve them in the usual
-way (with <xref target="additional"></xref> additional section processing if they support
+way (with <xref target="additional"></xref> Additional section processing if they support
 it). A working DNS NOTIFY <xref target="RFC1996"></xref> setup is necessary to avoid
 extra delays propagating updated sibling address records when they
 change.</t>
@@ -309,7 +311,7 @@ sibling address substitution on demand.</t>
 unspecified; typically they will be resolved in the DNS in the usual
 way, but if an ANAME implementation has special knowledge of the
 target it can short-cut the substitution process, or use clever tricks
-such as client-depedent answers.</t>
+such as client-dependant answers.</t>
 </section>
 </section>
 
@@ -319,7 +321,7 @@ receive a response containing ANAME information in the additional
 section, as described in <xref target="additional"></xref>. This informs the resolver that
 it MAY resolve the ANAME target address records to get answers that
 are tailored to the resolver rather than the ANAME's primary master.
-It SHOULD include the target address records in the additional section
+It SHOULD include the target address records in the Additional section
 of its responses as described in <xref target="additional"></xref>.</t>
 <t>In order to provide tailored answers to clients that are
 ANAME-oblivious, the resolver MAY do its own sibling address record
@@ -331,18 +333,18 @@ substitution in the following situations:</t>
 downgrade a secure answer to insecure, it MAY choose not to
 substitute the sibling address records.)</t>
 <t>The resolver's client queries with DO=1 and the ANAME and sibling
-address records are unsigned. (Note that this situation does not
-apply when the records are signed but insecure: the resolver might
-not be able to validate them because of a broken chain of trust,
-but its client could have an extra trust anchor that does allow it
-to validate them; if the resolver substitutes the sibling address
-records they will become bogus.)</t>
+address records are unsigned. (Note that this situation does not apply
+when the records are signed but insecure: the resolver might not be
+able to validate them because of a broken chain of trust, but its
+client could have an extra trust anchor that does allow it to validate
+them; if the resolver substitutes the sibling address records they will
+become bogus.)</t>
 </list>
 </t>
 <t>In these first two cases, the resolver MAY perform ANAME sibling
 address record substitution as described in <xref target="subst"></xref>. Any edit
-performed in the final step is applied to response's answer section.
-The resolver SHOULD then perform additional section processing as
+performed in the final step is applied to response's Answer section.
+The resolver SHOULD then perform Additional section processing as
 described in <xref target="additional"></xref>.</t>
 <t>If the resolver's client is querying using an API such as
 <spanx style="verb">getaddrinfo</spanx> <xref target="RFC3493"></xref> that does not support DNSSEC validation, the
@@ -395,19 +397,19 @@ target address records.</t>
 <references title="Normative References">
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2136.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml-ids/reference.I-D.ietf-dnsop-terminology-bis.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1035.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1033.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1035.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3597.xml"?>
 </references>
 <references title="Informative References">
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1996.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.0973.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1034.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2308.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.0973.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2065.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1996.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3493.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.0882.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2065.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1034.xml"?>
 </references>
 
 <section anchor="acknowledgments" title="Acknowledgments">
@@ -469,7 +471,7 @@ coexist.</t>
 </section>
 
 <section anchor="ttls" title="On preserving TTLs">
-<t>An ANAME's sibling address records are in an unusual situtation: they
+<t>An ANAME's sibling address records are in an unusual situation: they
 are authoritative data in the owner's zone, so from that point of view
 the owner has the last say over what their TTL should be; on the other
 hand, ANAMEs are supposed to act as aliases, in which case the target
@@ -488,13 +490,13 @@ servers for that domain are also well distributed. If the domain is
 popular, a recursive server will re-query for it once every TTL
 seconds, but the periodic queries from all the various recursive
 servers will not be aligned, so the queries remain well distributed.</t>
-<t>However, imagine that the TTLs of an ANAME's sibing address records
+<t>However, imagine that the TTLs of an ANAME's sibling address records
 are decremented in the same way as cache entries in recursive servers.
 Then all the recursive servers querying for the name will try to
 refresh their caches at the same time, when the TTL reaches zero. They
 will become synchronized and all the queries for the domain will be
 bunched into periodic spikes.</t>
-<t>This specification says that ANAME sibing address records have a
+<t>This specification says that ANAME sibling address records have a
 normal fixed TTL derived from (e.g. equal or nearly equal to) the
 target address records' original TTL. There is no cache-like
 decrementing TTL, so there is no bunching of queries.</t>
@@ -504,7 +506,7 @@ decrementing TTL, so there is no bunching of queries.</t>
 <t>There are two straightforward ways to get an RRset's original TTL:</t>
 <t>
 <list style="symbols">
-<t>by directly querying an authotitative server;</t>
+<t>by directly querying an authoritative server;</t>
 <t>using the original TTL field from the RRset's RRGIG record(s).</t>
 </list>
 </t>
@@ -539,7 +541,7 @@ ANAME in the chain.</t>
 </section>
 
 <section anchor="ttls-and-zone-transfers" title="TTLs and zone transfers">
-<t>When things are working properly (with secondary nameservers
+<t>When things are working properly (with secondary name servers
 responding to NOTIFY messages promptly) the authoritative servers will
 follow changes to ANAME target address records according to their
 TTLs. As a result the end-to-end TTL is unchanged from the previous
@@ -555,7 +557,7 @@ expiry time.</t>
 <list style="symbols">
 <t>Major revamp, so authoritative servers (other than primary
 masters) now do not do any special ANAME processing, just
-additional section processing.</t>
+Additional section processing.</t>
 </list>
 </t>
 </section>
