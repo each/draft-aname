@@ -1,6 +1,6 @@
 MMARK=${GOPATH}/bin/mmark
 
-DRAFT=draft-fanf-dnsop-aname
+DRAFT=draft-ietf-dnsop-aname
 
 OUT= ${DRAFT}.html ${DRAFT}.xml ${DRAFT}.txt
 
