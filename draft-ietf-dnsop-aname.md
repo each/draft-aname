@@ -131,8 +131,8 @@ by a number of DNS software vendors and service providers, using names
 such as ALIAS, ANAME, apex CNAME, CNAME flattening, and top level
 redirection. These mechanisms are proprietary, which hinders the
 ability of zone owners to have the same data served from multiple
-providers, to or move from one providers to another. None of these
-proprietary implementations include a mechanism for resolvers to
+providers, or to move from one provider to another. None of these
+proprietary implementations includes a mechanism for resolvers to
 follow the redirection chain themselves.
 
 
