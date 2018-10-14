@@ -300,7 +300,8 @@ The following steps MUST be performed for each address type:
      successfully resolving an empty RRset.)
 
   1. Replace the owner of the target address records with the owner of
-     the ANAME record. Drop any RRSIG records.
+     the ANAME record. Reduce the TTL to match the ANAME record if it
+     is greater. Drop any RRSIG records.
 
   1. Stop if this modified RRset is the same as the sibling RRset
      (ignoring any RRSIG records). The comparison MAY treat
@@ -348,10 +349,10 @@ due to ANAME processing.
 
 Sibling address records are served from authoritative servers with a
 fixed TTL. Normally this TTL is expected to be the same as the target
-address records' TTL; however the exact mechanism for obtaining the
-target is unspecified, so cache effects or deliberate policies might
-make the sibling TTL smaller. There is a longer discussion of TTL
-handling in {#ttls}.
+address records' TTL (or the ANAME TTL if that is smaller); however
+the exact mechanism for obtaining the target is unspecified, so cache
+effects or deliberate policies might make the sibling TTL smaller.
+There is a longer discussion of TTL handling in {#ttls}.
 
 Secondary servers rely on zone transfers to obtain sibling address
 records, just like the rest of the zone, and serve them in the usual
