@@ -5,12 +5,12 @@
 DNS Operations                                                  T. Finch
 Internet-Draft                                   University of Cambridge
 Intended status: Standards Track                                 E. Hunt
-Expires: April 16, 2019                                              ISC
+Expires: April 17, 2019                                              ISC
                                                              P. van Dijk
                                                                 PowerDNS
                                                                  A. Eden
                                                                 DNSimple
-                                                        October 13, 2018
+                                                        October 14, 2018
 
 
                   Address-specific DNS aliases (ANAME)
@@ -39,7 +39,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on April 16, 2019.
+   This Internet-Draft will expire on April 17, 2019.
 
 Copyright Notice
 
@@ -291,7 +291,8 @@ Table of Contents
        as successfully resolving an empty RRset.)
 
    4.  Replace the owner of the target address records with the owner of
-       the ANAME record.  Drop any RRSIG records.
+       the ANAME record.  Reduce the TTL to match the ANAME record if it
+       is greater.  Drop any RRSIG records.
 
    5.  Stop if this modified RRset is the same as the sibling RRset
        (ignoring any RRSIG records).  The comparison MAY treat nearly-
@@ -338,10 +339,10 @@ Table of Contents
 
    Sibling address records are served from authoritative servers with a
    fixed TTL.  Normally this TTL is expected to be the same as the
-   target address records' TTL; however the exact mechanism for
-   obtaining the target is unspecified, so cache effects or deliberate
-   policies might make the sibling TTL smaller.  There is a longer
-   discussion of TTL handling in {#ttls}.
+   target address records' TTL (or the ANAME TTL if that is smaller);
+   however the exact mechanism for obtaining the target is unspecified,
+   so cache effects or deliberate policies might make the sibling TTL
+   smaller.  There is a longer discussion of TTL handling in {#ttls}.
 
    Secondary servers rely on zone transfers to obtain sibling address
    records, just like the rest of the zone, and serve them in the usual

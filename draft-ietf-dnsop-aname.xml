@@ -32,7 +32,7 @@
 </postal><email>anthony.eden@dnsimple.com</email>
 <uri>https://dnsimple.com/</uri>
 </address></author>
-<date year="2018" month="October" day="13"></date>
+<date year="2018" month="October" day="14"></date>
 <area>Operations and Management</area><workgroup>DNS Operations</workgroup><keyword>DNS</keyword>
 <keyword>RR</keyword>
 <keyword>ANAME</keyword>
@@ -237,7 +237,8 @@ edit described in the final step.</t>
 <t>Stop if resolution failed. (Note that NXDOMAIN and NODATA count as
  successfully resolving an empty RRset.)</t>
 <t>Replace the owner of the target address records with the owner of
- the ANAME record. Drop any RRSIG records.</t>
+ the ANAME record. Reduce the TTL to match the ANAME record if it
+ is greater. Drop any RRSIG records.</t>
 <t>Stop if this modified RRset is the same as the sibling RRset
  (ignoring any RRSIG records). The comparison MAY treat
  nearly-equal TTLs as the same.</t>
@@ -278,10 +279,10 @@ nonvolatile storage. This allows a server to restart without delays
 due to ANAME processing.</t>
 <t>Sibling address records are served from authoritative servers with a
 fixed TTL. Normally this TTL is expected to be the same as the target
-address records' TTL; however the exact mechanism for obtaining the
-target is unspecified, so cache effects or deliberate policies might
-make the sibling TTL smaller. There is a longer discussion of TTL
-handling in {#ttls}.</t>
+address records' TTL (or the ANAME TTL if that is smaller); however
+the exact mechanism for obtaining the target is unspecified, so cache
+effects or deliberate policies might make the sibling TTL smaller.
+There is a longer discussion of TTL handling in {#ttls}.</t>
 <t>Secondary servers rely on zone transfers to obtain sibling address
 records, just like the rest of the zone, and serve them in the usual
 way (with <xref target="additional"></xref> Additional section processing if they support
@@ -395,21 +396,21 @@ target address records.</t>
 
 <back>
 <references title="Normative References">
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1033.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1035.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2136.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml-ids/reference.I-D.ietf-dnsop-terminology-bis.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1035.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3597.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml-ids/reference.I-D.ietf-dnsop-terminology-bis.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1033.xml"?>
 </references>
 <references title="Informative References">
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3493.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1034.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2308.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2065.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1996.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.0882.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.0973.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3493.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2065.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1996.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1034.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2308.xml"?>
 </references>
 
 <section anchor="acknowledgments" title="Acknowledgments">

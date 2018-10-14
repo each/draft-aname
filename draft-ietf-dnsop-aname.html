@@ -410,7 +410,7 @@
 
   <meta name="dct.creator" content="Finch, T., Hunt, E., van Dijk, P., and A. Eden" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-dnsop-aname-02" />
-  <meta name="dct.issued" scheme="ISO8601" content="2018-10-13" />
+  <meta name="dct.issued" scheme="ISO8601" content="2018-10-14" />
   <meta name="dct.abstract" content="This document defines the &quot;ANAME&quot; DNS RR type, to provide similar functionality to CNAME, but only for type A and AAAA queries. Unlike CNAME, an ANAME can coexist with other record types. The ANAME RR allows zone owners to make an apex domain name into an alias in a standards compliant manner." />
   <meta name="description" content="This document defines the &quot;ANAME&quot; DNS RR type, to provide similar functionality to CNAME, but only for type A and AAAA queries. Unlike CNAME, an ANAME can coexist with other record types. The ANAME RR allows zone owners to make an apex domain name into an alias in a standards compliant manner." />
 
@@ -434,7 +434,7 @@
 <td class="right">E. Hunt</td>
 </tr>
 <tr>
-<td class="left">Expires: April 16, 2019</td>
+<td class="left">Expires: April 17, 2019</td>
 <td class="right">ISC</td>
 </tr>
 <tr>
@@ -455,7 +455,7 @@
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">October 13, 2018</td>
+<td class="right">October 14, 2018</td>
 </tr>
 
     	
@@ -471,7 +471,7 @@
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on April 16, 2019.</p>
+<p>This Internet-Draft will expire on April 17, 2019.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2018 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -644,7 +644,7 @@
 <li>Starting at the ANAME owner, follow the chain of ANAME and/or CNAME records as far as possible to find the ultimate target.</li>
 <li>If a loop is detected, continue with an empty RRset, otherwise get the ultimate target's address records. (Ignore any sibling address records of intermediate ANAMEs.)</li>
 <li>Stop if resolution failed. (Note that NXDOMAIN and NODATA count as successfully resolving an empty RRset.)</li>
-<li>Replace the owner of the target address records with the owner of the ANAME record. Drop any RRSIG records.</li>
+<li>Replace the owner of the target address records with the owner of the ANAME record. Reduce the TTL to match the ANAME record if it is greater. Drop any RRSIG records.</li>
 <li>Stop if this modified RRset is the same as the sibling RRset (ignoring any RRSIG records). The comparison MAY treat nearly-equal TTLs as the same.</li>
 <li>Delete the sibling address RRset and replace it with the modified RRset.</li>
 </ol>
@@ -671,7 +671,7 @@
 <p id="rfc.section.5.1.p.1">A zone containing ANAME records has to be a dynamic zone, similar to automatic DNSSEC signature maintenance.</p>
 <p id="rfc.section.5.1.p.2">DNSSEC signatures on sibling address records are generated in the same way as for normal DNS UPDATEs.</p>
 <p id="rfc.section.5.1.p.3">Sibling address records are committed to the zone and stored in nonvolatile storage. This allows a server to restart without delays due to ANAME processing.</p>
-<p id="rfc.section.5.1.p.4">Sibling address records are served from authoritative servers with a fixed TTL. Normally this TTL is expected to be the same as the target address records' TTL; however the exact mechanism for obtaining the target is unspecified, so cache effects or deliberate policies might make the sibling TTL smaller. There is a longer discussion of TTL handling in {#ttls}.</p>
+<p id="rfc.section.5.1.p.4">Sibling address records are served from authoritative servers with a fixed TTL. Normally this TTL is expected to be the same as the target address records' TTL (or the ANAME TTL if that is smaller); however the exact mechanism for obtaining the target is unspecified, so cache effects or deliberate policies might make the sibling TTL smaller.  There is a longer discussion of TTL handling in {#ttls}.</p>
 <p id="rfc.section.5.1.p.5">Secondary servers rely on zone transfers to obtain sibling address records, just like the rest of the zone, and serve them in the usual way (with <a href="#additional" class="xref">Section 3</a> Additional section processing if they support it). A working DNS NOTIFY <a href="#RFC1996" class="xref">[RFC1996]</a> setup is necessary to avoid extra delays propagating updated sibling address records when they change.</p>
 <h1 id="rfc.section.5.2">
 <a href="#rfc.section.5.2">5.2.</a> <a href="#alternatives" id="alternatives">Alternatives</a>
