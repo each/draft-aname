@@ -644,6 +644,9 @@ If NOTIFY doesn't work, the TTLs can be stretched by the zone's SOA
 refresh timer. More serious breakage can stretch them up to the zone
 expiry time.
 
+A highly dynamic ANAME processing zone should expect an increase in
+the number of zone transfers.
+
 
 # Changes since the last revision
 
