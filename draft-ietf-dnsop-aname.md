@@ -226,8 +226,8 @@ that restricts the types with which it can itself coexist.
 
 Like other types, ANAME records can coexist with DNAME records at the
 same owner name; in fact, the two can be used cooperatively to
-redirect both the owner name (via ANAME) and everything under it (via
-DNAME).
+redirect both the owner name address records (via ANAME) and everything
+under it (via DNAME).
 
 
 # Additional section processing {#additional}
