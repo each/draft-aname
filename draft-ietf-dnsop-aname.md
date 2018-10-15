@@ -647,6 +647,15 @@ expiry time.
 A highly dynamic ANAME processing zone should expect an increase in
 the number of zone transfers.
 
+## Secondary servers
+
+While this document does not mention ANAME support at secondary servers
+the ANAME process does not prevent secondary servers to do ANAME
+processing. Secondary servers however must not alter the zone they receive
+from their primaries if they transfer the zone to another server and
+should consider that the sibling address records of an ANAME may already
+be substituted.
+
 
 # Changes since the last revision
 
