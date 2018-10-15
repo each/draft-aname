@@ -258,6 +258,12 @@ not be available if the server is authoritative and does not include
 out-of-zone or non-authoritative data in its answers, or if the server
 is recursive and the records are not in the cache.
 
+[MM: Discuss what should be in the additional section: ANAME makes sense,
+but differs from CNAME logic (where the CNAME is in the answer section).
+Additional target records that match the query type in my opinion should
+go in the answer section. Additional target address records that do not match
+the query type can go in the additional section].
+
 
 ## ANAME queries
 
