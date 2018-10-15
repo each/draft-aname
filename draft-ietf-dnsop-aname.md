@@ -564,6 +564,9 @@ The conclusion of the following subsections is that the end-to-end TTL
 end-user DNS caches) will be the target address record TTL plus the
 sibling address record TTL.
 
+[MM: Discuss: I think it should be just the ANAME record TTL perhaps
+the minimum of ANAME and sibling address RRset TTL. We should provide
+some guidance on TTL settings for ANAME).
 
 ## Query bunching
 
