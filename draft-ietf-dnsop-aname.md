@@ -217,7 +217,7 @@ RRset MUST NOT contain more than one resource record.
 
 An ANAME's sibling address records are under the control of ANAME
 processing (see (#primary)) and are not first-class records in their
-own right. They MAY exist in zone files, but they will be altered
+own right. They MAY exist in zone files, but they may be altered
 by ANAME processing.
 
 ANAME records MAY freely coexist at the same owner name with other RR
