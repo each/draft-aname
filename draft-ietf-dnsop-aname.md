@@ -653,18 +653,8 @@ expiry time.
 A highly dynamic ANAME processing zone should expect an increase in
 the number of zone transfers.
 
-## Secondary servers
-
-While this document does not mention ANAME support at secondary servers
-the ANAME process does not prevent secondary servers to do ANAME
-processing. Secondary servers however must not alter the zone they receive
-from their primaries if they transfer the zone to another server and
-should consider that the sibling address records of an ANAME can already
-be substituted.
-
 
 # Answer vs Additional sections
-
 
 [MM: Discuss what should be in the additional section: ANAME makes
 sense, but differs from CNAME logic (where the CNAME is in the answer
@@ -677,6 +667,16 @@ section].
 problems if we put unexpected records in the answer section, so I said
 everything should go in additional. We'll expand this appendix to
 explain the rationale.]
+
+
+# Secondary servers
+
+While this document does not mention ANAME support at secondary servers
+the ANAME process does not prevent secondary servers to do ANAME
+processing. Secondary servers however must not alter the zone they receive
+from their primaries if they transfer the zone to another server and
+should consider that the sibling address records of an ANAME can already
+be substituted.
 
 
 # Changes since the last revision
