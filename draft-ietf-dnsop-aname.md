@@ -499,7 +499,7 @@ using "ALIAS" records, which are expanded by the primary server and
 transfered as address records to secondaries.
 
 [TODO: Add discussion of DNSimple, DNS Made Easy, EasyDNS, Cloudflare, Amazon,
-and Akamai.]
+Dyn, and Akamai.]
 
 
 # Historical note {#history}
