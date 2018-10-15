@@ -312,8 +312,10 @@ The following steps MUST be performed for each address type:
      (ignoring any RRSIG records). The comparison MAY treat
      nearly-equal TTLs as the same.
 
-  1. Delete the sibling address RRset and replace it with the modified
-     RRset.
+  1. If the resolution returned a positive response (NOERROR and ANCOUNT > 0),
+     delete the sibling address RRset and replace it with the modified
+     RRset. If resolution resulted in NXDOMAIN or NODATA keep the sibling
+     RRset in the response.
 
 At this point, the substituted RRset is not signed. A primary master
 will proceed to sign the substituted RRset, whereas resolvers can only
