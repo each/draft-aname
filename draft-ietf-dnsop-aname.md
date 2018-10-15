@@ -91,7 +91,7 @@ standards compliant manner.
 
 # Introduction
 
-It is often desirable to provide web sites (and other services) at a
+It may be desirable to provide web sites (and other services) at a
 bare domain name (such as `example.com`) as well as a service-specific
 subdomain (`www.example.com`).
 
