@@ -176,6 +176,12 @@ An "address record" is a DNS resource record whose type is A or AAAA.
 These are referred to as "address types". "Address query" refers to a
 DNS query for any address type.
 
+When talking about "address records" we mean the entire RRset,
+including owner name and TTL. We treat missing address records (i.e.
+NXDOMAIN or NODATA) the same successfully resolving as a set of zero
+address records, and distinct from "failure" which covers error
+responses such as SERVFAIL or REFUSED.
+
 The "sibling address records" of an ANAME record are the address
 records at the same owner name as the ANAME, which are subject to
 ANAME substitution.
