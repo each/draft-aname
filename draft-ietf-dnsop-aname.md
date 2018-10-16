@@ -352,6 +352,10 @@ Sibling address records are committed to the zone and stored in
 nonvolatile storage. This allows a server to restart without delays
 due to ANAME processing.
 
+A zone containing ANAME records that point to frequently-changing
+targets will itself change frequently, which can increase the number
+of zone transfers.
+
 Sibling address records are served from authoritative servers with a
 fixed TTL. Normally this TTL is expected to be the same as the target
 address records' TTL (or the ANAME TTL if that is smaller); however
@@ -645,8 +649,6 @@ If NOTIFY doesn't work, the TTLs can be stretched by the zone's SOA
 refresh timer. More serious breakage can stretch them up to the zone
 expiry time.
 
-A highly dynamic ANAME processing zone should expect an increase in
-the number of zone transfers.
 
 
 # Answer vs Additional sections
