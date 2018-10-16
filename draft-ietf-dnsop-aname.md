@@ -671,12 +671,21 @@ explain the rationale.]
 
 # Secondary servers
 
-While this document does not mention ANAME support at secondary servers
+[MM: While this document does not mention ANAME support at secondary servers
 the ANAME process does not prevent secondary servers to do ANAME
 processing. Secondary servers however must not alter the zone they receive
 from their primaries if they transfer the zone to another server and
 should consider that the sibling address records of an ANAME can already
-be substituted.
+be substituted.]
+
+[TF: From the point of view of this draft, this kind of secondary is
+actually a primary master (since it is altering the contents of the
+zone) in a multi-primary server architecture that happens to use zone
+transfers as part of its back-end provisioning system replicaiton.
+Kind of by analogy to cases where zone transfers are used within a
+primary master system that contains separate servers for database ->
+cleartext zone and for DNSSEC signing. So this kind of setup is
+covered by the magic "as if".]
 
 
 # Changes since the last revision
