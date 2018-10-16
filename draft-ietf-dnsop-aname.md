@@ -567,6 +567,8 @@ sibling address record TTL.
 the minimum of ANAME and sibling address RRset TTL. We should provide
 some guidance on TTL settings for ANAME).
 
+[TF: see issue #30]
+
 ## Query bunching
 
 If the times of end-user queries for a domain name are well
