@@ -264,13 +264,6 @@ not be available if the server is authoritative and does not include
 out-of-zone or non-authoritative data in its answers, or if the server
 is recursive and the records are not in the cache.
 
-[MM: Discuss what should be in the additional section: ANAME makes sense,
-but differs from CNAME logic (where the CNAME is in the answer section).
-Additional target records that match the query type in my opinion should
-go in the answer section. Additional target address records that do not match
-the query type can go in the additional section].
-
-
 ## ANAME queries
 
 When a server receives an query for type ANAME, there are three
@@ -661,6 +654,22 @@ processing. Secondary servers however must not alter the zone they receive
 from their primaries if they transfer the zone to another server and
 should consider that the sibling address records of an ANAME can already
 be substituted.
+
+
+# Answer vs Additional sections
+
+
+[MM: Discuss what should be in the additional section: ANAME makes
+sense, but differs from CNAME logic (where the CNAME is in the answer
+section). Additional target records that match the query type in my
+opinion should go in the answer section. Additional target address
+records that do not match the query type can go in the additional
+section].
+
+[TF: from experience with DNAME I think there's a risk of interop
+problems if we put unexpected records in the answer section, so I said
+everything should go in additional. We'll expand this appendix to
+explain the rationale.]
 
 
 # Changes since the last revision
