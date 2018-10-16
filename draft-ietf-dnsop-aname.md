@@ -317,6 +317,11 @@ The following steps MUST be performed for each address type:
      RRset. If resolution resulted in NXDOMAIN or NODATA keep the sibling
      RRset in the response.
 
+	[TF: this is on the discuss branch because this is likely to lead
+    to zombie address records - there's no way with the UPDATE
+    semantics to tell the difference between fallback records and old
+    records copied from the target.]
+
 At this point, the substituted RRset is not signed. A primary master
 will proceed to sign the substituted RRset, whereas resolvers can only
 use the substituted RRset when an unsigned answer is appropriate. This
