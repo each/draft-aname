@@ -91,7 +91,7 @@ standards compliant manner.
 
 # Introduction
 
-It may be desirable to provide web sites (and other services) at a
+It can be desirable to provide web sites (and other services) at a
 bare domain name (such as `example.com`) as well as a service-specific
 subdomain (`www.example.com`).
 
@@ -217,8 +217,8 @@ RRset MUST NOT contain more than one resource record.
 
 An ANAME's sibling address records are under the control of ANAME
 processing (see (#primary)) and are not first-class records in their
-own right. They MAY exist in zone files, but they may be altered
-by ANAME processing.
+own right. They MAY exist in zone files, but they can subsequently be
+altered by ANAME processing.
 
 ANAME records MAY freely coexist at the same owner name with other RR
 types, except they MUST NOT coexist with CNAME or any other RR type
@@ -445,7 +445,7 @@ IANA is requested to assign a DNS RR TYPE value for ANAME resource
 records under the "Resource Record (RR) TYPEs" subregistry under the
 "Domain Name System (DNS) Parameters" registry.
 
-IANA may wish to consider the creation of a registry of address types;
+IANA might wish to consider the creation of a registry of address types;
 addition of new types to such a registry would then implicitly update
 this specification.
 
@@ -454,11 +454,11 @@ this specification.
 
 When a primary master updates an ANAME's sibling address records to
 match its target address records, it is uses its own best information
-as to the correct answer. The updated records may be signed by the
+as to the correct answer. The updated records might be signed by the
 primary master, but that is not a guarantee of the actual correctness
 of the answer. This can have the effect of promoting an insecure
 response from the ANAME \<target\> to a signed response from the
-\<owner\>, which may then appear to clients to be more trustworthy
+\<owner\>, which can then appear to clients to be more trustworthy
 than it should. To mitigate harm from this, DNSSEC validation SHOULD
 be used when resolving the ANAME \<target\>. Primary masters MAY
 refuse to substitute ANAME sibling address records unless the
