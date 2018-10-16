@@ -392,6 +392,13 @@ its secondary servers are up to date (because there are no secondary
 servers as such). Instead the authoritative servers can do ANAME
 sibling address substitution on demand.
 
+There are other variant architectures which use zone transfers within
+the provisioning system, but where the authoritative servers are able
+to independently vary the zone contents. They can conform to this
+specification provided their behaviour is consistent with it: unusual
+behaviour can appear "as if" there were a rapidly updating zone or
+multiple primary masters, etc.
+
 The exact mechanism for obtaining the target address records is
 unspecified; typically they will be resolved in the DNS in the usual
 way, but if an ANAME implementation has special knowledge of the
