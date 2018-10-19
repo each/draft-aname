@@ -1,79 +1,79 @@
 %%%
-title			= "Address-specific DNS aliases (ANAME)"
-abbrev			= "ANAME"
-workgroup		= "DNS Operations"
-area			= "Operations and Management"
-submissiontype	= "IETF"
-ipr				= "trust200902"
-date			= 2018-10-14T09:00:06Z
-keyword			= [
-	"DNS",
-	"RR",
-	"ANAME",
-	"CNAME",
-	"apex",
+title           = "Address-specific DNS aliases (ANAME)"
+abbrev          = "ANAME"
+workgroup       = "DNS Operations"
+area            = "Operations and Management"
+submissiontype  = "IETF"
+ipr             = "trust200902"
+date            = 2018-10-14T09:00:06Z
+keyword         = [
+    "DNS",
+    "RR",
+    "ANAME",
+    "CNAME",
+    "apex",
 ]
 
 [seriesInfo]
-name			= "Internet-Draft"
-value			= "draft-ietf-dnsop-aname-02"
-status			= "standard"
+name            = "Internet-Draft"
+value           = "draft-ietf-dnsop-aname-02"
+status          = "standard"
 
 [[author]]
-initials		= "T."
-surname			= "Finch"
-fullname		= "Tony Finch"
-organization	= "University of Cambridge"
+initials        = "T."
+surname         = "Finch"
+fullname        = "Tony Finch"
+organization    = "University of Cambridge"
  [author.address]
- email			= "dot@dotat.at"
+ email          = "dot@dotat.at"
   [author.address.postal]
-  streets		= [
+  streets       = [
     "University Information Services",
-	"Roger Needham Building",
-	"7 JJ Thomson Avenue",
+    "Roger Needham Building",
+    "7 JJ Thomson Avenue",
   ]
-  city			= "Cambridge"
-  country		= "England"
-  code			= "CB3 0RB"
+  city          = "Cambridge"
+  country       = "England"
+  code          = "CB3 0RB"
 
 [[author]]
-initials		= "E."
-surname			= "Hunt"
-fullname		= "Evan Hunt"
-organization	= "ISC"
+initials        = "E."
+surname         = "Hunt"
+fullname        = "Evan Hunt"
+organization    = "ISC"
  [author.address]
- email			= "each@isc.org"
+ email          = "each@isc.org"
   [author.address.postal]
-  street		= "950 Charter St"
-  city			= "Redwood City"
-  region		= "CA"
-  code			= "94063"
-  country		= "USA"
+  street        = "950 Charter St"
+  city          = "Redwood City"
+  region        = "CA"
+  code          = "94063"
+  country       = "USA"
 
 [[author]]
-initials		= "P.D."
-surname			= "van Dijk"
-fullname		= "Peter van Dijk"
-organization	= "PowerDNS.COM B.V."
-abbrev			= "PowerDNS"
+initials        = "P.D."
+surname         = "van Dijk"
+fullname        = "Peter van Dijk"
+organization    = "PowerDNS.COM B.V."
+abbrev          = "PowerDNS"
  [author.address]
- email			= "peter.van.dijk@powerdns.com"
+ email          = "peter.van.dijk@powerdns.com"
   [author.address.postal]
-  city			= "Den Haag"
-  country		= "The Netherlands"
+  city          = "Den Haag"
+  country       = "The Netherlands"
 
 [[author]]
-initials		= "A."
-surname			= "Eden"
-fullname		= "Anthony Eden"
-organization	= "DNSimple"
+initials        = "A."
+surname         = "Eden"
+fullname        = "Anthony Eden"
+organization    = "DNSimple"
  [author.address]
- email			= "anthony.eden@dnsimple.com"
- uri			= "https://dnsimple.com/"
+ email          = "anthony.eden@dnsimple.com"
+ uri            = "https://dnsimple.com/"
   [author.address.postal]
-  city			= "Boston"
-  region		= "MA"
-  code			= "USA"
+  city          = "Boston"
+  region        = "MA"
+  code          = "USA"
 
 %%%
 
@@ -294,26 +294,26 @@ edit described in the final step.
 
 The following steps MUST be performed for each address type:
 
-  1. Starting at the ANAME owner, follow the chain of ANAME and/or
-     CNAME records as far as possible to find the ultimate target.
+ 1. Starting at the ANAME owner, follow the chain of ANAME and/or
+    CNAME records as far as possible to find the ultimate target.
 
-  1. If a loop is detected, continue with an empty RRset, otherwise get
-     the ultimate target's address records. (Ignore any sibling address
-     records of intermediate ANAMEs.)
+ 1. If a loop is detected, continue with an empty RRset, otherwise get
+    the ultimate target's address records. (Ignore any sibling address
+    records of intermediate ANAMEs.)
 
-  1. Stop if resolution failed. (Note that NXDOMAIN and NODATA count as
-     successfully resolving an empty RRset.)
+ 1. Stop if resolution failed. (Note that NXDOMAIN and NODATA count as
+    successfully resolving an empty RRset.)
 
-  1. Replace the owner of the target address records with the owner of
-     the ANAME record. Reduce the TTL to match the ANAME record if it
-     is greater. Drop any RRSIG records.
+ 1. Replace the owner of the target address records with the owner of
+    the ANAME record. Reduce the TTL to match the ANAME record if it
+    is greater. Drop any RRSIG records.
 
-  1. Stop if this modified RRset is the same as the sibling RRset
-     (ignoring any RRSIG records). The comparison MAY treat
-     nearly-equal TTLs as the same.
+ 1. Stop if this modified RRset is the same as the sibling RRset
+    (ignoring any RRSIG records). The comparison MAY treat
+    nearly-equal TTLs as the same.
 
-  1. Delete the sibling address RRset and replace it with the modified
-     RRset.
+ 1. Delete the sibling address RRset and replace it with the modified
+    RRset.
 
 At this point, the substituted RRset is not signed. A primary master
 will proceed to sign the substituted RRset, whereas resolvers can only
