@@ -32,7 +32,7 @@
 </postal><email>anthony.eden@dnsimple.com</email>
 <uri>https://dnsimple.com/</uri>
 </address></author>
-<date year="2018" month="October" day="14"></date>
+<date year="2018" month="October" day="19"></date>
 <area>Operations and Management</area><workgroup>DNS Operations</workgroup><keyword>DNS</keyword>
 <keyword>RR</keyword>
 <keyword>ANAME</keyword>
@@ -51,7 +51,7 @@ standards compliant manner.</t>
 <middle>
 
 <section anchor="introduction" title="Introduction">
-<t>It is often desirable to provide web sites (and other services) at a
+<t>It can be desirable to provide web sites (and other services) at a
 bare domain name (such as <spanx style="verb">example.com</spanx>) as well as a service-specific
 subdomain (<spanx style="verb">www.example.com</spanx>).</t>
 <t>If the web site is hosted by a third-party provider, the ideal way to
@@ -128,6 +128,11 @@ will help ANAME to work better the more widely it is deployed.</t>
 <t>An &quot;address record&quot; is a DNS resource record whose type is A or AAAA.
 These are referred to as &quot;address types&quot;. &quot;Address query&quot; refers to a
 DNS query for any address type.</t>
+<t>When talking about &quot;address records&quot; we mean the entire RRset,
+including owner name and TTL. We treat missing address records (i.e.
+NXDOMAIN or NODATA) the same successfully resolving as a set of zero
+address records, and distinct from &quot;failure&quot; which covers error
+responses such as SERVFAIL or REFUSED.</t>
 <t>The &quot;sibling address records&quot; of an ANAME record are the address
 records at the same owner name as the ANAME, which are subject to
 ANAME substitution.</t>
@@ -162,15 +167,15 @@ name compression is not permitted in ANAME RDATA, per <xref target="RFC3597"></x
 RRset MUST NOT contain more than one resource record.</t>
 <t>An ANAME's sibling address records are under the control of ANAME
 processing (see <xref target="primary"></xref>) and are not first-class records in their
-own right. They MAY exist in zone files, but they will be altered
-by ANAME processing.</t>
+own right. They MAY exist in zone files, but they can subsequently be
+altered by ANAME processing.</t>
 <t>ANAME records MAY freely coexist at the same owner name with other RR
 types, except they MUST NOT coexist with CNAME or any other RR type
 that restricts the types with which it can itself coexist.</t>
 <t>Like other types, ANAME records can coexist with DNAME records at the
 same owner name; in fact, the two can be used cooperatively to
-redirect both the owner name (via ANAME) and everything under it (via
-DNAME).</t>
+redirect both the owner name address records (via ANAME) and everything
+under it (via DNAME).</t>
 </section>
 </section>
 
@@ -230,20 +235,20 @@ edit described in the final step.</t>
 <t>
 <list style="numbers">
 <t>Starting at the ANAME owner, follow the chain of ANAME and/or
- CNAME records as far as possible to find the ultimate target.</t>
+CNAME records as far as possible to find the ultimate target.</t>
 <t>If a loop is detected, continue with an empty RRset, otherwise get
- the ultimate target's address records. (Ignore any sibling address
- records of intermediate ANAMEs.)</t>
+the ultimate target's address records. (Ignore any sibling address
+records of intermediate ANAMEs.)</t>
 <t>Stop if resolution failed. (Note that NXDOMAIN and NODATA count as
- successfully resolving an empty RRset.)</t>
+successfully resolving an empty RRset.)</t>
 <t>Replace the owner of the target address records with the owner of
- the ANAME record. Reduce the TTL to match the ANAME record if it
- is greater. Drop any RRSIG records.</t>
+the ANAME record. Reduce the TTL to match the ANAME record if it
+is greater. Drop any RRSIG records.</t>
 <t>Stop if this modified RRset is the same as the sibling RRset
- (ignoring any RRSIG records). The comparison MAY treat
- nearly-equal TTLs as the same.</t>
+(ignoring any RRSIG records). The comparison MAY treat
+nearly-equal TTLs as the same.</t>
 <t>Delete the sibling address RRset and replace it with the modified
- RRset.</t>
+RRset.</t>
 </list>
 </t>
 <t>At this point, the substituted RRset is not signed. A primary master
@@ -277,6 +282,9 @@ way as for normal DNS UPDATEs.</t>
 <t>Sibling address records are committed to the zone and stored in
 nonvolatile storage. This allows a server to restart without delays
 due to ANAME processing.</t>
+<t>A zone containing ANAME records that point to frequently-changing
+targets will itself change frequently, which can increase the number
+of zone transfers.</t>
 <t>Sibling address records are served from authoritative servers with a
 fixed TTL. Normally this TTL is expected to be the same as the target
 address records' TTL (or the ANAME TTL if that is smaller); however
@@ -308,6 +316,12 @@ ANAME implementation to poll the target address records to ensure that
 its secondary servers are up to date (because there are no secondary
 servers as such). Instead the authoritative servers can do ANAME
 sibling address substitution on demand.</t>
+<t>There are other variant architectures which use zone transfers within
+the provisioning system, but where the authoritative servers are able
+to independently vary the zone contents. They can conform to this
+specification provided their behaviour is consistent with it: unusual
+behaviour can appear &quot;as if&quot; there were a rapidly updating zone or
+multiple primary masters, etc.</t>
 <t>The exact mechanism for obtaining the target address records is
 unspecified; typically they will be resolved in the DNS in the usual
 way, but if an ANAME implementation has special knowledge of the
@@ -361,7 +375,7 @@ substitution for them.)</t>
 <t>IANA is requested to assign a DNS RR TYPE value for ANAME resource
 records under the &quot;Resource Record (RR) TYPEs&quot; subregistry under the
 &quot;Domain Name System (DNS) Parameters&quot; registry.</t>
-<t>IANA may wish to consider the creation of a registry of address types;
+<t>IANA might wish to consider the creation of a registry of address types;
 addition of new types to such a registry would then implicitly update
 this specification.</t>
 </section>
@@ -369,11 +383,11 @@ this specification.</t>
 <section anchor="security-considerations" title="Security considerations">
 <t>When a primary master updates an ANAME's sibling address records to
 match its target address records, it is uses its own best information
-as to the correct answer. The updated records may be signed by the
+as to the correct answer. The updated records might be signed by the
 primary master, but that is not a guarantee of the actual correctness
 of the answer. This can have the effect of promoting an insecure
 response from the ANAME &lt;target&gt; to a signed response from the
-&lt;owner&gt;, which may then appear to clients to be more trustworthy
+&lt;owner&gt;, which can then appear to clients to be more trustworthy
 than it should. To mitigate harm from this, DNSSEC validation SHOULD
 be used when resolving the ANAME &lt;target&gt;. Primary masters MAY
 refuse to substitute ANAME sibling address records unless the
@@ -397,19 +411,19 @@ target address records.</t>
 <back>
 <references title="Normative References">
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2136.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml-ids/reference.I-D.ietf-dnsop-terminology-bis.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1033.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1035.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3597.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml-ids/reference.I-D.ietf-dnsop-terminology-bis.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1033.xml"?>
 </references>
 <references title="Informative References">
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.0882.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.0973.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3493.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1034.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2065.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1996.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1034.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3493.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.0882.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.0973.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2308.xml"?>
 </references>
 
@@ -426,7 +440,7 @@ discussion and feedback.</t>
 using &quot;ALIAS&quot; records, which are expanded by the primary server and
 transfered as address records to secondaries.</t>
 <t>[TODO: Add discussion of DNSimple, DNS Made Easy, EasyDNS, Cloudflare, Amazon,
-and Akamai.]</t>
+Dyn, and Akamai.]</t>
 </section>
 
 <section anchor="history" title="Historical note">
@@ -483,6 +497,10 @@ preserve the target address record TTLs.</t>
 (from the authoritative servers for the target address records to
 end-user DNS caches) will be the target address record TTL plus the
 sibling address record TTL.</t>
+<t>[MM: Discuss: I think it should be just the ANAME record TTL perhaps
+the minimum of ANAME and sibling address RRset TTL. We should provide
+some guidance on TTL settings for ANAME).</t>
+<t>[TF: see issue #30]</t>
 
 <section anchor="query-bunching" title="Query bunching">
 <t>If the times of end-user queries for a domain name are well
@@ -553,10 +571,26 @@ expiry time.</t>
 </section>
 </section>
 
+<section anchor="answer-vs-additional-sections" title="Answer vs Additional sections">
+<t>[MM: Discuss what should be in the additional section: ANAME makes
+sense, but differs from CNAME logic (where the CNAME is in the answer
+section). Additional target records that match the query type in my
+opinion should go in the answer section. Additional target address
+records that do not match the query type can go in the additional
+section].</t>
+<t>[TF: from experience with DNAME I think there's a risk of interop
+problems if we put unexpected records in the answer section, so I said
+everything should go in additional. We'll expand this appendix to
+explain the rationale.]</t>
+</section>
+
 <section anchor="changes-since-the-last-revision" title="Changes since the last revision">
+<t>[This section is to be removed before publication as an RFC.]</t>
+<t>The full history of this draft and its issue tracker can be found at
+<eref target="https://github.com/each/draft-aname">https://github.com/each/draft-aname</eref></t>
 <t>
 <list style="symbols">
-<t>Major revamp, so authoritative servers (other than primary
+<t><spanx style="verb">-02</spanx>: Major revamp, so authoritative servers (other than primary
 masters) now do not do any special ANAME processing, just
 Additional section processing.</t>
 </list>
