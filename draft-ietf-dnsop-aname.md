@@ -151,8 +151,8 @@ requiring secondary servers or resolvers to be upgraded.
     records in sync with the ANAME target; this allows it to interoperate
     with existing DNSSEC signers, secondary servers, and resolvers.
 
-This is enough to be useful by itself. However, it can be less than
-optimal in certain situations: for instance, when the ANAME target uses
+This definition is enough to be useful by itself. However, it can be less
+than optimal in certain situations: for instance, when the ANAME target uses
 clever tricks to provide different answers to different clients to
 improve latency or load balancing.
 
