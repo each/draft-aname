@@ -101,17 +101,16 @@ third party provider retains control over the mapping from names to IP
 address(es). It is now common for name-to-address mappings to be
 highly dynamic, dependent on client location, server load, etc.
 
-However, CNAME records cannot coexist with other records. (The reason
-why is explored in (#history)). This means they cannot appear at a
-zone apex (such as `example.com`) because of the SOA, NS, and other
-records that have to be present there. CNAME records can also conflict
-at subdomains, for example if `department.example.edu` has separately
-hosted mail and web servers.
+However, CNAME records cannot coexist with other records with the same
+owner name. (The reason why is explored in (#history)). This restriction
+means they cannot appear at a zone apex (such as `example.com`) because of
+the SOA, NS, and other records that have to be present there. CNAME records
+can also conflict at subdomains, for example, if `department.example.edu`
+has separately hosted mail and web servers.
 
 Redirecting website lookups to an alternate domain name via SRV or URI
 resource records would be an effective solution from the DNS point of
-view, but to date this approach has not been accepted by browser
-implementations.
+view, but to date, browser vendors have not accepted this approach.
 
 As a result, the only widely supported and standards-compliant way to
 publish a web site at a bare domain is to place A and/or AAAA records
@@ -124,14 +123,14 @@ record are automatically copied from and kept in sync with the ANAME
 target's address records. The ANAME record can be present at any DNS
 node, and can coexist with most other RR types, enabling it to be
 present at a zone apex, or any other name where the presence of other
-records prevents the use of CNAME.
+records prevent the use of a CNAME record.
 
 Similar authoritative functionality has been implemented and deployed
 by a number of DNS software vendors and service providers, using names
-such as ALIAS, ANAME, apex CNAME, CNAME flattening, and top level
+such as ALIAS, ANAME, apex CNAME, CNAME flattening, and top-level
 redirection. These mechanisms are proprietary, which hinders the
 ability of zone owners to have the same data served from multiple
-providers, or to move from one provider to another. None of these
+providers or to move from one provider to another. None of these
 proprietary implementations includes a mechanism for resolvers to
 follow the redirection chain themselves.
 
