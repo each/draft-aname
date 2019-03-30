@@ -164,7 +164,7 @@ improve latency or load balancing.
     rather than to the zone's primary master.
 
 Resolver support for ANAME is not necessary, since ANAME-oblivious
-resolvers will get working answers from authoritative servers. It's
+resolvers can get working answers from authoritative servers. It's
 just an optimization that can be rolled out incrementally, and that
 will help ANAME to work better the more widely it is deployed.
 
