@@ -190,7 +190,7 @@ records obtained by resolving the ultimate target of the ANAME (see
 (#subst)).
 
 Other DNS-related terminology can be found in
-[@!I-D.ietf-dnsop-terminology-bis].
+[@!RFC8499].
 
 The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**,
 **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **MAY**,
