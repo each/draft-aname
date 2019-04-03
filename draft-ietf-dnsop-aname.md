@@ -680,6 +680,8 @@ explain the rationale.]
 The full history of this draft and its issue tracker can be found at
 <https://github.com/each/draft-aname>
 
+  * `-03`: Grammar improvements (Olli Vanhoja).
+
   * `-02`: Major revamp, so authoritative servers (other than primary
     masters) now do not do any special ANAME processing, just
     Additional section processing.
