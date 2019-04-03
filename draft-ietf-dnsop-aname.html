@@ -406,7 +406,7 @@
 <link href="#rfc.authors" rel="Chapter">
 
 
-  <meta name="generator" content="xml2rfc version 2.11.1 - https://tools.ietf.org/tools/xml2rfc" />
+  <meta name="generator" content="xml2rfc version 2.9.6 - https://tools.ietf.org/tools/xml2rfc" />
   <link rel="schema.dct" href="http://purl.org/dc/terms/" />
 
   <meta name="dct.creator" content="Finch, T., Hunt, E., van Dijk, P., and A. Eden" />
@@ -551,11 +551,11 @@
 </h1>
 <p id="rfc.section.1.p.1">It can be desirable to provide web sites (and other services) at a bare domain name (such as <samp>example.com</samp>) as well as a service-specific subdomain (<samp>www.example.com</samp>).</p>
 <p id="rfc.section.1.p.2">If the web site is hosted by a third-party provider, the ideal way to provision its name in the DNS is using a CNAME record, so that the third party provider retains control over the mapping from names to IP address(es). It is now common for name-to-address mappings to be highly dynamic, dependent on client location, server load, etc.</p>
-<p id="rfc.section.1.p.3">However, CNAME records cannot coexist with other records. (The reason why is explored in <a href="#history" class="xref">Appendix C</a>). This means they cannot appear at a zone apex (such as <samp>example.com</samp>) because of the SOA, NS, and other records that have to be present there. CNAME records can also conflict at subdomains, for example if <samp>department.example.edu</samp> has separately hosted mail and web servers.</p>
-<p id="rfc.section.1.p.4">Redirecting website lookups to an alternate domain name via SRV or URI resource records would be an effective solution from the DNS point of view, but to date this approach has not been accepted by browser implementations.</p>
+<p id="rfc.section.1.p.3">However, CNAME records cannot coexist with other records with the same owner name. (The reason why is explored in <a href="#history" class="xref">Appendix C</a>). This restriction means they cannot appear at a zone apex (such as <samp>example.com</samp>) because of the SOA, NS, and other records that have to be present there. CNAME records can also conflict at subdomains, for example, if <samp>department.example.edu</samp> has separately hosted mail and web servers.</p>
+<p id="rfc.section.1.p.4">Redirecting website lookups to an alternate domain name via SRV or URI resource records would be an effective solution from the DNS point of view, but to date, browser vendors have not accepted this approach.</p>
 <p id="rfc.section.1.p.5">As a result, the only widely supported and standards-compliant way to publish a web site at a bare domain is to place A and/or AAAA records at the zone apex. The flexibility afforded by CNAME is not available.</p>
-<p id="rfc.section.1.p.6">This document specifies a new RR type "ANAME", which provides similar functionality to CNAME, but only for address queries (i.e., for type A or AAAA). The basic idea is that the address records next to an ANAME record are automatically copied from and kept in sync with the ANAME target's address records. The ANAME record can be present at any DNS node, and can coexist with most other RR types, enabling it to be present at a zone apex, or any other name where the presence of other records prevents the use of CNAME.</p>
-<p id="rfc.section.1.p.7">Similar authoritative functionality has been implemented and deployed by a number of DNS software vendors and service providers, using names such as ALIAS, ANAME, apex CNAME, CNAME flattening, and top level redirection. These mechanisms are proprietary, which hinders the ability of zone owners to have the same data served from multiple providers, or to move from one provider to another. None of these proprietary implementations includes a mechanism for resolvers to follow the redirection chain themselves.</p>
+<p id="rfc.section.1.p.6">This document specifies a new RR type "ANAME", which provides similar functionality to CNAME, but only for address queries (i.e., for type A or AAAA). The basic idea is that the address records next to an ANAME record are automatically copied from and kept in sync with the ANAME target's address records. The ANAME record can be present at any DNS node, and can coexist with most other RR types, enabling it to be present at a zone apex, or any other name where the presence of other records prevent the use of a CNAME record.</p>
+<p id="rfc.section.1.p.7">Similar authoritative functionality has been implemented and deployed by a number of DNS software vendors and service providers, using names such as ALIAS, ANAME, apex CNAME, CNAME flattening, and top-level redirection. These mechanisms are proprietary, which hinders the ability of zone owners to have the same data served from multiple providers or to move from one provider to another. None of these proprietary implementations includes a mechanism for resolvers to follow the redirection chain themselves.</p>
 <h1 id="rfc.section.1.1">
 <a href="#rfc.section.1.1">1.1.</a> <a href="#overview" id="overview">Overview</a>
 </h1>
@@ -568,7 +568,7 @@
 </ul>
 
 <p> </p>
-<p id="rfc.section.1.1.p.3">This is enough to be useful by itself. However, it can be less than optimal in certain situations: for instance, when the ANAME target uses clever tricks to provide different answers to different clients to improve latency or load balancing.</p>
+<p id="rfc.section.1.1.p.3">This definition is enough to be useful by itself. However, it can be less than optimal in certain situations: for instance, when the ANAME target uses clever tricks to provide different answers to different clients to improve latency or load balancing.</p>
 <p></p>
 
 <ul>
@@ -577,7 +577,7 @@
 </ul>
 
 <p> </p>
-<p id="rfc.section.1.1.p.5">Resolver support for ANAME is not necessary, since ANAME-oblivious resolvers will get working answers from authoritative servers. It's just an optimization that can be rolled out incrementally, and that will help ANAME to work better the more widely it is deployed.</p>
+<p id="rfc.section.1.1.p.5">Resolver support for ANAME is not necessary, since ANAME-oblivious resolvers can get working answers from authoritative servers. It's just an optimization that can be rolled out incrementally, and that will help ANAME to work better the more widely it is deployed.</p>
 <h1 id="rfc.section.1.2">
 <a href="#rfc.section.1.2">1.2.</a> <a href="#terminology" id="terminology">Terminology</a>
 </h1>
@@ -585,7 +585,7 @@
 <p id="rfc.section.1.2.p.2">When talking about "address records" we mean the entire RRset, including owner name and TTL. We treat missing address records (i.e.  NXDOMAIN or NODATA) the same successfully resolving as a set of zero address records, and distinct from "failure" which covers error responses such as SERVFAIL or REFUSED.</p>
 <p id="rfc.section.1.2.p.3">The "sibling address records" of an ANAME record are the address records at the same owner name as the ANAME, which are subject to ANAME substitution.</p>
 <p id="rfc.section.1.2.p.4">The "target address records" of an ANAME record are the address records obtained by resolving the ultimate target of the ANAME (see <a href="#subst" class="xref">Section 4</a>).</p>
-<p id="rfc.section.1.2.p.5">Other DNS-related terminology can be found in <a href="#I-D.ietf-dnsop-terminology-bis" class="xref">[I-D.ietf-dnsop-terminology-bis]</a>.</p>
+<p id="rfc.section.1.2.p.5">Other DNS-related terminology can be found in <a href="#RFC8499" class="xref">[RFC8499]</a>.</p>
 <p id="rfc.section.1.2.p.6">The key words MUST, MUST NOT, REQUIRED, SHALL, SHALL NOT, SHOULD, SHOULD NOT, RECOMMENDED, MAY, and OPTIONAL in this document are to be interpreted as described in <a href="#RFC2119" class="xref">[RFC2119]</a>.</p>
 <h1 id="rfc.section.2">
 <a href="#rfc.section.2">2.</a> <a href="#rdata" id="rdata">The ANAME resource record</a>
@@ -676,7 +676,7 @@
 <p id="rfc.section.5.1.p.2">DNSSEC signatures on sibling address records are generated in the same way as for normal DNS UPDATEs.</p>
 <p id="rfc.section.5.1.p.3">Sibling address records are committed to the zone and stored in nonvolatile storage. This allows a server to restart without delays due to ANAME processing.</p>
 <p id="rfc.section.5.1.p.4">A zone containing ANAME records that point to frequently-changing targets will itself change frequently, which can increase the number of zone transfers.</p>
-<p id="rfc.section.5.1.p.5">Sibling address records are served from authoritative servers with a fixed TTL. Normally this TTL is expected to be the same as the target address records' TTL (or the ANAME TTL if that is smaller); however the exact mechanism for obtaining the target is unspecified, so cache effects or deliberate policies might make the sibling TTL smaller.  There is a longer discussion of TTL handling in {#ttls}.</p>
+<p id="rfc.section.5.1.p.5">Sibling address records are served from authoritative servers with a fixed TTL. Normally this TTL is expected to be the same as the target address records' TTL (or the ANAME TTL if that is smaller); however the exact mechanism for obtaining the target is unspecified, so cache effects or deliberate policies might make the sibling TTL smaller.  There is a more extended discussion of TTL handling in {#ttls}.</p>
 <p id="rfc.section.5.1.p.6">Secondary servers rely on zone transfers to obtain sibling address records, just like the rest of the zone, and serve them in the usual way (with <a href="#additional" class="xref">Section 3</a> Additional section processing if they support it). A working DNS NOTIFY <a href="#RFC1996" class="xref">[RFC1996]</a> setup is necessary to avoid extra delays propagating updated sibling address records when they change.</p>
 <h1 id="rfc.section.5.2">
 <a href="#rfc.section.5.2">5.2.</a> <a href="#alternatives" id="alternatives">Alternatives</a>
@@ -690,7 +690,7 @@
 <a href="#rfc.section.6">6.</a> <a href="#resolver" id="resolver">ANAME processing by resolvers</a>
 </h1>
 <p id="rfc.section.6.p.1">When a resolver makes an address query in the usual way, it might receive a response containing ANAME information in the additional section, as described in <a href="#additional" class="xref">Section 3</a>. This informs the resolver that it MAY resolve the ANAME target address records to get answers that are tailored to the resolver rather than the ANAME's primary master.  It SHOULD include the target address records in the Additional section of its responses as described in <a href="#additional" class="xref">Section 3</a>.</p>
-<p id="rfc.section.6.p.2">In order to provide tailored answers to clients that are ANAME-oblivious, the resolver MAY do its own sibling address record substitution in the following situations:</p>
+<p id="rfc.section.6.p.2">In order to provide tailored answers to clients that are ANAME-oblivious, the resolver MAY perform sibling address record substitution in the following situations:</p>
 <p></p>
 
 <ul>
@@ -699,7 +699,7 @@
 </ul>
 
 <p> </p>
-<p id="rfc.section.6.p.4">In these first two cases, the resolver MAY perform ANAME sibling address record substitution as described in <a href="#subst" class="xref">Section 4</a>. Any edit performed in the final step is applied to response's Answer section.  The resolver SHOULD then perform Additional section processing as described in <a href="#additional" class="xref">Section 3</a>.</p>
+<p id="rfc.section.6.p.4">In these first two cases, the resolver MAY perform ANAME sibling address record substitution as described in <a href="#subst" class="xref">Section 4</a>. Any edit performed in the final step is applied to the Answer section of the response. The resolver SHOULD then perform Additional section processing as described in <a href="#additional" class="xref">Section 3</a>.</p>
 <p id="rfc.section.6.p.5">If the resolver's client is querying using an API such as <samp>getaddrinfo</samp> <a href="#RFC3493" class="xref">[RFC3493]</a> that does not support DNSSEC validation, the resolver MAY perform ANAME sibling address record substitution as described in <a href="#subst" class="xref">Section 4</a>. Any edits performed in the final step are applied to the addresses returned by the API. (This case is for validating stub resolvers that query an upstream recursive server with DO=1, so they cannot rely on the recursive server to do ANAME substitution for them.)</p>
 <h1 id="rfc.section.7">
 <a href="#rfc.section.7">7.</a> <a href="#iana-considerations" id="iana-considerations">IANA considerations</a>
@@ -709,18 +709,13 @@
 <h1 id="rfc.section.8">
 <a href="#rfc.section.8">8.</a> <a href="#security-considerations" id="security-considerations">Security considerations</a>
 </h1>
-<p id="rfc.section.8.p.1">When a primary master updates an ANAME's sibling address records to match its target address records, it is uses its own best information as to the correct answer. The updated records might be signed by the primary master, but that is not a guarantee of the actual correctness of the answer. This can have the effect of promoting an insecure response from the ANAME &lt;target&gt; to a signed response from the &lt;owner&gt;, which can then appear to clients to be more trustworthy than it should. To mitigate harm from this, DNSSEC validation SHOULD be used when resolving the ANAME &lt;target&gt;. Primary masters MAY refuse to substitute ANAME sibling address records unless the &lt;target&gt; node is both signed and validated.</p>
-<p id="rfc.section.8.p.2">When a resolver substitutes an ANAME's sibling address records, it can find that the sibling address records are secure but the target address records are insecure. Going ahead with the substitution will downgrade a secure answer to an insecure one. But this is likely to be the counterpart of the situation described in the previous paragraph, so the resolver is downgrading an answer that the ANAME's primary master upgraded. A resolver will only downgrade an answer in this way when its client is security-oblivious; however the client's path to the resolver is likely to be practically safer than the resolver's path to the ANAME target's servers. Resolvers MAY choose not to substitute sibling address records when they are more secure than the target address records.</p>
+<p id="rfc.section.8.p.1">When a primary master updates an ANAME's sibling address records to match its target address records, it uses its own best information as to the correct answer. The primary master might sign the updated records, but that is not a guarantee of the actual correctness of the answer. This signing can have the effect of promoting an insecure response from the ANAME &lt;target&gt; to a signed response from the &lt;owner&gt;, which can then appear to clients to be more trustworthy than it should. DNSSEC validation SHOULD be used when resolving the ANAME &lt;target&gt; to mitigate this possible harm. Primary masters MAY refuse to substitute ANAME sibling address records unless the &lt;target&gt; node is both signed and validated.</p>
+<p id="rfc.section.8.p.2">When a resolver substitutes an ANAME's sibling address records, it can find that the sibling address records are secure but the target address records are insecure. Going ahead with the substitution will downgrade a secure answer to an insecure one. However this is likely to be the counterpart of the situation described in the previous paragraph, so the resolver is downgrading an answer that the ANAME's primary master upgraded. A resolver will only downgrade an answer in this way when its client is security-oblivious; however the client's path to the resolver is likely to be practically safer than the resolver's path to the ANAME target's servers. Resolvers MAY choose not to substitute sibling address records when they are more secure than the target address records.</p>
 <h1 id="rfc.references">
 <a href="#rfc.references">9.</a> References</h1>
 <h1 id="rfc.references.1">
 <a href="#rfc.references.1">9.1.</a> Normative References</h1>
 <table><tbody>
-<tr>
-<td class="reference"><b id="I-D.ietf-dnsop-terminology-bis">[I-D.ietf-dnsop-terminology-bis]</b></td>
-<td class="top">
-<a>Hoffman, P.</a>, <a>Sullivan, A.</a> and <a>K. Fujiwara</a>, "<a href="https://tools.ietf.org/html/draft-ietf-dnsop-terminology-bis-14">DNS Terminology</a>", Internet-Draft draft-ietf-dnsop-terminology-bis-14, September 2018.</td>
-</tr>
 <tr>
 <td class="reference"><b id="RFC1033">[RFC1033]</b></td>
 <td class="top">
@@ -745,6 +740,11 @@
 <td class="reference"><b id="RFC3597">[RFC3597]</b></td>
 <td class="top">
 <a>Gustafsson, A.</a>, "<a href="https://tools.ietf.org/html/rfc3597">Handling of Unknown DNS Resource Record (RR) Types</a>", RFC 3597, DOI 10.17487/RFC3597, September 2003.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC8499">[RFC8499]</b></td>
+<td class="top">
+<a>Hoffman, P.</a>, <a>Sullivan, A.</a> and <a>K. Fujiwara</a>, "<a href="https://tools.ietf.org/html/rfc8499">DNS Terminology</a>", BCP 219, RFC 8499, DOI 10.17487/RFC8499, January 2019.</td>
 </tr>
 </tbody></table>
 <h1 id="rfc.references.2">
@@ -814,14 +814,14 @@
 </h1>
 <p id="rfc.section.D.p.1">An ANAME's sibling address records are in an unusual situation: they are authoritative data in the owner's zone, so from that point of view the owner has the last say over what their TTL should be; on the other hand, ANAMEs are supposed to act as aliases, in which case the target should control the address record TTLs.</p>
 <p id="rfc.section.D.p.2">However there are some technical constraints that make it difficult to preserve the target address record TTLs.</p>
-<p id="rfc.section.D.p.3">The conclusion of the following subsections is that the end-to-end TTL (from the authoritative servers for the target address records to end-user DNS caches) will be the target address record TTL plus the sibling address record TTL.</p>
+<p id="rfc.section.D.p.3">The following subsections conclude that the end-to-end TTL (from the authoritative servers for the target address records to end-user DNS caches) should be set as the target address record TTL plus the sibling address record TTL.</p>
 <p id="rfc.section.D.p.4">[MM: Discuss: I think it should be just the ANAME record TTL perhaps the minimum of ANAME and sibling address RRset TTL. We should provide some guidance on TTL settings for ANAME).</p>
 <p id="rfc.section.D.p.5">[TF: see issue #30]</p>
 <h1 id="rfc.appendix.D.1">
 <a href="#rfc.appendix.D.1">D.1.</a> <a href="#query-bunching" id="query-bunching">Query bunching</a>
 </h1>
-<p id="rfc.section.D.1.p.1">If the times of end-user queries for a domain name are well distributed, then (normally) queries received by the authoritative servers for that domain are also well distributed. If the domain is popular, a recursive server will re-query for it once every TTL seconds, but the periodic queries from all the various recursive servers will not be aligned, so the queries remain well distributed.</p>
-<p id="rfc.section.D.1.p.2">However, imagine that the TTLs of an ANAME's sibling address records are decremented in the same way as cache entries in recursive servers.  Then all the recursive servers querying for the name will try to refresh their caches at the same time, when the TTL reaches zero. They will become synchronized and all the queries for the domain will be bunched into periodic spikes.</p>
+<p id="rfc.section.D.1.p.1">If the times of end-user queries for a domain name are well distributed, then (typically) queries received by the authoritative servers for that domain are also well distributed. If the domain is popular, a recursive server will re-query for it once every TTL seconds, but the periodic queries from all the various recursive servers will not be aligned, so the queries remain well distributed.</p>
+<p id="rfc.section.D.1.p.2">However, imagine that the TTLs of an ANAME's sibling address records are decremented in the same way as cache entries in recursive servers.  Then all the recursive servers querying for the name would try to refresh their caches at the same time when the TTL reaches zero. They would become synchronized, and all the queries for the domain would be bunched into periodic spikes.</p>
 <p id="rfc.section.D.1.p.3">This specification says that ANAME sibling address records have a normal fixed TTL derived from (e.g. equal or nearly equal to) the target address records' original TTL. There is no cache-like decrementing TTL, so there is no bunching of queries.</p>
 <h1 id="rfc.appendix.D.2">
 <a href="#rfc.appendix.D.2">D.2.</a> <a href="#upstream-caches" id="upstream-caches">Upstream caches</a>
@@ -835,8 +835,8 @@
 </ul>
 
 <p> </p>
-<p id="rfc.section.D.2.p.3">However, not all zones are signed, and a primary master might not be able to directly query other authoritative servers (e.g. if it is a hidden primary behind a strict firewall). Instead it might have to obtain an ANAME's target address records via some other recursive server.</p>
-<p id="rfc.section.D.2.p.4">Querying via a separate recursive server means the primary master cannot trivially obtain the target address records' original TTLs.  Fortunately this is likely to be a self-correcting problem for similar reasons to the query-bunching discussed in the previous subsection.  The primary master re-checks the target address records just after the TTL expires, when its upstream cache has just refreshed them, so the TTL will be nearly equal to the original TTL.</p>
+<p id="rfc.section.D.2.p.3">However, not all zones are signed, and a primary master might not be able to query other authoritative servers directly (e.g. if it is a hidden primary behind a strict firewall). Instead it might have to obtain an ANAME's target address records via some other recursive server.</p>
+<p id="rfc.section.D.2.p.4">Querying via a separate recursive server means the primary master cannot trivially obtain the target address records' original TTLs.  Fortunately this is likely to be a self-correcting problem for similar reasons to the query-bunching discussed in the previous subsection.  The primary master re-checks the target address records just after the TTL expires when its upstream cache has just refreshed them, so the TTL will be nearly equal to the original TTL.</p>
 <p id="rfc.section.D.2.p.5">A related consideration is that the primary master cannot in general refresh its copies of an ANAME's target address records more frequently than their TTL, without privileged control over its resolver cache.</p>
 <p id="rfc.section.D.2.p.6">Combined with the requirement that sibling address records are served with a fixed TTL, this means that the end-to-end TTL will be the target address record TTL (which determines when the sibling address records are updated) plus the sibling address record TTL (which determines when end-user caches are updated).</p>
 <h1 id="rfc.appendix.D.3">
@@ -860,8 +860,12 @@
 <p id="rfc.section.F.p.2">The full history of this draft and its issue tracker can be found at <a href="https://github.com/each/draft-aname">https://github.com/each/draft-aname</a></p>
 <p></p>
 
-<ul><li>
-<samp>-02</samp>: Major revamp, so authoritative servers (other than primary masters) now do not do any special ANAME processing, just Additional section processing.</li></ul>
+<ul>
+<li>
+<samp>-03</samp>: Grammar improvements (Olli Vanhoja).</li>
+<li>
+<samp>-02</samp>: Major revamp, so authoritative servers (other than primary masters) now do not do any special ANAME processing, just Additional section processing.</li>
+</ul>
 
 <p> </p>
 <h1 id="rfc.authors"><a href="#rfc.authors">Authors' Addresses</a></h1>

@@ -101,17 +101,16 @@ third party provider retains control over the mapping from names to IP
 address(es). It is now common for name-to-address mappings to be
 highly dynamic, dependent on client location, server load, etc.
 
-However, CNAME records cannot coexist with other records. (The reason
-why is explored in (#history)). This means they cannot appear at a
-zone apex (such as `example.com`) because of the SOA, NS, and other
-records that have to be present there. CNAME records can also conflict
-at subdomains, for example if `department.example.edu` has separately
-hosted mail and web servers.
+However, CNAME records cannot coexist with other records with the same
+owner name. (The reason why is explored in (#history)). This restriction
+means they cannot appear at a zone apex (such as `example.com`) because of
+the SOA, NS, and other records that have to be present there. CNAME records
+can also conflict at subdomains, for example, if `department.example.edu`
+has separately hosted mail and web servers.
 
 Redirecting website lookups to an alternate domain name via SRV or URI
 resource records would be an effective solution from the DNS point of
-view, but to date this approach has not been accepted by browser
-implementations.
+view, but to date, browser vendors have not accepted this approach.
 
 As a result, the only widely supported and standards-compliant way to
 publish a web site at a bare domain is to place A and/or AAAA records
@@ -124,14 +123,14 @@ record are automatically copied from and kept in sync with the ANAME
 target's address records. The ANAME record can be present at any DNS
 node, and can coexist with most other RR types, enabling it to be
 present at a zone apex, or any other name where the presence of other
-records prevents the use of CNAME.
+records prevent the use of a CNAME record.
 
 Similar authoritative functionality has been implemented and deployed
 by a number of DNS software vendors and service providers, using names
-such as ALIAS, ANAME, apex CNAME, CNAME flattening, and top level
+such as ALIAS, ANAME, apex CNAME, CNAME flattening, and top-level
 redirection. These mechanisms are proprietary, which hinders the
 ability of zone owners to have the same data served from multiple
-providers, or to move from one provider to another. None of these
+providers or to move from one provider to another. None of these
 proprietary implementations includes a mechanism for resolvers to
 follow the redirection chain themselves.
 
@@ -152,8 +151,8 @@ requiring secondary servers or resolvers to be upgraded.
     records in sync with the ANAME target; this allows it to interoperate
     with existing DNSSEC signers, secondary servers, and resolvers.
 
-This is enough to be useful by itself. However, it can be less than
-optimal in certain situations: for instance, when the ANAME target uses
+This definition is enough to be useful by itself. However, it can be less
+than optimal in certain situations: for instance, when the ANAME target uses
 clever tricks to provide different answers to different clients to
 improve latency or load balancing.
 
@@ -165,7 +164,7 @@ improve latency or load balancing.
     rather than to the zone's primary master.
 
 Resolver support for ANAME is not necessary, since ANAME-oblivious
-resolvers will get working answers from authoritative servers. It's
+resolvers can get working answers from authoritative servers. It's
 just an optimization that can be rolled out incrementally, and that
 will help ANAME to work better the more widely it is deployed.
 
@@ -191,7 +190,7 @@ records obtained by resolving the ultimate target of the ANAME (see
 (#subst)).
 
 Other DNS-related terminology can be found in
-[@!I-D.ietf-dnsop-terminology-bis].
+[@!RFC8499].
 
 The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**,
 **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **MAY**,
@@ -361,7 +360,7 @@ fixed TTL. Normally this TTL is expected to be the same as the target
 address records' TTL (or the ANAME TTL if that is smaller); however
 the exact mechanism for obtaining the target is unspecified, so cache
 effects or deliberate policies might make the sibling TTL smaller.
-There is a longer discussion of TTL handling in {#ttls}.
+There is a more extended discussion of TTL handling in {#ttls}.
 
 Secondary servers rely on zone transfers to obtain sibling address
 records, just like the rest of the zone, and serve them in the usual
@@ -417,7 +416,7 @@ It SHOULD include the target address records in the Additional section
 of its responses as described in (#additional).
 
 In order to provide tailored answers to clients that are
-ANAME-oblivious, the resolver MAY do its own sibling address record
+ANAME-oblivious, the resolver MAY perform sibling address record
 substitution in the following situations:
 
   * The resolver's client queries with DO=0. (As discussed in
@@ -435,9 +434,9 @@ substitution in the following situations:
 
 In these first two cases, the resolver MAY perform ANAME sibling
 address record substitution as described in (#subst). Any edit
-performed in the final step is applied to response's Answer section.
-The resolver SHOULD then perform Additional section processing as
-described in (#additional).
+performed in the final step is applied to the Answer section of the
+response. The resolver SHOULD then perform Additional section processing
+as described in (#additional).
 
 If the resolver's client is querying using an API such as
 `getaddrinfo` [@?RFC3493] that does not support DNSSEC validation, the
@@ -463,21 +462,21 @@ this specification.
 # Security considerations
 
 When a primary master updates an ANAME's sibling address records to
-match its target address records, it is uses its own best information
-as to the correct answer. The updated records might be signed by the
-primary master, but that is not a guarantee of the actual correctness
-of the answer. This can have the effect of promoting an insecure
+match its target address records, it uses its own best information
+as to the correct answer. The primary master might sign the updated
+records, but that is not a guarantee of the actual correctness
+of the answer. This signing can have the effect of promoting an insecure
 response from the ANAME \<target\> to a signed response from the
 \<owner\>, which can then appear to clients to be more trustworthy
-than it should. To mitigate harm from this, DNSSEC validation SHOULD
-be used when resolving the ANAME \<target\>. Primary masters MAY
+than it should. DNSSEC validation SHOULD be used when resolving the
+ANAME \<target\> to mitigate this possible harm. Primary masters MAY
 refuse to substitute ANAME sibling address records unless the
 \<target\> node is both signed and validated.
 
 When a resolver substitutes an ANAME's sibling address records, it can
 find that the sibling address records are secure but the target
 address records are insecure. Going ahead with the substitution will
-downgrade a secure answer to an insecure one. But this is likely to be
+downgrade a secure answer to an insecure one. However this is likely to be
 the counterpart of the situation described in the previous paragraph,
 so the resolver is downgrading an answer that the ANAME's primary
 master upgraded. A resolver will only downgrade an answer in this way
@@ -569,9 +568,9 @@ should control the address record TTLs.
 However there are some technical constraints that make it difficult to
 preserve the target address record TTLs.
 
-The conclusion of the following subsections is that the end-to-end TTL
+The following subsections conclude that the end-to-end TTL
 (from the authoritative servers for the target address records to
-end-user DNS caches) will be the target address record TTL plus the
+end-user DNS caches) should be set as the target address record TTL plus the
 sibling address record TTL.
 
 [MM: Discuss: I think it should be just the ANAME record TTL perhaps
@@ -583,7 +582,7 @@ some guidance on TTL settings for ANAME).
 ## Query bunching
 
 If the times of end-user queries for a domain name are well
-distributed, then (normally) queries received by the authoritative
+distributed, then (typically) queries received by the authoritative
 servers for that domain are also well distributed. If the domain is
 popular, a recursive server will re-query for it once every TTL
 seconds, but the periodic queries from all the various recursive
@@ -591,9 +590,9 @@ servers will not be aligned, so the queries remain well distributed.
 
 However, imagine that the TTLs of an ANAME's sibling address records
 are decremented in the same way as cache entries in recursive servers.
-Then all the recursive servers querying for the name will try to
-refresh their caches at the same time, when the TTL reaches zero. They
-will become synchronized and all the queries for the domain will be
+Then all the recursive servers querying for the name would try to
+refresh their caches at the same time when the TTL reaches zero. They
+would become synchronized, and all the queries for the domain would be
 bunched into periodic spikes.
 
 This specification says that ANAME sibling address records have a
@@ -611,7 +610,7 @@ There are two straightforward ways to get an RRset's original TTL:
   * using the original TTL field from the RRset's RRGIG record(s).
 
 However, not all zones are signed, and a primary master might not be
-able to directly query other authoritative servers (e.g. if it is a
+able to query other authoritative servers directly (e.g. if it is a
 hidden primary behind a strict firewall). Instead it might have to
 obtain an ANAME's target address records via some other recursive
 server.
@@ -621,7 +620,7 @@ cannot trivially obtain the target address records' original TTLs.
 Fortunately this is likely to be a self-correcting problem for similar
 reasons to the query-bunching discussed in the previous subsection.
 The primary master re-checks the target address records just after the
-TTL expires, when its upstream cache has just refreshed them, so the
+TTL expires when its upstream cache has just refreshed them, so the
 TTL will be nearly equal to the original TTL.
 
 A related consideration is that the primary master cannot in general
@@ -680,6 +679,8 @@ explain the rationale.]
 
 The full history of this draft and its issue tracker can be found at
 <https://github.com/each/draft-aname>
+
+  * `-03`: Grammar improvements (Olli Vanhoja).
 
   * `-02`: Major revamp, so authoritative servers (other than primary
     masters) now do not do any special ANAME processing, just
