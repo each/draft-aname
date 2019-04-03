@@ -146,10 +146,8 @@ requiring secondary servers or resolvers to be upgraded.
     the common core functionality of existing proprietary
     ANAME-like facilities.
 
-  * The zone maintenance mechanism described in (#primary) behaves as if DNS
-    UPDATE [@!RFC2136] were being used to keep an ANAME's sibling address
-    records in sync with the ANAME target; this allows it to interoperate
-    with existing DNSSEC signers, secondary servers, and resolvers.
+  * The zone maintenance mechanism described in (#primary) keeps the
+    ANAME's sibling address records in sync with the ANAME target.
 
 This definition is enough to be useful by itself. However, it can be less
 than optimal in certain situations: for instance, when the ANAME target uses
@@ -327,7 +325,8 @@ following process, for each address type:
 
   * Perform ANAME sibling address record substitution as described in
     (#subst). Any edit performed in the final step is applied to the
-    ANAME's zone in the same manner as a DNS UPDATE [@!RFC2136].
+    ANAME's zone. A primary server MAY use Dynamic Updates (DNS UPDATE)
+    [@!RFC2136] to update the zone.
 
   * If resolution failed, wait for a period before trying again. This
     retry time SHOULD be configurable.
@@ -335,25 +334,36 @@ following process, for each address type:
   * Otherwise, wait until the target address record TTL has expired,
     then repeat.
 
-The following informative subsections explore the effects of this
-specification, to clarify how it can work in practice.
-
-
-## Implications
-
-A zone containing ANAME records has to be a dynamic zone, similar to
-automatic DNSSEC signature maintenance.
-
-DNSSEC signatures on sibling address records are generated in the same
-way as for normal DNS UPDATEs.
-
 Sibling address records are committed to the zone and stored in
 nonvolatile storage. This allows a server to restart without delays
 due to ANAME processing.
 
+## Zone transfers
+
 A zone containing ANAME records that point to frequently-changing
 targets will itself change frequently, which can increase the number
 of zone transfers.
+
+ANAME is no more special than any other RRtype and does not introduce
+any special processing related to zone transfers.
+
+Secondary servers that rely on zone transfers to obtain sibling
+address records, just like the rest of the zone, and serve them in the
+usual way (with (#additional) Additional section processing if they
+support it). A working DNS NOTIFY [@?RFC1996] setup is recommended to
+avoid extra delays propagating updated sibling address records when
+they change.
+
+## DNSSEC
+
+A zone containing ANAME records that will update A and AAAA records
+has to do so before signing the zone with DNSSEC [@!RFC4033]
+[@!RFC4034] [@!RFC4035].
+
+DNSSEC signatures on sibling address records are generated in the same
+way as for normal (dynamic) updates.
+
+## TTLs
 
 Sibling address records are served from authoritative servers with a
 fixed TTL. Normally this TTL is expected to be the same as the target
@@ -361,14 +371,6 @@ address records' TTL (or the ANAME TTL if that is smaller); however
 the exact mechanism for obtaining the target is unspecified, so cache
 effects or deliberate policies might make the sibling TTL smaller.
 There is a more extended discussion of TTL handling in {#ttls}.
-
-Secondary servers rely on zone transfers to obtain sibling address
-records, just like the rest of the zone, and serve them in the usual
-way (with (#additional) Additional section processing if they support
-it). A working DNS NOTIFY [@?RFC1996] setup is necessary to avoid
-extra delays propagating updated sibling address records when they
-change.
-
 
 ## Alternatives
 
