@@ -372,41 +372,6 @@ the exact mechanism for obtaining the target is unspecified, so cache
 effects or deliberate policies might make the sibling TTL smaller.
 There is a more extended discussion of TTL handling in {#ttls}.
 
-## Alternatives
-
-The process at the start of this section is specified using the mighty
-weasel words "as if", which are intended to allow a great deal of
-latitude to implementers so long as the observed behaviour is
-compatible.
-
-For instance, it is likely to be more efficient to manage the polling
-per ANAME target rather than per ANAME as specified.
-
-More radically, some existing ANAME-like implementations are based on
-a different DNS server architecture, in which a zone's published
-authoritative servers all perform the duties of a primary master in a
-distributed manner: provisioning records from a non-DNS back-end
-store, refreshing DNSSEC signatures, and so forth. This architecture
-does not use standard zone transfers, so there is no need for its
-ANAME implementation to poll the target address records to ensure that
-its secondary servers are up to date (because there are no secondary
-servers as such). Instead the authoritative servers can do ANAME
-sibling address substitution on demand.
-
-There are other variant architectures which use zone transfers within
-the provisioning system, but where the authoritative servers are able
-to independently vary the zone contents. They can conform to this
-specification provided their behaviour is consistent with it: unusual
-behaviour can appear "as if" there were a rapidly updating zone or
-multiple primary masters, etc.
-
-The exact mechanism for obtaining the target address records is
-unspecified; typically they will be resolved in the DNS in the usual
-way, but if an ANAME implementation has special knowledge of the
-target it can short-cut the substitution process, or use clever tricks
-such as client-dependant answers.
-
-
 # ANAME processing by resolvers {#resolver}
 
 When a resolver makes an address query in the usual way, it might
@@ -675,6 +640,44 @@ everything should go in additional. We'll expand this appendix to
 explain the rationale.]
 
 
+{backmatter}
+
+# Appendix A: Alternatives
+
+## Alternatives
+
+The process at the start of this section is specified using the mighty
+weasel words "as if", which are intended to allow a great deal of
+latitude to implementers so long as the observed behaviour is
+compatible.
+
+For instance, it is likely to be more efficient to manage the polling
+per ANAME target rather than per ANAME as specified.
+
+More radically, some existing ANAME-like implementations are based on
+a different DNS server architecture, in which a zone's published
+authoritative servers all perform the duties of a primary master in a
+distributed manner: provisioning records from a non-DNS back-end
+store, refreshing DNSSEC signatures, and so forth. This architecture
+does not use standard zone transfers, so there is no need for its
+ANAME implementation to poll the target address records to ensure that
+its secondary servers are up to date (because there are no secondary
+servers as such). Instead the authoritative servers can do ANAME
+sibling address substitution on demand.
+
+There are other variant architectures which use zone transfers within
+the provisioning system, but where the authoritative servers are able
+to independently vary the zone contents. They can conform to this
+specification provided their behaviour is consistent with it: unusual
+behaviour can appear "as if" there were a rapidly updating zone or
+multiple primary masters, etc.
+
+The exact mechanism for obtaining the target address records is
+unspecified; typically they will be resolved in the DNS in the usual
+way, but if an ANAME implementation has special knowledge of the
+target it can short-cut the substitution process, or use clever tricks
+such as client-dependant answers.
+
 # Changes since the last revision
 
 [This section is to be removed before publication as an RFC.]
@@ -688,3 +691,4 @@ The full history of this draft and its issue tracker can be found at
   * `-02`: Major revamp, so authoritative servers (other than primary
     masters) now do not do any special ANAME processing, just
     Additional section processing.
+
