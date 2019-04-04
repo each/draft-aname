@@ -123,7 +123,7 @@ record are automatically copied from and kept in sync with the ANAME
 target's address records. The ANAME record can be present at any DNS
 node, and can coexist with most other RR types, enabling it to be
 present at a zone apex, or any other name where the presence of other
-records prevent the use of a CNAME record.
+records prevents the use of a CNAME record.
 
 Similar authoritative functionality has been implemented and deployed
 by a number of DNS software vendors and service providers, using names
