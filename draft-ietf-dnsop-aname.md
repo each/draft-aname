@@ -497,8 +497,8 @@ target address records.
 Thanks to Mark Andrews, Ray Bellis, Stefan Buehler, Paul Ebersman,
 Richard Gibson, Tatuya JINMEI, Hakan Lindqvist, Mattijs Mekking,
 Stephen Morris, Bjorn Mott, Richard Salts, Mukund Sivaraman, Job
-Snijders, Jan Vcelak, Paul Vixie, Duane Wessels, and Paul Wouters for
-discussion and feedback.
+Snijders, Jan Vcelak, Paul Vixie, Duane Wessels, and Paul Wouters,
+Olli Vanhoja for discussion and feedback.
 
 
 # Implementation status
@@ -682,7 +682,8 @@ explain the rationale.]
 The full history of this draft and its issue tracker can be found at
 <https://github.com/each/draft-aname>
 
-  * `-03`: Grammar improvements (Olli Vanhoja).
+  * `-03`: Grammar improvements (Olli Vanhoja), split up Implications
+    section, clarify text on zone transfers and dynamic updates.
 
   * `-02`: Major revamp, so authoritative servers (other than primary
     masters) now do not do any special ANAME processing, just
