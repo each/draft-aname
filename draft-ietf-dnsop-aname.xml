@@ -98,10 +98,8 @@ requiring secondary servers or resolvers to be upgraded.</t>
 zone data portability between standards-compliant DNS servers and
 the common core functionality of existing proprietary
 ANAME-like facilities.</t>
-<t>The zone maintenance mechanism described in <xref target="primary"></xref> behaves as if DNS
-UPDATE <xref target="RFC2136"></xref> were being used to keep an ANAME's sibling address
-records in sync with the ANAME target; this allows it to interoperate
-with existing DNSSEC signers, secondary servers, and resolvers.</t>
+<t>The zone maintenance mechanism described in <xref target="primary"></xref> keeps the
+ANAME's sibling address records in sync with the ANAME target.</t>
 </list>
 </t>
 <t>This definition is enough to be useful by itself. However, it can be less
@@ -263,39 +261,47 @@ following process, for each address type:</t>
 <list style="symbols">
 <t>Perform ANAME sibling address record substitution as described in
 <xref target="subst"></xref>. Any edit performed in the final step is applied to the
-ANAME's zone in the same manner as a DNS UPDATE <xref target="RFC2136"></xref>.</t>
+ANAME's zone. A primary server MAY use Dynamic Updates (DNS UPDATE)
+<xref target="RFC2136"></xref> to update the zone.</t>
 <t>If resolution failed, wait for a period before trying again. This
 retry time SHOULD be configurable.</t>
 <t>Otherwise, wait until the target address record TTL has expired,
 then repeat.</t>
 </list>
 </t>
-<t>The following informative subsections explore the effects of this
-specification, to clarify how it can work in practice.</t>
-
-<section anchor="implications" title="Implications">
-<t>A zone containing ANAME records has to be a dynamic zone, similar to
-automatic DNSSEC signature maintenance.</t>
-<t>DNSSEC signatures on sibling address records are generated in the same
-way as for normal DNS UPDATEs.</t>
 <t>Sibling address records are committed to the zone and stored in
 nonvolatile storage. This allows a server to restart without delays
 due to ANAME processing.</t>
+
+<section anchor="zone-transfers" title="Zone transfers">
 <t>A zone containing ANAME records that point to frequently-changing
 targets will itself change frequently, which can increase the number
 of zone transfers.</t>
+<t>ANAME is no more special than any other RRtype and does not introduce
+any special processing related to zone transfers.</t>
+<t>Secondary servers that rely on zone transfers to obtain sibling
+address records, just like the rest of the zone, and serve them in the
+usual way (with <xref target="additional"></xref> Additional section processing if they
+support it). A working DNS NOTIFY <xref target="RFC1996"></xref> setup is recommended to
+avoid extra delays propagating updated sibling address records when
+they change.</t>
+</section>
+
+<section anchor="dnssec" title="DNSSEC">
+<t>A zone containing ANAME records that will update A and AAAA records
+has to do so before signing the zone with DNSSEC <xref target="RFC4033"></xref>
+<xref target="RFC4034"></xref> <xref target="RFC4035"></xref>.</t>
+<t>DNSSEC signatures on sibling address records are generated in the same
+way as for normal (dynamic) updates.</t>
+</section>
+
+<section anchor="ttls" title="TTLs">
 <t>Sibling address records are served from authoritative servers with a
 fixed TTL. Normally this TTL is expected to be the same as the target
 address records' TTL (or the ANAME TTL if that is smaller); however
 the exact mechanism for obtaining the target is unspecified, so cache
 effects or deliberate policies might make the sibling TTL smaller.
 There is a more extended discussion of TTL handling in {#ttls}.</t>
-<t>Secondary servers rely on zone transfers to obtain sibling address
-records, just like the rest of the zone, and serve them in the usual
-way (with <xref target="additional"></xref> Additional section processing if they support
-it). A working DNS NOTIFY <xref target="RFC1996"></xref> setup is necessary to avoid
-extra delays propagating updated sibling address records when they
-change.</t>
 </section>
 
 <section anchor="alternatives" title="Alternatives">
@@ -409,19 +415,22 @@ target address records.</t>
 
 <back>
 <references title="Normative References">
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.8499.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1033.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1035.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.4035.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.4034.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3597.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2136.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.8499.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1035.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.4033.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1033.xml"?>
 </references>
 <references title="Informative References">
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2065.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3493.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.0973.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1996.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2308.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2065.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1996.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.0882.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1034.xml"?>
 </references>
@@ -430,8 +439,8 @@ target address records.</t>
 <t>Thanks to Mark Andrews, Ray Bellis, Stefan Buehler, Paul Ebersman,
 Richard Gibson, Tatuya JINMEI, Hakan Lindqvist, Mattijs Mekking,
 Stephen Morris, Bjorn Mott, Richard Salts, Mukund Sivaraman, Job
-Snijders, Jan Vcelak, Paul Vixie, Duane Wessels, and Paul Wouters for
-discussion and feedback.</t>
+Snijders, Jan Vcelak, Paul Vixie, Duane Wessels, and Paul Wouters,
+Olli Vanhoja for discussion and feedback.</t>
 </section>
 
 <section anchor="implementation-status" title="Implementation status">
@@ -484,7 +493,7 @@ that the problems are particularly acute when CNAME and MX try to
 coexist.</t>
 </section>
 
-<section anchor="ttls" title="On preserving TTLs">
+<section anchor="ttls-1" title="On preserving TTLs">
 <t>An ANAME's sibling address records are in an unusual situation: they
 are authoritative data in the owner's zone, so from that point of view
 the owner has the last say over what their TTL should be; on the other
@@ -589,7 +598,8 @@ explain the rationale.]</t>
 <eref target="https://github.com/each/draft-aname">https://github.com/each/draft-aname</eref></t>
 <t>
 <list style="symbols">
-<t><spanx style="verb">-03</spanx>: Grammar improvements (Olli Vanhoja).</t>
+<t><spanx style="verb">-03</spanx>: Grammar improvements (Olli Vanhoja), split up Implications
+section, clarify text on zone transfers and dynamic updates.</t>
 <t><spanx style="verb">-02</spanx>: Major revamp, so authoritative servers (other than primary
 masters) now do not do any special ANAME processing, just
 Additional section processing.</t>

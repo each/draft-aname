@@ -69,8 +69,10 @@ Table of Contents
      3.2.  ANAME queries
    4.  Substituting ANAME sibling address records
    5.  ANAME processing by primary masters
-     5.1.  Implications
-     5.2.  Alternatives
+     5.1.  Zone transfers
+     5.2.  DNSSEC
+     5.3.  TTLs
+     5.4.  Alternatives
    6.  ANAME processing by resolvers
    7.  IANA considerations
    8.  Security considerations
@@ -148,11 +150,8 @@ Table of Contents
       the common core functionality of existing proprietary ANAME-like
       facilities.
 
-   o  The zone maintenance mechanism described in Section 5 behaves as
-      if DNS UPDATE [RFC2136] were being used to keep an ANAME's sibling
-      address records in sync with the ANAME target; this allows it to
-      interoperate with existing DNSSEC signers, secondary servers, and
-      resolvers.
+   o  The zone maintenance mechanism described in Section 5 keeps the
+      ANAME's sibling address records in sync with the ANAME target.
 
    This definition is enough to be useful by itself.  However, it can be
    less than optimal in certain situations: for instance, when the ANAME
@@ -321,7 +320,8 @@ Table of Contents
 
    o  Perform ANAME sibling address record substitution as described in
       Section 4.  Any edit performed in the final step is applied to the
-      ANAME's zone in the same manner as a DNS UPDATE [RFC2136].
+      ANAME's zone.  A primary server MAY use Dynamic Updates (DNS
+      UPDATE) [RFC2136] to update the zone.
 
    o  If resolution failed, wait for a period before trying again.  This
       retry time SHOULD be configurable.
@@ -329,24 +329,36 @@ Table of Contents
    o  Otherwise, wait until the target address record TTL has expired,
       then repeat.
 
-   The following informative subsections explore the effects of this
-   specification, to clarify how it can work in practice.
-
-5.1.  Implications
-
-   A zone containing ANAME records has to be a dynamic zone, similar to
-   automatic DNSSEC signature maintenance.
-
-   DNSSEC signatures on sibling address records are generated in the
-   same way as for normal DNS UPDATEs.
-
    Sibling address records are committed to the zone and stored in
    nonvolatile storage.  This allows a server to restart without delays
    due to ANAME processing.
 
+5.1.  Zone transfers
+
    A zone containing ANAME records that point to frequently-changing
    targets will itself change frequently, which can increase the number
    of zone transfers.
+
+   ANAME is no more special than any other RRtype and does not introduce
+   any special processing related to zone transfers.
+
+   Secondary servers that rely on zone transfers to obtain sibling
+   address records, just like the rest of the zone, and serve them in
+   the usual way (with Section 3 Additional section processing if they
+   support it).  A working DNS NOTIFY [RFC1996] setup is recommended to
+   avoid extra delays propagating updated sibling address records when
+   they change.
+
+5.2.  DNSSEC
+
+   A zone containing ANAME records that will update A and AAAA records
+   has to do so before signing the zone with DNSSEC [RFC4033] [RFC4034]
+   [RFC4035].
+
+   DNSSEC signatures on sibling address records are generated in the
+   same way as for normal (dynamic) updates.
+
+5.3.  TTLs
 
    Sibling address records are served from authoritative servers with a
    fixed TTL.  Normally this TTL is expected to be the same as the
@@ -356,14 +368,7 @@ Table of Contents
    smaller.  There is a more extended discussion of TTL handling in
    {#ttls}.
 
-   Secondary servers rely on zone transfers to obtain sibling address
-   records, just like the rest of the zone, and serve them in the usual
-   way (with Section 3 Additional section processing if they support
-   it).  A working DNS NOTIFY [RFC1996] setup is necessary to avoid
-   extra delays propagating updated sibling address records when they
-   change.
-
-5.2.  Alternatives
+5.4.  Alternatives
 
    The process at the start of this section is specified using the
    mighty weasel words "as if", which are intended to allow a great deal
@@ -502,6 +507,21 @@ Table of Contents
               (RR) Types", RFC 3597, DOI 10.17487/RFC3597, September
               2003, <https://www.rfc-editor.org/info/rfc3597>.
 
+   [RFC4033]  Arends, R., Austein, R., Larson, M., Massey, D., and S.
+              Rose, "DNS Security Introduction and Requirements",
+              RFC 4033, DOI 10.17487/RFC4033, March 2005,
+              <https://www.rfc-editor.org/info/rfc4033>.
+
+   [RFC4034]  Arends, R., Austein, R., Larson, M., Massey, D., and S.
+              Rose, "Resource Records for the DNS Security Extensions",
+              RFC 4034, DOI 10.17487/RFC4034, March 2005,
+              <https://www.rfc-editor.org/info/rfc4034>.
+
+   [RFC4035]  Arends, R., Austein, R., Larson, M., Massey, D., and S.
+              Rose, "Protocol Modifications for the DNS Security
+              Extensions", RFC 4035, DOI 10.17487/RFC4035, March 2005,
+              <https://www.rfc-editor.org/info/rfc4035>.
+
    [RFC8499]  Hoffman, P., Sullivan, A., and K. Fujiwara, "DNS
               Terminology", BCP 219, RFC 8499, DOI 10.17487/RFC8499,
               January 2019, <https://www.rfc-editor.org/info/rfc8499>.
@@ -546,8 +566,8 @@ Appendix A.  Acknowledgments
    Thanks to Mark Andrews, Ray Bellis, Stefan Buehler, Paul Ebersman,
    Richard Gibson, Tatuya JINMEI, Hakan Lindqvist, Mattijs Mekking,
    Stephen Morris, Bjorn Mott, Richard Salts, Mukund Sivaraman, Job
-   Snijders, Jan Vcelak, Paul Vixie, Duane Wessels, and Paul Wouters for
-   discussion and feedback.
+   Snijders, Jan Vcelak, Paul Vixie, Duane Wessels, and Paul Wouters,
+   Olli Vanhoja for discussion and feedback.
 
 Appendix B.  Implementation status
 
@@ -720,7 +740,8 @@ Appendix F.  Changes since the last revision
    The full history of this draft and its issue tracker can be found at
    https://github.com/each/draft-aname [1]
 
-   o  "-03": Grammar improvements (Olli Vanhoja).
+   o  "-03": Grammar improvements (Olli Vanhoja), split up Implications
+      section, clarify text on zone transfers and dynamic updates.
 
    o  "-02": Major revamp, so authoritative servers (other than primary
       masters) now do not do any special ANAME processing, just
