@@ -652,12 +652,19 @@ explain the rationale.]
 The full history of this draft and its issue tracker can be found at
 <https://github.com/each/draft-aname>
 
-  * `-03`: Grammar improvements (Olli Vanhoja), split up Implications
-    section, clarify text on zone transfers and dynamic updates.
+## Version -03
 
-  * `-02`: Major revamp, so authoritative servers (other than primary
-    masters) now do not do any special ANAME processing, just
-    Additional section processing.
+  * Grammar improvements (Olli Vanhoja)
+  * Split up Implications section, clarify text on zone transfers
+    and dynamic updates
+  * Rewrite Alternative setup section and move to Appendix, add
+    text on zone transfer scalibility concerns and GeoIP.
+
+## Version -02
+
+Major revamp, so authoritative servers (other than primary masters)
+now do not do any special ANAME processing, just Additional section
+processing.
 
 
 {backmatter}
