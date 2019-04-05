@@ -335,7 +335,8 @@ following process, for each address type:
     then repeat.
 
 It may be more efficient to manage the polling per ANAME target rather
-than per ANAME as specified.
+than per ANAME as specified (for example if the same ANAME target is
+used by multiple zones).
 
 Sibling address records are committed to the zone and stored in
 nonvolatile storage. This allows a server to restart without delays
