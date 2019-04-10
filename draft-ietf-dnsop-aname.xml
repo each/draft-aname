@@ -269,16 +269,25 @@ retry time SHOULD be configurable.</t>
 then repeat.</t>
 </list>
 </t>
+<t>It may be more efficient to manage the polling per ANAME target rather
+than per ANAME as specified (for example if the same ANAME target is
+used by multiple zones).</t>
 <t>Sibling address records are committed to the zone and stored in
 nonvolatile storage. This allows a server to restart without delays
-due to ANAME processing.</t>
+due to ANAME processing, use offline DNSSEC signing, and not implement
+special ANAME processing logic when handling a DNS query.</t>
+<t><xref target="alternatives"></xref> describes how ANAME would fit in different DNS
+architectures that use online signing or tailored responses.</t>
 
 <section anchor="zone-transfers" title="Zone transfers">
-<t>A zone containing ANAME records that point to frequently-changing
-targets will itself change frequently, which can increase the number
-of zone transfers.</t>
 <t>ANAME is no more special than any other RRtype and does not introduce
 any special processing related to zone transfers.</t>
+<t>A zone containing ANAME records that point to frequently-changing
+targets will itself change frequently, and may see an increased number
+of zone transfers.  Or if a very large number of zones are sharing the
+same ANAME target, and that changes address, that may cause a great
+volume of zone transfers.  Guidance on dealing with ANAME in large scale
+implementations is provided <xref target="alternatives"></xref>.</t>
 <t>Secondary servers that rely on zone transfers to obtain sibling
 address records, just like the rest of the zone, and serve them in the
 usual way (with <xref target="additional"></xref> Additional section processing if they
@@ -302,36 +311,6 @@ address records' TTL (or the ANAME TTL if that is smaller); however
 the exact mechanism for obtaining the target is unspecified, so cache
 effects or deliberate policies might make the sibling TTL smaller.
 There is a more extended discussion of TTL handling in {#ttls}.</t>
-</section>
-
-<section anchor="alternatives" title="Alternatives">
-<t>The process at the start of this section is specified using the mighty
-weasel words &quot;as if&quot;, which are intended to allow a great deal of
-latitude to implementers so long as the observed behaviour is
-compatible.</t>
-<t>For instance, it is likely to be more efficient to manage the polling
-per ANAME target rather than per ANAME as specified.</t>
-<t>More radically, some existing ANAME-like implementations are based on
-a different DNS server architecture, in which a zone's published
-authoritative servers all perform the duties of a primary master in a
-distributed manner: provisioning records from a non-DNS back-end
-store, refreshing DNSSEC signatures, and so forth. This architecture
-does not use standard zone transfers, so there is no need for its
-ANAME implementation to poll the target address records to ensure that
-its secondary servers are up to date (because there are no secondary
-servers as such). Instead the authoritative servers can do ANAME
-sibling address substitution on demand.</t>
-<t>There are other variant architectures which use zone transfers within
-the provisioning system, but where the authoritative servers are able
-to independently vary the zone contents. They can conform to this
-specification provided their behaviour is consistent with it: unusual
-behaviour can appear &quot;as if&quot; there were a rapidly updating zone or
-multiple primary masters, etc.</t>
-<t>The exact mechanism for obtaining the target address records is
-unspecified; typically they will be resolved in the DNS in the usual
-way, but if an ANAME implementation has special knowledge of the
-target it can short-cut the substitution process, or use clever tricks
-such as client-dependant answers.</t>
 </section>
 </section>
 
@@ -596,15 +575,85 @@ explain the rationale.]</t>
 <t>[This section is to be removed before publication as an RFC.]</t>
 <t>The full history of this draft and its issue tracker can be found at
 <eref target="https://github.com/each/draft-aname">https://github.com/each/draft-aname</eref></t>
+
+<section anchor="version-03" title="Version -03">
 <t>
 <list style="symbols">
-<t><spanx style="verb">-03</spanx>: Grammar improvements (Olli Vanhoja), split up Implications
-section, clarify text on zone transfers and dynamic updates.</t>
-<t><spanx style="verb">-02</spanx>: Major revamp, so authoritative servers (other than primary
-masters) now do not do any special ANAME processing, just
-Additional section processing.</t>
+<t>Grammar improvements (Olli Vanhoja)</t>
+<t>Split up Implications section, clarify text on zone transfers
+and dynamic updates.</t>
+<t>Rewrite Alternative setup section and move to Appendix, add
+text on zone transfer scalibility concerns and GeoIP.</t>
 </list>
 </t>
+</section>
+
+<section anchor="version-02" title="Version -02">
+<t>Major revamp, so authoritative servers (other than primary masters)
+now do not do any special ANAME processing, just Additional section
+processing.</t>
+</section>
+</section>
+
+</middle>
+
+<back>
+<references title="Normative References">
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.4034.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.4035.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1033.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1035.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2136.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.4033.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.8499.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3597.xml"?>
+</references>
+<references title="Informative References">
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3493.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.0882.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2308.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.0973.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2065.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1996.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1034.xml"?>
+</references>
+
+<section anchor="alternatives" title="Alternative setups">
+<t>If you are a large scale DNS provider, ANAME may introduce some
+scalability concerns.  A frequently changing ANAME target, or a
+ANAME target that changes its address and is used for many zones,
+can lead to an increased number of zone transfers.  Such DNS
+architectures may want to consider a zone transfer mechanism
+outside the DNS.</t>
+<t>Another way to deal with zone transfer scalability is to move the
+ANAME processing (<xref target="subst"></xref>) inside the name server daemon. This is
+not a requirement for ANAME to work, but may be a better solution
+in large scale implementations.  These implementations usually
+already rely on online DNSSEC signing for similar reasons.  If
+ANAME processing occurs inside the name server daemon, it MUST be
+done before any DNSSEC online signing happens.</t>
+<t>For example, some existing ANAME-like implementations are based on
+a DNS server architecture, in which a zone's published authoritative
+servers all perform the duties of a primary master in a distributed
+manner: provisioning records from a non-DNS back-end store,
+refreshing DNSSEC signatures, and so forth.  They don't use standard
+standard zone transfers, and already implement their ANAME-like
+processing inside the name server daemon, substituting ANAME sibling
+address records on demand.</t>
+<t>Also, some DNS providers will tailor responses based on information
+in the client request.  Such implementations will use the source IP
+address or EDNS Client Subnet information and use geographical data
+(GeoIP) or network latency measurements to decide what the best
+answer is for a given query.  Such setups won't work with
+traditional DNSSEC and provide DNSSEC support usually through online
+signing.  Similar such setups should provide ANAME support through
+substituting ANAME sibling records on demand.</t>
+<t>The exact mechanism for obtaining the target address records in such
+setups is unspecified; typically they will be resolved in the DNS in
+the usual way, but if an ANAME implementation has special knowledge
+of the target it can short-cut the substitution process, or it can
+use clever tricks such as client-dependant answers.</t>
 </section>
 
 </back>

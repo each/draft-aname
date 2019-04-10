@@ -657,7 +657,7 @@ The full history of this draft and its issue tracker can be found at
 
   * Grammar improvements (Olli Vanhoja)
   * Split up Implications section, clarify text on zone transfers
-    and dynamic updates
+    and dynamic updates.
   * Rewrite Alternative setup section and move to Appendix, add
     text on zone transfer scalibility concerns and GeoIP.
 
