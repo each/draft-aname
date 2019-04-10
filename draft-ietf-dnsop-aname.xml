@@ -398,6 +398,54 @@ Snijders, Jan Vcelak, Paul Vixie, Duane Wessels, and Paul Wouters,
 Olli Vanhoja for discussion and feedback.</t>
 </section>
 
+<section anchor="changes-since-the-last-revision" title="Changes since the last revision">
+<t>[This section is to be removed before publication as an RFC.]</t>
+<t>The full history of this draft and its issue tracker can be found at
+<eref target="https://github.com/each/draft-aname">https://github.com/each/draft-aname</eref></t>
+
+<section anchor="version-03" title="Version -03">
+<t>
+<list style="symbols">
+<t>Grammar improvements (Olli Vanhoja)</t>
+<t>Split up Implications section, clarify text on zone transfers
+and dynamic updates.</t>
+<t>Rewrite Alternative setup section and move to Appendix, add
+text on zone transfer scalibility concerns and GeoIP.</t>
+</list>
+</t>
+</section>
+
+<section anchor="version-02" title="Version -02">
+<t>Major revamp, so authoritative servers (other than primary masters)
+now do not do any special ANAME processing, just Additional section
+processing.</t>
+</section>
+</section>
+
+</middle>
+
+<back>
+<references title="Normative References">
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.4033.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.4034.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1035.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.4035.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.8499.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1033.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3597.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2136.xml"?>
+</references>
+<references title="Informative References">
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1034.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.0882.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.0973.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1996.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3493.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2308.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2065.xml"?>
+</references>
+
 <section anchor="implementation-status" title="Implementation status">
 <t>PowerDNS currently implements a similar authoritative-only feature
 using &quot;ALIAS&quot; records, which are expanded by the primary server and
@@ -546,54 +594,6 @@ problems if we put unexpected records in the answer section, so I said
 everything should go in additional. We'll expand this appendix to
 explain the rationale.]</t>
 </section>
-
-<section anchor="changes-since-the-last-revision" title="Changes since the last revision">
-<t>[This section is to be removed before publication as an RFC.]</t>
-<t>The full history of this draft and its issue tracker can be found at
-<eref target="https://github.com/each/draft-aname">https://github.com/each/draft-aname</eref></t>
-
-<section anchor="version-03" title="Version -03">
-<t>
-<list style="symbols">
-<t>Grammar improvements (Olli Vanhoja)</t>
-<t>Split up Implications section, clarify text on zone transfers
-and dynamic updates.</t>
-<t>Rewrite Alternative setup section and move to Appendix, add
-text on zone transfer scalibility concerns and GeoIP.</t>
-</list>
-</t>
-</section>
-
-<section anchor="version-02" title="Version -02">
-<t>Major revamp, so authoritative servers (other than primary masters)
-now do not do any special ANAME processing, just Additional section
-processing.</t>
-</section>
-</section>
-
-</middle>
-
-<back>
-<references title="Normative References">
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.4034.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2136.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.4033.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1033.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.4035.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.8499.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1035.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3597.xml"?>
-</references>
-<references title="Informative References">
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1996.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3493.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.0882.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1034.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2308.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.0973.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2065.xml"?>
-</references>
 
 <section anchor="alternatives" title="Alternative setups">
 <t>If you are a large scale DNS provider, ANAME may introduce some

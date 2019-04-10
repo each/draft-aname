@@ -475,6 +475,30 @@ Snijders, Jan Vcelak, Paul Vixie, Duane Wessels, and Paul Wouters,
 Olli Vanhoja for discussion and feedback.
 
 
+# Changes since the last revision
+
+[This section is to be removed before publication as an RFC.]
+
+The full history of this draft and its issue tracker can be found at
+<https://github.com/each/draft-aname>
+
+## Version -03
+
+  * Grammar improvements (Olli Vanhoja)
+  * Split up Implications section, clarify text on zone transfers
+    and dynamic updates.
+  * Rewrite Alternative setup section and move to Appendix, add
+    text on zone transfer scalibility concerns and GeoIP.
+
+## Version -02
+
+Major revamp, so authoritative servers (other than primary masters)
+now do not do any special ANAME processing, just Additional section
+processing.
+
+
+{backmatter}
+
 # Implementation status
 
 PowerDNS currently implements a similar authoritative-only feature
@@ -644,31 +668,6 @@ section].
 problems if we put unexpected records in the answer section, so I said
 everything should go in additional. We'll expand this appendix to
 explain the rationale.]
-
-
-# Changes since the last revision
-
-[This section is to be removed before publication as an RFC.]
-
-The full history of this draft and its issue tracker can be found at
-<https://github.com/each/draft-aname>
-
-## Version -03
-
-  * Grammar improvements (Olli Vanhoja)
-  * Split up Implications section, clarify text on zone transfers
-    and dynamic updates.
-  * Rewrite Alternative setup section and move to Appendix, add
-    text on zone transfer scalibility concerns and GeoIP.
-
-## Version -02
-
-Major revamp, so authoritative servers (other than primary masters)
-now do not do any special ANAME processing, just Additional section
-processing.
-
-
-{backmatter}
 
 
 # Alternative setups {#alternatives}
