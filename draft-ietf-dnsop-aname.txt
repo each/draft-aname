@@ -72,23 +72,26 @@ Table of Contents
      5.1.  Zone transfers
      5.2.  DNSSEC
      5.3.  TTLs
-     5.4.  Alternatives
    6.  ANAME processing by resolvers
    7.  IANA considerations
    8.  Security considerations
-   9.  References
-     9.1.  Normative References
-     9.2.  Informative References
-   Appendix A.  Acknowledgments
-   Appendix B.  Implementation status
-   Appendix C.  Historical note
-   Appendix D.  On preserving TTLs
-     D.1.  Query bunching
-     D.2.  Upstream caches
-     D.3.  ANAME chains
-     D.4.  TTLs and zone transfers
-   Appendix E.  Answer vs Additional sections
-   Appendix F.  Changes since the last revision
+   9.  Acknowledgments
+   10. Changes since the last revision
+     10.1.  Version -03
+     10.2.  Version -02
+   11. References
+     11.1.  Normative References
+     11.2.  Informative References
+     11.3.  URIs
+   Appendix A.  Implementation status
+   Appendix B.  Historical note
+   Appendix C.  On preserving TTLs
+     C.1.  Query bunching
+     C.2.  Upstream caches
+     C.3.  ANAME chains
+     C.4.  TTLs and zone transfers
+   Appendix D.  Answer vs Additional sections
+   Appendix E.  Alternative setups
    Authors' Addresses
 
 1.  Introduction
@@ -104,7 +107,7 @@ Table of Contents
    highly dynamic, dependent on client location, server load, etc.
 
    However, CNAME records cannot coexist with other records with the
-   same owner name.  (The reason why is explored in Appendix C).  This
+   same owner name.  (The reason why is explored in Appendix B).  This
    restriction means they cannot appear at a zone apex (such as
    "example.com") because of the SOA, NS, and other records that have to
    be present there.  CNAME records can also conflict at subdomains, for
@@ -329,18 +332,29 @@ Table of Contents
    o  Otherwise, wait until the target address record TTL has expired,
       then repeat.
 
+   It may be more efficient to manage the polling per ANAME target
+   rather than per ANAME as specified (for example if the same ANAME
+   target is used by multiple zones).
+
    Sibling address records are committed to the zone and stored in
    nonvolatile storage.  This allows a server to restart without delays
-   due to ANAME processing.
+   due to ANAME processing, use offline DNSSEC signing, and not
+   implement special ANAME processing logic when handling a DNS query.
+
+   Appendix E describes how ANAME would fit in different DNS
+   architectures that use online signing or tailored responses.
 
 5.1.  Zone transfers
 
-   A zone containing ANAME records that point to frequently-changing
-   targets will itself change frequently, which can increase the number
-   of zone transfers.
-
    ANAME is no more special than any other RRtype and does not introduce
    any special processing related to zone transfers.
+
+   A zone containing ANAME records that point to frequently-changing
+   targets will itself change frequently, and may see an increased
+   number of zone transfers.  Or if a very large number of zones are
+   sharing the same ANAME target, and that changes address, that may
+   cause a great volume of zone transfers.  Guidance on dealing with
+   ANAME in large scale implementations is provided Appendix E.
 
    Secondary servers that rely on zone transfers to obtain sibling
    address records, just like the rest of the zone, and serve them in
@@ -367,40 +381,6 @@ Table of Contents
    so cache effects or deliberate policies might make the sibling TTL
    smaller.  There is a more extended discussion of TTL handling in
    {#ttls}.
-
-5.4.  Alternatives
-
-   The process at the start of this section is specified using the
-   mighty weasel words "as if", which are intended to allow a great deal
-   of latitude to implementers so long as the observed behaviour is
-   compatible.
-
-   For instance, it is likely to be more efficient to manage the polling
-   per ANAME target rather than per ANAME as specified.
-
-   More radically, some existing ANAME-like implementations are based on
-   a different DNS server architecture, in which a zone's published
-   authoritative servers all perform the duties of a primary master in a
-   distributed manner: provisioning records from a non-DNS back-end
-   store, refreshing DNSSEC signatures, and so forth.  This architecture
-   does not use standard zone transfers, so there is no need for its
-   ANAME implementation to poll the target address records to ensure
-   that its secondary servers are up to date (because there are no
-   secondary servers as such).  Instead the authoritative servers can do
-   ANAME sibling address substitution on demand.
-
-   There are other variant architectures which use zone transfers within
-   the provisioning system, but where the authoritative servers are able
-   to independently vary the zone contents.  They can conform to this
-   specification provided their behaviour is consistent with it: unusual
-   behaviour can appear "as if" there were a rapidly updating zone or
-   multiple primary masters, etc.
-
-   The exact mechanism for obtaining the target address records is
-   unspecified; typically they will be resolved in the DNS in the usual
-   way, but if an ANAME implementation has special knowledge of the
-   target it can short-cut the substitution process, or use clever
-   tricks such as client-dependant answers.
 
 6.  ANAME processing by resolvers
 
@@ -481,9 +461,40 @@ Table of Contents
    not to substitute sibling address records when they are more secure
    than the target address records.
 
-9.  References
+9.  Acknowledgments
 
-9.1.  Normative References
+   Thanks to Mark Andrews, Ray Bellis, Stefan Buehler, Paul Ebersman,
+   Richard Gibson, Tatuya JINMEI, Hakan Lindqvist, Mattijs Mekking,
+   Stephen Morris, Bjorn Mott, Richard Salts, Mukund Sivaraman, Job
+   Snijders, Jan Vcelak, Paul Vixie, Duane Wessels, and Paul Wouters,
+   Olli Vanhoja for discussion and feedback.
+
+10.  Changes since the last revision
+
+   [This section is to be removed before publication as an RFC.]
+
+   The full history of this draft and its issue tracker can be found at
+   https://github.com/each/draft-aname [1]
+
+10.1.  Version -03
+
+   o  Grammar improvements (Olli Vanhoja)
+
+   o  Split up Implications section, clarify text on zone transfers and
+      dynamic updates.
+
+   o  Rewrite Alternative setup section and move to Appendix, add text
+      on zone transfer scalibility concerns and GeoIP.
+
+10.2.  Version -02
+
+   Major revamp, so authoritative servers (other than primary masters)
+   now do not do any special ANAME processing, just Additional section
+   processing.
+
+11.  References
+
+11.1.  Normative References
 
    [RFC1033]  Lottor, M., "Domain Administrators Operations Guide",
               RFC 1033, DOI 10.17487/RFC1033, November 1987,
@@ -526,7 +537,7 @@ Table of Contents
               Terminology", BCP 219, RFC 8499, DOI 10.17487/RFC8499,
               January 2019, <https://www.rfc-editor.org/info/rfc8499>.
 
-9.2.  Informative References
+11.2.  Informative References
 
    [RFC0882]  Mockapetris, P., "Domain names: Concepts and facilities",
               RFC 882, DOI 10.17487/RFC0882, November 1983,
@@ -557,19 +568,11 @@ Table of Contents
               RFC 3493, DOI 10.17487/RFC3493, February 2003,
               <https://www.rfc-editor.org/info/rfc3493>.
 
-9.3.  URIs
+11.3.  URIs
 
    [1] https://github.com/each/draft-aname
 
-Appendix A.  Acknowledgments
-
-   Thanks to Mark Andrews, Ray Bellis, Stefan Buehler, Paul Ebersman,
-   Richard Gibson, Tatuya JINMEI, Hakan Lindqvist, Mattijs Mekking,
-   Stephen Morris, Bjorn Mott, Richard Salts, Mukund Sivaraman, Job
-   Snijders, Jan Vcelak, Paul Vixie, Duane Wessels, and Paul Wouters,
-   Olli Vanhoja for discussion and feedback.
-
-Appendix B.  Implementation status
+Appendix A.  Implementation status
 
    PowerDNS currently implements a similar authoritative-only feature
    using "ALIAS" records, which are expanded by the primary server and
@@ -578,7 +581,7 @@ Appendix B.  Implementation status
    [TODO: Add discussion of DNSimple, DNS Made Easy, EasyDNS,
    Cloudflare, Amazon, Dyn, and Akamai.]
 
-Appendix C.  Historical note
+Appendix B.  Historical note
 
    In the early DNS [RFC0882], CNAME records were allowed to coexist
    with other records.  However this led to coherency problems: if a
@@ -624,7 +627,7 @@ Appendix C.  Historical note
    show that the problems are particularly acute when CNAME and MX try
    to coexist.
 
-Appendix D.  On preserving TTLs
+Appendix C.  On preserving TTLs
 
    An ANAME's sibling address records are in an unusual situation: they
    are authoritative data in the owner's zone, so from that point of
@@ -646,7 +649,7 @@ Appendix D.  On preserving TTLs
 
    [TF: see issue #30]
 
-D.1.  Query bunching
+C.1.  Query bunching
 
    If the times of end-user queries for a domain name are well
    distributed, then (typically) queries received by the authoritative
@@ -667,7 +670,7 @@ D.1.  Query bunching
    target address records' original TTL.  There is no cache-like
    decrementing TTL, so there is no bunching of queries.
 
-D.2.  Upstream caches
+C.2.  Upstream caches
 
    There are two straightforward ways to get an RRset's original TTL:
 
@@ -700,14 +703,14 @@ D.2.  Upstream caches
    records are updated) plus the sibling address record TTL (which
    determines when end-user caches are updated).
 
-D.3.  ANAME chains
+C.3.  ANAME chains
 
    ANAME sibling address record substitution is made slightly more
    complicated by the requirement to follow chains of ANAME and/or CNAME
    records.  This stops the end-to-end TTL from being inflated by each
    ANAME in the chain.
 
-D.4.  TTLs and zone transfers
+C.4.  TTLs and zone transfers
 
    When things are working properly (with secondary name servers
    responding to NOTIFY messages promptly) the authoritative servers
@@ -719,7 +722,7 @@ D.4.  TTLs and zone transfers
    refresh timer.  More serious breakage can stretch them up to the zone
    expiry time.
 
-Appendix E.  Answer vs Additional sections
+Appendix D.  Answer vs Additional sections
 
    [MM: Discuss what should be in the additional section: ANAME makes
    sense, but differs from CNAME logic (where the CNAME is in the answer
@@ -733,19 +736,45 @@ Appendix E.  Answer vs Additional sections
    said everything should go in additional.  We'll expand this appendix
    to explain the rationale.]
 
-Appendix F.  Changes since the last revision
+Appendix E.  Alternative setups
 
-   [This section is to be removed before publication as an RFC.]
+   If you are a large scale DNS provider, ANAME may introduce some
+   scalability concerns.  A frequently changing ANAME target, or a ANAME
+   target that changes its address and is used for many zones, can lead
+   to an increased number of zone transfers.  Such DNS architectures may
+   want to consider a zone transfer mechanism outside the DNS.
 
-   The full history of this draft and its issue tracker can be found at
-   https://github.com/each/draft-aname [1]
+   Another way to deal with zone transfer scalability is to move the
+   ANAME processing (Section 4) inside the name server daemon.  This is
+   not a requirement for ANAME to work, but may be a better solution in
+   large scale implementations.  These implementations usually already
+   rely on online DNSSEC signing for similar reasons.  If ANAME
+   processing occurs inside the name server daemon, it MUST be done
+   before any DNSSEC online signing happens.
 
-   o  "-03": Grammar improvements (Olli Vanhoja), split up Implications
-      section, clarify text on zone transfers and dynamic updates.
+   For example, some existing ANAME-like implementations are based on a
+   DNS server architecture, in which a zone's published authoritative
+   servers all perform the duties of a primary master in a distributed
+   manner: provisioning records from a non-DNS back-end store,
+   refreshing DNSSEC signatures, and so forth.  They don't use standard
+   standard zone transfers, and already implement their ANAME-like
+   processing inside the name server daemon, substituting ANAME sibling
+   address records on demand.
 
-   o  "-02": Major revamp, so authoritative servers (other than primary
-      masters) now do not do any special ANAME processing, just
-      Additional section processing.
+   Also, some DNS providers will tailor responses based on information
+   in the client request.  Such implementations will use the source IP
+   address or EDNS Client Subnet information and use geographical data
+   (GeoIP) or network latency measurements to decide what the best
+   answer is for a given query.  Such setups won't work with traditional
+   DNSSEC and provide DNSSEC support usually through online signing.
+   Similar such setups should provide ANAME support through substituting
+   ANAME sibling records on demand.
+
+   The exact mechanism for obtaining the target address records in such
+   setups is unspecified; typically they will be resolved in the DNS in
+   the usual way, but if an ANAME implementation has special knowledge
+   of the target it can short-cut the substitution process, or it can
+   use clever tricks such as client-dependant answers.
 
 Authors' Addresses
 
