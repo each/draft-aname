@@ -5,18 +5,18 @@
 DNS Operations                                                  T. Finch
 Internet-Draft                                   University of Cambridge
 Intended status: Standards Track                                 E. Hunt
-Expires: April 22, 2019                                              ISC
+Expires: October 17, 2019                                            ISC
                                                              P. van Dijk
                                                                 PowerDNS
                                                                  A. Eden
                                                                 DNSimple
                                                               W. Mekking
                                                                      ISC
-                                                        October 19, 2018
+                                                          April 15, 2019
 
 
                   Address-specific DNS aliases (ANAME)
-                       draft-ietf-dnsop-aname-02
+                       draft-ietf-dnsop-aname-03
 
 Abstract
 
@@ -41,11 +41,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on April 22, 2019.
+   This Internet-Draft will expire on October 17, 2019.
 
 Copyright Notice
 
-   Copyright (c) 2018 IETF Trust and the persons identified as the
+   Copyright (c) 2019 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
