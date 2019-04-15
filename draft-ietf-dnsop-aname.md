@@ -16,7 +16,7 @@ keyword         = [
 
 [seriesInfo]
 name            = "Internet-Draft"
-value           = "draft-ietf-dnsop-aname-02"
+value           = "draft-ietf-dnsop-aname-03"
 status          = "standard"
 
 [[author]]

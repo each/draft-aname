@@ -16,7 +16,7 @@ Expires: October 17, 2019                                            ISC
 
 
                   Address-specific DNS aliases (ANAME)
-                       draft-ietf-dnsop-aname-02
+                       draft-ietf-dnsop-aname-03
 
 Abstract
 
