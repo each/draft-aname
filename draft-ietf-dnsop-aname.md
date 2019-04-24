@@ -312,48 +312,30 @@ architectures that use online signing or tailored responses.
 
 ## Additional section processing {#additional}
 
-An ANAME target may resolve to address records via a chain of CNAME
-and/or ANAME records; any CNAME/ANAME chain MAY be included when
-adding target address records to a response's Additional section.
-
 ### Address queries
 
 When a server receives an address query for a name that has an ANAME
-record, the response's Additional section:
-
-  * MUST contain the ANAME record;
-
-  * MAY contain the target address records that match the query
-    type (or the corresponding proof of nonexistence), if they are
-    available and the target address RDATA fields differ from the
-    sibling address RRset.
-
+record, the response's Additional section MUST contain the ANAME record.
 The ANAME record indicates to a client that it might wish to resolve
-the target address records itself. The target address records might
-not be available if the server is authoritative and does not include
-out-of-zone or non-authoritative data in its answers.
+the target address records itself.
 
 ### ANAME queries
 
-When a server receives an query for type ANAME, there are three
+When a server receives an query for type ANAME, there are two
 possibilities:
 
-  * The query resolved to an ANAME record, and the server has the
-    target address records; any target address records SHOULD be added
-    to the Additional section.
-
-  * The query resolved to an ANAME record, and the server does not
-    have the target address records; any sibling address records
+  * The query resolved to an ANAME record; any sibling address records
     SHOULD be added to the Additional section.
 
   * The query did not resolve to an ANAME record; any address records
     with the same owner name SHOULD be added to the Additional section
     of the NOERROR response.
 
+The sibling address records MAY be already substituted.
+
 When adding address records to the Additional section, if not all
 address types are present and the zone is signed, the server SHOULD
 include a DNSSEC proof of nonexistence for the missing address types.
-
 
 ## Zone transfers
 
