@@ -439,32 +439,26 @@ substitution for them.)
 
 ## Address queries
 
-When a server receives an address query for a name that has an ANAME
+When a resolver receives an address query for a name that has an ANAME
 record, the response's Additional section:
 
   * MUST contain the ANAME record;
 
   * MAY contain the target address records that match the query
     type (or the corresponding proof of nonexistence), if they are
-    available and the target address RDATA fields differ from the
-    sibling address RRset.
-
-The ANAME record indicates to a client that it might wish to resolve
-the target address records itself. The target address records might
-not be available if the server is authoritative and does not include
-out-of-zone or non-authoritative data in its answers, or if the server
-is recursive and the records are not in the cache.
+    available in the cache and the target address RDATA fields differ
+    from the sibling address RRset.
 
 ## ANAME queries
 
-When a server receives an query for type ANAME, there are three
+When a resolver receives an query for type ANAME, there are three
 possibilities:
 
-  * The query resolved to an ANAME record, and the server has the
+  * The query resolved to an ANAME record, and the resolver has the
     target address records; any target address records SHOULD be added
     to the Additional section.
 
-  * The query resolved to an ANAME record, and the server does not
+  * The query resolved to an ANAME record, and the resolver does not
     have the target address records; any sibling address records
     SHOULD be added to the Additional section.
 
@@ -472,9 +466,10 @@ possibilities:
     with the same owner name SHOULD be added to the Additional section
     of the NOERROR response.
 
-When adding address records to the Additional section, if not all
-address types are present and the zone is signed, the server SHOULD
-include a DNSSEC proof of nonexistence for the missing address types.
+Just like with an authoritative server, when adding address records to
+the Additional section, if not all address types are present and the
+zone is signed, the server SHOULD include a DNSSEC proof of nonexistence
+for the missing address types.
 
 # IANA considerations
 
