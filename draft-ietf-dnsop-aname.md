@@ -247,56 +247,6 @@ redirect both the owner name address records (via ANAME) and everything
 under it (via DNAME).
 
 
-# Additional section processing {#additional}
-
-The requirements in this section apply to both recursive and
-authoritative servers.
-
-An ANAME target MAY resolve to address records via a chain of CNAME
-and/or ANAME records; any CNAME/ANAME chain MUST be included when
-adding target address records to a response's Additional section.
-
-
-## Address queries
-
-When a server receives an address query for a name that has an ANAME
-record, the response's Additional section:
-
-  * MUST contain the ANAME record;
-
-  * MAY contain the target address records that match the query
-    type (or the corresponding proof of nonexistence), if they are
-    available and the target address RDATA fields differ from the
-    sibling address RRset.
-
-The ANAME record indicates to a client that it might wish to resolve
-the target address records itself. The target address records might
-not be available if the server is authoritative and does not include
-out-of-zone or non-authoritative data in its answers, or if the server
-is recursive and the records are not in the cache.
-
-## ANAME queries
-
-When a server receives an query for type ANAME, there are three
-possibilities:
-
-  * The query resolved to an ANAME record, and the server has the
-    target address records; any target address records SHOULD be added
-    to the Additional section.
-
-  * The query resolved to an ANAME record, and the server does not
-    have the target address records; any sibling address records
-    SHOULD be added to the Additional section.
-
-  * The query did not resolve to an ANAME record; any address records
-    with the same owner name SHOULD be added to the Additional section
-    of the NOERROR response.
-
-When adding address records to the Additional section, if not all
-address types are present and the zone is signed, the server SHOULD
-include a DNSSEC proof of nonexistence for the missing address types.
-
-
 # Substituting ANAME sibling address records {#subst}
 
 This process is used by both primary masters (see (#primary)) and
@@ -360,6 +310,51 @@ special ANAME processing logic when handling a DNS query.
 (#alternatives) describes how ANAME would fit in different DNS
 architectures that use online signing or tailored responses.
 
+## Additional section processing {#additional}
+
+An ANAME target may resolve to address records via a chain of CNAME
+and/or ANAME records; any CNAME/ANAME chain MAY be included when
+adding target address records to a response's Additional section.
+
+### Address queries
+
+When a server receives an address query for a name that has an ANAME
+record, the response's Additional section:
+
+  * MUST contain the ANAME record;
+
+  * MAY contain the target address records that match the query
+    type (or the corresponding proof of nonexistence), if they are
+    available and the target address RDATA fields differ from the
+    sibling address RRset.
+
+The ANAME record indicates to a client that it might wish to resolve
+the target address records itself. The target address records might
+not be available if the server is authoritative and does not include
+out-of-zone or non-authoritative data in its answers.
+
+### ANAME queries
+
+When a server receives an query for type ANAME, there are three
+possibilities:
+
+  * The query resolved to an ANAME record, and the server has the
+    target address records; any target address records SHOULD be added
+    to the Additional section.
+
+  * The query resolved to an ANAME record, and the server does not
+    have the target address records; any sibling address records
+    SHOULD be added to the Additional section.
+
+  * The query did not resolve to an ANAME record; any address records
+    with the same owner name SHOULD be added to the Additional section
+    of the NOERROR response.
+
+When adding address records to the Additional section, if not all
+address types are present and the zone is signed, the server SHOULD
+include a DNSSEC proof of nonexistence for the missing address types.
+
+
 ## Zone transfers
 
 ANAME is no more special than any other RRtype and does not introduce
@@ -402,11 +397,11 @@ There is a more extended discussion of TTL handling in {#ttls}.
 
 When a resolver makes an address query in the usual way, it might
 receive a response containing ANAME information in the additional
-section, as described in (#additional). This informs the resolver that
-it MAY resolve the ANAME target address records to get answers that
+section, as described in (#additionalresolver). This informs the resolver
+that it MAY resolve the ANAME target address records to get answers that
 are tailored to the resolver rather than the ANAME's primary master.
 It SHOULD include the target address records in the Additional section
-of its responses as described in (#additional).
+of its responses as described in (#additionalresolver).
 
 In order to provide tailored answers to clients that are
 ANAME-oblivious, the resolver MAY perform sibling address record
@@ -429,7 +424,7 @@ In these first two cases, the resolver MAY perform ANAME sibling
 address record substitution as described in (#subst). Any edit
 performed in the final step is applied to the Answer section of the
 response. The resolver SHOULD then perform Additional section processing
-as described in (#additional).
+as described in (#additionalresolver).
 
 If the resolver's client is querying using an API such as
 `getaddrinfo` [@?RFC3493] that does not support DNSSEC validation, the
@@ -440,6 +435,46 @@ validating stub resolvers that query an upstream recursive server with
 DO=1, so they cannot rely on the recursive server to do ANAME
 substitution for them.)
 
+# Additional section processing {#additionalresolver}
+
+## Address queries
+
+When a server receives an address query for a name that has an ANAME
+record, the response's Additional section:
+
+  * MUST contain the ANAME record;
+
+  * MAY contain the target address records that match the query
+    type (or the corresponding proof of nonexistence), if they are
+    available and the target address RDATA fields differ from the
+    sibling address RRset.
+
+The ANAME record indicates to a client that it might wish to resolve
+the target address records itself. The target address records might
+not be available if the server is authoritative and does not include
+out-of-zone or non-authoritative data in its answers, or if the server
+is recursive and the records are not in the cache.
+
+## ANAME queries
+
+When a server receives an query for type ANAME, there are three
+possibilities:
+
+  * The query resolved to an ANAME record, and the server has the
+    target address records; any target address records SHOULD be added
+    to the Additional section.
+
+  * The query resolved to an ANAME record, and the server does not
+    have the target address records; any sibling address records
+    SHOULD be added to the Additional section.
+
+  * The query did not resolve to an ANAME record; any address records
+    with the same owner name SHOULD be added to the Additional section
+    of the NOERROR response.
+
+When adding address records to the Additional section, if not all
+address types are present and the zone is signed, the server SHOULD
+include a DNSSEC proof of nonexistence for the missing address types.
 
 # IANA considerations
 
