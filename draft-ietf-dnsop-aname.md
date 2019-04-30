@@ -239,7 +239,11 @@ altered by ANAME processing.
 
 ANAME records MAY freely coexist at the same owner name with other RR
 types, except they MUST NOT coexist with CNAME or any other RR type
-that restricts the types with which it can itself coexist.
+that restricts the types with which it can itself coexist. That means
+ANAME records can coexist at the same owner name with A and AAAA records.
+These are the sibling address records that are updated with the target
+addresses that are retrieved through the ANAME substitution
+process (#subst).
 
 Like other types, ANAME records can coexist with DNAME records at the
 same owner name; in fact, the two can be used cooperatively to
@@ -265,16 +269,17 @@ The following steps MUST be performed for each address type:
  1. Stop if resolution failed. (Note that NXDOMAIN and NODATA count as
     successfully resolving an empty RRset.)
 
- 1. Replace the owner of the target address records with the owner of
-    the ANAME record. Reduce the TTL to match the ANAME record if it
-    is greater. Drop any RRSIG records.
+ 1. If one ore more address records are found, replace the owner of
+    the target address records with the owner of the ANAME record.
+    Reduce the TTL to match the ANAME record if it is greater. Drop any
+    RRSIG records.
 
  1. Stop if this modified RRset is the same as the sibling RRset
     (ignoring any RRSIG records). The comparison MAY treat
     nearly-equal TTLs as the same.
 
- 1. Delete the sibling address RRset and replace it with the modified
-    RRset.
+ 1. Delete the sibling address RRset (if any) and replace it with the
+    modified RRset.
 
 At this point, the substituted RRset is not signed. A primary master
 will proceed to sign the substituted RRset, whereas resolvers can only
@@ -295,8 +300,8 @@ following process, for each address type:
   * If resolution failed, wait for a period before trying again. This
     retry time SHOULD be configurable.
 
-  * Otherwise, wait until the target address record TTL has expired,
-    then repeat.
+  * Otherwise, wait until the target address RRset TTL has expired or
+    is close to expiring, then repeat.
 
 It may be more efficient to manage the polling per ANAME target rather
 than per ANAME as specified (for example if the same ANAME target is
@@ -310,7 +315,88 @@ special ANAME processing logic when handling a DNS query.
 (#alternatives) describes how ANAME would fit in different DNS
 architectures that use online signing or tailored responses.
 
-## Additional section processing {#additional}
+## Zone transfers
+
+ANAME is no more special than any other RRtype and does not introduce
+any special processing related to zone transfers.
+
+A zone containing ANAME records that point to frequently-changing
+targets will itself change frequently, and may see an increased number
+of zone transfers.  Or if a very large number of zones are sharing the
+same ANAME target, and that changes address, that may cause a great
+volume of zone transfers.  Guidance on dealing with ANAME in large scale
+implementations is provided (#alternatives).
+
+Secondary servers that rely on zone transfers to obtain sibling
+address records, just like the rest of the zone, and serve them in the
+usual way (with (#additional) Additional section processing if they
+support it). A working DNS NOTIFY [@?RFC1996] setup is recommended to
+avoid extra delays propagating updated sibling address records when
+they change.
+
+## DNSSEC
+
+A zone containing ANAME records that will update A and AAAA records
+has to do so before signing the zone with DNSSEC [@!RFC4033]
+[@!RFC4034] [@!RFC4035].
+
+DNSSEC signatures on sibling address records are generated in the same
+way as for normal (dynamic) updates.
+
+## TTLs
+
+Sibling address records are served from authoritative servers with a
+fixed TTL. Normally this TTL is expected to be the same as the target
+address records' TTL (or the ANAME TTL if that is smaller); however
+the exact mechanism for obtaining the target is unspecified, so cache
+effects or deliberate policies might make the sibling TTL smaller.
+There is a more extended discussion of TTL handling in {#ttls}.
+
+# ANAME processing by resolvers {#resolver}
+
+When a resolver makes an address query in the usual way, it might
+receive a response containing ANAME information in the additional
+section, as described in (#additional). This informs the resolver
+that it MAY resolve the ANAME target address records to get answers that
+are tailored to the resolver rather than the ANAME's primary master.
+It SHOULD include the target address records in the Additional section
+of its responses as described in (#additional).
+
+In order to provide tailored answers to clients that are
+ANAME-oblivious, the resolver MAY perform sibling address record
+substitution in the following situations:
+
+  * The resolver's client queries with DO=0. (As discussed in
+    (#security-considerations), if the resolver finds it would
+    downgrade a secure answer to insecure, it MAY choose not to
+    substitute the sibling address records.)
+
+  * The resolver's client queries with DO=1 and the ANAME and sibling
+    address records are unsigned. (Note that this situation does not apply
+    when the records are signed but insecure: the resolver might not be
+    able to validate them because of a broken chain of trust, but its
+    client could have an extra trust anchor that does allow it to validate
+    them; if the resolver substitutes the sibling address records they will
+    become bogus.)
+
+In these first two cases, the resolver MAY perform ANAME sibling
+address record substitution as described in (#subst). Any edit
+performed in the final step is applied to the Answer section of the
+response. The resolver SHOULD then perform Additional section processing
+as described in (#additional).
+
+If the resolver's client is querying using an API such as
+`getaddrinfo` [@?RFC3493] that does not support DNSSEC validation, the
+resolver MAY perform ANAME sibling address record substitution as
+described in (#subst). Any edits performed in the final step are
+applied to the addresses returned by the API. (This case is for
+validating stub resolvers that query an upstream recursive server with
+DO=1, so they cannot rely on the recursive server to do ANAME
+substitution for them.)
+
+# Additional section processing {#additional}
+
+## Authoritative servers
 
 ### Address queries
 
@@ -337,89 +423,9 @@ When adding address records to the Additional section, if not all
 address types are present and the zone is signed, the server SHOULD
 include a DNSSEC proof of nonexistence for the missing address types.
 
-## Zone transfers
+## Resolvers
 
-ANAME is no more special than any other RRtype and does not introduce
-any special processing related to zone transfers.
-
-A zone containing ANAME records that point to frequently-changing
-targets will itself change frequently, and may see an increased number
-of zone transfers.  Or if a very large number of zones are sharing the
-same ANAME target, and that changes address, that may cause a great
-volume of zone transfers.  Guidance on dealing with ANAME in large scale
-implementations is provided (#alternatives).
-
-Secondary servers that rely on zone transfers to obtain sibling
-address records, just like the rest of the zone, and serve them in the
-usual way (with (#additional) Additional section processing if they
-support it). A working DNS NOTIFY [@?RFC1996] setup is recommended to
-avoid extra delays propagating updated sibling address records when
-they change.
-
-
-## DNSSEC
-
-A zone containing ANAME records that will update A and AAAA records
-has to do so before signing the zone with DNSSEC [@!RFC4033]
-[@!RFC4034] [@!RFC4035].
-
-DNSSEC signatures on sibling address records are generated in the same
-way as for normal (dynamic) updates.
-
-## TTLs
-
-Sibling address records are served from authoritative servers with a
-fixed TTL. Normally this TTL is expected to be the same as the target
-address records' TTL (or the ANAME TTL if that is smaller); however
-the exact mechanism for obtaining the target is unspecified, so cache
-effects or deliberate policies might make the sibling TTL smaller.
-There is a more extended discussion of TTL handling in {#ttls}.
-
-# ANAME processing by resolvers {#resolver}
-
-When a resolver makes an address query in the usual way, it might
-receive a response containing ANAME information in the additional
-section, as described in (#additionalresolver). This informs the resolver
-that it MAY resolve the ANAME target address records to get answers that
-are tailored to the resolver rather than the ANAME's primary master.
-It SHOULD include the target address records in the Additional section
-of its responses as described in (#additionalresolver).
-
-In order to provide tailored answers to clients that are
-ANAME-oblivious, the resolver MAY perform sibling address record
-substitution in the following situations:
-
-  * The resolver's client queries with DO=0. (As discussed in
-    (#security-considerations), if the resolver finds it would
-    downgrade a secure answer to insecure, it MAY choose not to
-    substitute the sibling address records.)
-
-  * The resolver's client queries with DO=1 and the ANAME and sibling
-    address records are unsigned. (Note that this situation does not apply
-    when the records are signed but insecure: the resolver might not be
-    able to validate them because of a broken chain of trust, but its
-    client could have an extra trust anchor that does allow it to validate
-    them; if the resolver substitutes the sibling address records they will
-    become bogus.)
-
-In these first two cases, the resolver MAY perform ANAME sibling
-address record substitution as described in (#subst). Any edit
-performed in the final step is applied to the Answer section of the
-response. The resolver SHOULD then perform Additional section processing
-as described in (#additionalresolver).
-
-If the resolver's client is querying using an API such as
-`getaddrinfo` [@?RFC3493] that does not support DNSSEC validation, the
-resolver MAY perform ANAME sibling address record substitution as
-described in (#subst). Any edits performed in the final step are
-applied to the addresses returned by the API. (This case is for
-validating stub resolvers that query an upstream recursive server with
-DO=1, so they cannot rely on the recursive server to do ANAME
-substitution for them.)
-
-# Additional section processing {#additionalresolver}
-
-## Address queries
+### Address queries
 
 When a resolver receives an address query for a name that has an ANAME
 record, the response's Additional section:
@@ -431,7 +437,7 @@ record, the response's Additional section:
     available in the cache and the target address RDATA fields differ
     from the sibling address RRset.
 
-## ANAME queries
+### ANAME queries
 
 When a resolver receives an query for type ANAME, there are three
 possibilities:
