@@ -508,6 +508,10 @@ Olli Vanhoja for discussion and feedback.
 The full history of this draft and its issue tracker can be found at
 <https://github.com/each/draft-aname>
 
+## Version -04
+
+  * Split up section about Additional Section processing.
+
 ## Version -03
 
   * Grammar improvements (Olli Vanhoja)
