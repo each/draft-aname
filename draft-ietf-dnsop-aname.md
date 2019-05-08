@@ -357,7 +357,7 @@ address records' TTL; however the exact mechanism for obtaining the
 target is unspecified, so cache effects, following ANAME and CNAME
 chains, or deliberate policies might make the sibling TTL smaller.
 
-This means that when adding A and AAAA records into the zone as a
+This means that when adding A or AAAA records into the zone as a
 result of ANAME processing, the TTL to use is at most that of the
 TTL of the address target records. If you use a higher value,
 this will stretch the TTL which is undesired.
