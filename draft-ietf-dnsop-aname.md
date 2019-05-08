@@ -201,6 +201,12 @@ The "target address records" of an ANAME record are the address
 records obtained by resolving the ultimate target of the ANAME (see
 (#subst)).
 
+During the process of looking up the target address records, one or
+more CNAME or ANAME records may be encountered. These records are not
+the final target address records, and are referred in this document
+as "intermediate records". The target name must be replaced with the
+new name provided in the RDATA and the new target is resolved.
+
 Other DNS-related terminology can be found in
 [@!RFC8499].
 
