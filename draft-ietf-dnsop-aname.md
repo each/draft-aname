@@ -277,7 +277,8 @@ The following steps MUST be performed for each address type:
 
  1. If one ore more address records are found, replace the owner of
     the target address records with the owner of the ANAME record.
-    Set the TTL to the minimum of all TTLs of intermediate records.
+    Set the TTL to the minimum of the ANAME TTL, the TTL of each
+    intermediate record, and the TTL of the target address records.
     Drop any RRSIG records.
 
  1. Stop if this modified RRset is the same as the sibling RRset
@@ -691,8 +692,8 @@ the end-to-end TTL will be nearing twice the target address record TTL.
 ANAME sibling address record substitution is made slightly more
 complicated by the requirement to follow chains of ANAME and/or CNAME
 records. The TTL of the substituted address records is the minimum
-of TTLs of all the intermediate records. This stops the end-to-end
-TTL from being inflated by each ANAME in the chain.
+of TTLs of the ANAME, all the intermediate records, and target records.  This
+stops the end-to-end TTL from being inflated by each ANAME in the chain.
 
 
 ## ANAME substitution inside the name server
