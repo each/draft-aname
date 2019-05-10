@@ -695,6 +695,14 @@ records. The TTL of the substituted address records is the minimum
 of TTLs of the ANAME, all the intermediate records, and target records.  This
 stops the end-to-end TTL from being inflated by each ANAME in the chain.
 
+With CNAME records, repeat queries for "cname.example. CNAME target.example."
+must not be fully answered from cache after its TTL expires, but must instead
+be sent to name servers authoritative for "cname.example" in case the CNAME
+has been updated or removed. Similarly, an ANAME at "aname.example" means that
+repeat queries for "aname.example" must not be fully answered from cache after
+its TTL expire, but must instead be sent to name servers authoritative for
+aname.example in case the ANAME has been updated or removed.
+
 
 ## ANAME substitution inside the name server
 
@@ -712,7 +720,7 @@ zero to avoid query bunching (#bunching).
 A resolver that performs ANAME substitution is able to get the
 original TTL from the authoritative name server and use its own
 cache to store the substituted address records with the appropriate
-TTL, therefor honoring the target address records TTL.
+TTL, thereby honoring the TTL of target address records.
 
 
 ## TTLs and zone transfers
