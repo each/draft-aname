@@ -409,7 +409,8 @@
 <link href="#rfc.appendix.C.1" rel="Chapter" title="C.1 Query bunching">
 <link href="#rfc.appendix.C.2" rel="Chapter" title="C.2 Upstream caches">
 <link href="#rfc.appendix.C.3" rel="Chapter" title="C.3 ANAME chains">
-<link href="#rfc.appendix.C.4" rel="Chapter" title="C.4 TTLs and zone transfers">
+<link href="#rfc.appendix.C.4" rel="Chapter" title="C.4 ANAME substitution inside the name server">
+<link href="#rfc.appendix.C.5" rel="Chapter" title="C.5 TTLs and zone transfers">
 <link href="#rfc.appendix.D" rel="Chapter" title="D Answer vs Additional sections">
 <link href="#rfc.appendix.E" rel="Chapter" title="E Alternative setups">
 <link href="#rfc.authors" rel="Chapter">
@@ -569,7 +570,9 @@
 </li>
 <li>C.3.   <a href="#rfc.appendix.C.3">ANAME chains</a>
 </li>
-<li>C.4.   <a href="#rfc.appendix.C.4">TTLs and zone transfers</a>
+<li>C.4.   <a href="#rfc.appendix.C.4">ANAME substitution inside the name server</a>
+</li>
+<li>C.5.   <a href="#rfc.appendix.C.5">TTLs and zone transfers</a>
 </li>
 </ul><li>Appendix D.   <a href="#rfc.appendix.D">Answer vs Additional sections</a>
 </li>
@@ -620,8 +623,9 @@
 <p id="rfc.section.1.2.p.2">When talking about "address records" we mean the entire RRset, including owner name and TTL. We treat missing address records (i.e.  NXDOMAIN or NODATA) the same successfully resolving as a set of zero address records, and distinct from "failure" which covers error responses such as SERVFAIL or REFUSED.</p>
 <p id="rfc.section.1.2.p.3">The "sibling address records" of an ANAME record are the address records at the same owner name as the ANAME, which are subject to ANAME substitution.</p>
 <p id="rfc.section.1.2.p.4">The "target address records" of an ANAME record are the address records obtained by resolving the ultimate target of the ANAME (see <a href="#subst" class="xref">Section 3</a>).</p>
-<p id="rfc.section.1.2.p.5">Other DNS-related terminology can be found in <a href="#RFC8499" class="xref">[RFC8499]</a>.</p>
-<p id="rfc.section.1.2.p.6">The key words MUST, MUST NOT, REQUIRED, SHALL, SHALL NOT, SHOULD, SHOULD NOT, RECOMMENDED, MAY, and OPTIONAL in this document are to be interpreted as described in <a href="#RFC2119" class="xref">[RFC2119]</a>.</p>
+<p id="rfc.section.1.2.p.5">During the process of looking up the target address records, one or more CNAME or ANAME records may be encountered. These records are not the final target address records, and are referred in this document as "intermediate records". The target name must be replaced with the new name provided in the RDATA and the new target is resolved.</p>
+<p id="rfc.section.1.2.p.6">Other DNS-related terminology can be found in <a href="#RFC8499" class="xref">[RFC8499]</a>.</p>
+<p id="rfc.section.1.2.p.7">The key words MUST, MUST NOT, REQUIRED, SHALL, SHALL NOT, SHOULD, SHOULD NOT, RECOMMENDED, MAY, and OPTIONAL in this document are to be interpreted as described in <a href="#RFC2119" class="xref">[RFC2119]</a>.</p>
 <h1 id="rfc.section.2">
 <a href="#rfc.section.2">2.</a> <a href="#rdata" id="rdata">The ANAME resource record</a>
 </h1>
@@ -651,7 +655,7 @@
 <li>Starting at the ANAME owner, follow the chain of ANAME and/or CNAME records as far as possible to find the ultimate target.</li>
 <li>If a loop is detected, continue with an empty RRset, otherwise get the ultimate target's address records. (Ignore any sibling address records of intermediate ANAMEs.)</li>
 <li>Stop if resolution failed. (Note that NXDOMAIN and NODATA count as successfully resolving an empty RRset.)</li>
-<li>If one ore more address records are found, replace the owner of the target address records with the owner of the ANAME record.  Reduce the TTL to match the ANAME record if it is greater. Drop any RRSIG records.</li>
+<li>If one ore more address records are found, replace the owner of the target address records with the owner of the ANAME record.  Set the TTL to the minimum of the ANAME TTL, the TTL of each intermediate record, and the TTL of the target address records.  Drop any RRSIG records.</li>
 <li>Stop if this modified RRset is the same as the sibling RRset (ignoring any RRSIG records). The comparison MAY treat nearly-equal TTLs as the same.</li>
 <li>Delete the sibling address RRset (if any) and replace it with the modified RRset.</li>
 </ol>
@@ -688,7 +692,9 @@
 <h1 id="rfc.section.4.3">
 <a href="#rfc.section.4.3">4.3.</a> <a href="#ttls" id="ttls">TTLs</a>
 </h1>
-<p id="rfc.section.4.3.p.1">Sibling address records are served from authoritative servers with a fixed TTL. Normally this TTL is expected to be the same as the target address records' TTL (or the ANAME TTL if that is smaller); however the exact mechanism for obtaining the target is unspecified, so cache effects or deliberate policies might make the sibling TTL smaller.  There is a more extended discussion of TTL handling in {#ttls}.</p>
+<p id="rfc.section.4.3.p.1">Sibling address records are served from authoritative servers with a fixed TTL. Normally this TTL is expected to be the same as the target address records' TTL; however the exact mechanism for obtaining the target is unspecified, so cache effects, following ANAME and CNAME chains, or deliberate policies might make the sibling TTL smaller.</p>
+<p id="rfc.section.4.3.p.2">This means that when adding A or AAAA records into the zone as a result of ANAME processing, the TTL to use is at most that of the TTL of the address target records. If you use a higher value, this will stretch the TTL which is undesired.</p>
+<p id="rfc.section.4.3.p.3">TTL stretching is hard to avoid when implementing ANAME substitution at the primary: The target address records' TTL influences the update rate of the zone, while the sibling address records' TTL determine how long a resolver may cache the address records. Thus, the end-to-end TTL (from the authoritative servers for the target address records to end-user DNS caches) is nearing twice the target address record TTL.  There is a more extended discussion of TTL handling in {#ttls}.</p>
 <h1 id="rfc.section.5">
 <a href="#rfc.section.5">5.</a> <a href="#resolver" id="resolver">ANAME processing by resolvers</a>
 </h1>
@@ -781,7 +787,10 @@
 </h1>
 <p></p>
 
-<ul><li>Split up section about Additional Section processing.</li></ul>
+<ul>
+<li>Split up section about Additional Section processing.</li>
+<li>Revisit TTL considerations.</li>
+</ul>
 
 <p> </p>
 <h1 id="rfc.section.10.2">
@@ -914,11 +923,9 @@
 </h1>
 <p id="rfc.section.C.p.1">An ANAME's sibling address records are in an unusual situation: they are authoritative data in the owner's zone, so from that point of view the owner has the last say over what their TTL should be; on the other hand, ANAMEs are supposed to act as aliases, in which case the target should control the address record TTLs.</p>
 <p id="rfc.section.C.p.2">However there are some technical constraints that make it difficult to preserve the target address record TTLs.</p>
-<p id="rfc.section.C.p.3">The following subsections conclude that the end-to-end TTL (from the authoritative servers for the target address records to end-user DNS caches) should be set as the target address record TTL plus the sibling address record TTL.</p>
-<p id="rfc.section.C.p.4">[MM: Discuss: I think it should be just the ANAME record TTL perhaps the minimum of ANAME and sibling address RRset TTL. We should provide some guidance on TTL settings for ANAME).</p>
-<p id="rfc.section.C.p.5">[TF: see issue #30]</p>
+<p id="rfc.section.C.p.3">The following subsections conclude that the end-to-end TTL (from the authoritative servers for the target address records to end-user DNS caches) is nearing twice the target address record TTL.</p>
 <h1 id="rfc.appendix.C.1">
-<a href="#rfc.appendix.C.1">C.1.</a> <a href="#query-bunching" id="query-bunching">Query bunching</a>
+<a href="#rfc.appendix.C.1">C.1.</a> <a href="#bunching" id="bunching">Query bunching</a>
 </h1>
 <p id="rfc.section.C.1.p.1">If the times of end-user queries for a domain name are well distributed, then (typically) queries received by the authoritative servers for that domain are also well distributed. If the domain is popular, a recursive server will re-query for it once every TTL seconds, but the periodic queries from all the various recursive servers will not be aligned, so the queries remain well distributed.</p>
 <p id="rfc.section.C.1.p.2">However, imagine that the TTLs of an ANAME's sibling address records are decremented in the same way as cache entries in recursive servers.  Then all the recursive servers querying for the name would try to refresh their caches at the same time when the TTL reaches zero. They would become synchronized, and all the queries for the domain would be bunched into periodic spikes.</p>
@@ -936,18 +943,25 @@
 
 <p> </p>
 <p id="rfc.section.C.2.p.3">However, not all zones are signed, and a primary master might not be able to query other authoritative servers directly (e.g. if it is a hidden primary behind a strict firewall). Instead it might have to obtain an ANAME's target address records via some other recursive server.</p>
-<p id="rfc.section.C.2.p.4">Querying via a separate recursive server means the primary master cannot trivially obtain the target address records' original TTLs.  Fortunately this is likely to be a self-correcting problem for similar reasons to the query-bunching discussed in the previous subsection.  The primary master re-checks the target address records just after the TTL expires when its upstream cache has just refreshed them, so the TTL will be nearly equal to the original TTL.</p>
+<p id="rfc.section.C.2.p.4">Querying via a separate recursive server means the primary master cannot trivially obtain the target address records' original TTLs.  Fortunately this is likely to be a self-correcting problem for similar reasons to the query-bunching discussed in the previous subsection.  The primary master can inspect the target address records just after the TTL expires when its upstream cache has just refreshed them, so the TTL will be nearly equal to the original TTL.</p>
 <p id="rfc.section.C.2.p.5">A related consideration is that the primary master cannot in general refresh its copies of an ANAME's target address records more frequently than their TTL, without privileged control over its resolver cache.</p>
-<p id="rfc.section.C.2.p.6">Combined with the requirement that sibling address records are served with a fixed TTL, this means that the end-to-end TTL will be the target address record TTL (which determines when the sibling address records are updated) plus the sibling address record TTL (which determines when end-user caches are updated).</p>
+<p id="rfc.section.C.2.p.6">Combined with the requirement that sibling address records are served with a fixed TTL, this means that the end-to-end TTL will be the target address record TTL (which determines when the sibling address records are updated) plus the sibling address record TTL (which determines when end-user caches are updated). Since the sibling address record TTL is derived from the target address records' original TTL, the end-to-end TTL will be nearing twice the target address record TTL.</p>
 <h1 id="rfc.appendix.C.3">
 <a href="#rfc.appendix.C.3">C.3.</a> <a href="#aname-chains" id="aname-chains">ANAME chains</a>
 </h1>
-<p id="rfc.section.C.3.p.1">ANAME sibling address record substitution is made slightly more complicated by the requirement to follow chains of ANAME and/or CNAME records. This stops the end-to-end TTL from being inflated by each ANAME in the chain.</p>
+<p id="rfc.section.C.3.p.1">ANAME sibling address record substitution is made slightly more complicated by the requirement to follow chains of ANAME and/or CNAME records. The TTL of the substituted address records is the minimum of TTLs of the ANAME, all the intermediate records, and target records.  This stops the end-to-end TTL from being inflated by each ANAME in the chain.</p>
+<p id="rfc.section.C.3.p.2">With CNAME records, repeat queries for "cname.example. CNAME target.example." must not be fully answered from cache after its TTL expires, but must instead be sent to name servers authoritative for "cname.example" in case the CNAME has been updated or removed. Similarly, an ANAME at "aname.example" means that repeat queries for "aname.example" must not be fully answered from cache after its TTL expire, but must instead be sent to name servers authoritative for aname.example in case the ANAME has been updated or removed.</p>
 <h1 id="rfc.appendix.C.4">
-<a href="#rfc.appendix.C.4">C.4.</a> <a href="#ttls-and-zone-transfers" id="ttls-and-zone-transfers">TTLs and zone transfers</a>
+<a href="#rfc.appendix.C.4">C.4.</a> <a href="#aname-substitution-inside-the-name-server" id="aname-substitution-inside-the-name-server">ANAME substitution inside the name server</a>
 </h1>
-<p id="rfc.section.C.4.p.1">When things are working properly (with secondary name servers responding to NOTIFY messages promptly) the authoritative servers will follow changes to ANAME target address records according to their TTLs. As a result the end-to-end TTL is unchanged from the previous subsection.</p>
-<p id="rfc.section.C.4.p.2">If NOTIFY doesn't work, the TTLs can be stretched by the zone's SOA refresh timer. More serious breakage can stretch them up to the zone expiry time.</p>
+<p id="rfc.section.C.4.p.1">When ANAME substitution is performed inside the authoritative name server (as described in #alternatives) or in the resolver (as described in #resolver) the end-to-end TTL will actually be just the target address record TTL.</p>
+<p id="rfc.section.C.4.p.2">An authoritative server that has control over its resolver can use a cached target address RRset and decremented TTL in the response to the client rather than using the original target address records' TTL. It SHOULD however not use TTLs in the response that are nearing zero to avoid query bunching <a href="#bunching" class="xref">Appendix C.1</a>.</p>
+<p id="rfc.section.C.4.p.3">A resolver that performs ANAME substitution is able to get the original TTL from the authoritative name server and use its own cache to store the substituted address records with the appropriate TTL, thereby honoring the TTL of target address records.</p>
+<h1 id="rfc.appendix.C.5">
+<a href="#rfc.appendix.C.5">C.5.</a> <a href="#ttls-and-zone-transfers" id="ttls-and-zone-transfers">TTLs and zone transfers</a>
+</h1>
+<p id="rfc.section.C.5.p.1">When things are working properly (with secondary name servers responding to NOTIFY messages promptly) the authoritative servers will follow changes to ANAME target address records according to their TTLs. As a result the end-to-end TTL is unchanged from the previous subsection.</p>
+<p id="rfc.section.C.5.p.2">If NOTIFY doesn't work, the TTLs can be stretched by the zone's SOA refresh timer. More serious breakage can stretch them up to the zone expiry time.</p>
 <h1 id="rfc.appendix.D">
 <a href="#rfc.appendix.D">Appendix D.</a> <a href="#answer-vs-additional-sections" id="answer-vs-additional-sections">Answer vs Additional sections</a>
 </h1>

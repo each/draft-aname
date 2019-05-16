@@ -201,6 +201,12 @@ The "target address records" of an ANAME record are the address
 records obtained by resolving the ultimate target of the ANAME (see
 (#subst)).
 
+During the process of looking up the target address records, one or
+more CNAME or ANAME records may be encountered. These records are not
+the final target address records, and are referred in this document
+as "intermediate records". The target name must be replaced with the
+new name provided in the RDATA and the new target is resolved.
+
 Other DNS-related terminology can be found in
 [@!RFC8499].
 
@@ -271,8 +277,9 @@ The following steps MUST be performed for each address type:
 
  1. If one ore more address records are found, replace the owner of
     the target address records with the owner of the ANAME record.
-    Reduce the TTL to match the ANAME record if it is greater. Drop any
-    RRSIG records.
+    Set the TTL to the minimum of the ANAME TTL, the TTL of each
+    intermediate record, and the TTL of the target address records.
+    Drop any RRSIG records.
 
  1. Stop if this modified RRset is the same as the sibling RRset
     (ignoring any RRSIG records). The comparison MAY treat
@@ -347,10 +354,23 @@ way as for normal (dynamic) updates.
 
 Sibling address records are served from authoritative servers with a
 fixed TTL. Normally this TTL is expected to be the same as the target
-address records' TTL (or the ANAME TTL if that is smaller); however
-the exact mechanism for obtaining the target is unspecified, so cache
-effects or deliberate policies might make the sibling TTL smaller.
+address records' TTL; however the exact mechanism for obtaining the
+target is unspecified, so cache effects, following ANAME and CNAME
+chains, or deliberate policies might make the sibling TTL smaller.
+
+This means that when adding A or AAAA records into the zone as a
+result of ANAME processing, the TTL to use is at most that of the
+TTL of the address target records. If you use a higher value,
+this will stretch the TTL which is undesired.
+
+TTL stretching is hard to avoid when implementing ANAME substitution
+at the primary: The target address records' TTL influences the update
+rate of the zone, while the sibling address records' TTL determine how
+long a resolver may cache the address records. Thus, the end-to-end TTL
+(from the authoritative servers for the target address records to
+end-user DNS caches) is nearing twice the target address record TTL.
 There is a more extended discussion of TTL handling in {#ttls}.
+
 
 # ANAME processing by resolvers {#resolver}
 
@@ -517,6 +537,7 @@ The full history of this draft and its issue tracker can be found at
 ## Version -04
 
   * Split up section about Additional Section processing.
+  * Revisit TTL considerations.
 
 ## Version -03
 
@@ -605,16 +626,10 @@ preserve the target address record TTLs.
 
 The following subsections conclude that the end-to-end TTL
 (from the authoritative servers for the target address records to
-end-user DNS caches) should be set as the target address record TTL plus the
-sibling address record TTL.
+end-user DNS caches) is nearing twice the target address record TTL.
 
-[MM: Discuss: I think it should be just the ANAME record TTL perhaps
-the minimum of ANAME and sibling address RRset TTL. We should provide
-some guidance on TTL settings for ANAME).
 
-[TF: see issue #30]
-
-## Query bunching
+## Query bunching {#bunching}
 
 If the times of end-user queries for a domain name are well
 distributed, then (typically) queries received by the authoritative
@@ -654,9 +669,9 @@ Querying via a separate recursive server means the primary master
 cannot trivially obtain the target address records' original TTLs.
 Fortunately this is likely to be a self-correcting problem for similar
 reasons to the query-bunching discussed in the previous subsection.
-The primary master re-checks the target address records just after the
-TTL expires when its upstream cache has just refreshed them, so the
-TTL will be nearly equal to the original TTL.
+The primary master can inspect the target address records just after
+the TTL expires when its upstream cache has just refreshed them, so
+the TTL will be nearly equal to the original TTL.
 
 A related consideration is that the primary master cannot in general
 refresh its copies of an ANAME's target address records more
@@ -667,15 +682,45 @@ Combined with the requirement that sibling address records are served
 with a fixed TTL, this means that the end-to-end TTL will be the
 target address record TTL (which determines when the sibling address
 records are updated) plus the sibling address record TTL (which
-determines when end-user caches are updated).
+determines when end-user caches are updated). Since the sibling address
+record TTL is derived from the target address records' original TTL,
+the end-to-end TTL will be nearing twice the target address record TTL.
 
 
 ## ANAME chains
 
 ANAME sibling address record substitution is made slightly more
 complicated by the requirement to follow chains of ANAME and/or CNAME
-records. This stops the end-to-end TTL from being inflated by each
-ANAME in the chain.
+records. The TTL of the substituted address records is the minimum
+of TTLs of the ANAME, all the intermediate records, and target records.  This
+stops the end-to-end TTL from being inflated by each ANAME in the chain.
+
+With CNAME records, repeat queries for "cname.example. CNAME target.example."
+must not be fully answered from cache after its TTL expires, but must instead
+be sent to name servers authoritative for "cname.example" in case the CNAME
+has been updated or removed. Similarly, an ANAME at "aname.example" means that
+repeat queries for "aname.example" must not be fully answered from cache after
+its TTL expire, but must instead be sent to name servers authoritative for
+aname.example in case the ANAME has been updated or removed.
+
+
+## ANAME substitution inside the name server
+
+When ANAME substitution is performed inside the authoritative name
+server (as described in #alternatives) or in the resolver (as
+described in #resolver) the end-to-end TTL will actually be just
+the target address record TTL.
+
+An authoritative server that has control over its resolver can use
+a cached target address RRset and decremented TTL in the response
+to the client rather than using the original target address records'
+TTL. It SHOULD however not use TTLs in the response that are nearing
+zero to avoid query bunching (#bunching).
+
+A resolver that performs ANAME substitution is able to get the
+original TTL from the authoritative name server and use its own
+cache to store the substituted address records with the appropriate
+TTL, thereby honoring the TTL of target address records.
 
 
 ## TTLs and zone transfers
