@@ -422,8 +422,8 @@
   <meta name="dct.creator" content="Finch, T., Hunt, E., van Dijk, P., Eden, A., and W. Mekking" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-dnsop-aname-03" />
   <meta name="dct.issued" scheme="ISO8601" content="2019-04-15" />
-  <meta name="dct.abstract" content="This document defines the &quot;ANAME&quot; DNS RR type, to provide similar functionality to CNAME, but only for type A and AAAA queries. Unlike CNAME, an ANAME can coexist with other record types. The ANAME RR allows zone owners to make an apex domain name into an alias in a standards compliant manner." />
-  <meta name="description" content="This document defines the &quot;ANAME&quot; DNS RR type, to provide similar functionality to CNAME, but only for type A and AAAA queries. Unlike CNAME, an ANAME can coexist with other record types. The ANAME RR allows zone owners to make an apex domain name into an alias in a standards compliant manner." />
+  <meta name="dct.abstract" content="This document defines the &quot;ANAME&quot; DNS RR type, to provide similar functionality to CNAME, but only for address queries. Unlike CNAME, an ANAME can coexist with other record types. The ANAME RR allows zone owners to make an apex domain name into an alias in a standards compliant manner." />
+  <meta name="description" content="This document defines the &quot;ANAME&quot; DNS RR type, to provide similar functionality to CNAME, but only for address queries. Unlike CNAME, an ANAME can coexist with other record types. The ANAME RR allows zone owners to make an apex domain name into an alias in a standards compliant manner." />
 
 </head>
 
@@ -485,7 +485,7 @@
   <span class="filename">draft-ietf-dnsop-aname-03</span></p>
   
   <h1 id="rfc.abstract"><a href="#rfc.abstract">Abstract</a></h1>
-<p>This document defines the "ANAME" DNS RR type, to provide similar functionality to CNAME, but only for type A and AAAA queries. Unlike CNAME, an ANAME can coexist with other record types. The ANAME RR allows zone owners to make an apex domain name into an alias in a standards compliant manner.</p>
+<p>This document defines the "ANAME" DNS RR type, to provide similar functionality to CNAME, but only for address queries. Unlike CNAME, an ANAME can coexist with other record types. The ANAME RR allows zone owners to make an apex domain name into an alias in a standards compliant manner.</p>
 <h1 id="rfc.status"><a href="#rfc.status">Status of This Memo</a></h1>
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
@@ -591,7 +591,7 @@
 <p id="rfc.section.1.p.2">If the web site is hosted by a third-party provider, the ideal way to provision its name in the DNS is using a CNAME record, so that the third party provider retains control over the mapping from names to IP address(es). It is now common for name-to-address mappings to be highly dynamic, dependent on client location, server load, etc.</p>
 <p id="rfc.section.1.p.3">However, CNAME records cannot coexist with other records with the same owner name. (The reason why is explored in <a href="#history" class="xref">Appendix B</a>). This restriction means they cannot appear at a zone apex (such as <samp>example.com</samp>) because of the SOA, NS, and other records that have to be present there. CNAME records can also conflict at subdomains, for example, if <samp>department.example.edu</samp> has separately hosted mail and web servers.</p>
 <p id="rfc.section.1.p.4">Redirecting website lookups to an alternate domain name via SRV or URI resource records would be an effective solution from the DNS point of view, but to date, browser vendors have not accepted this approach.</p>
-<p id="rfc.section.1.p.5">As a result, the only widely supported and standards-compliant way to publish a web site at a bare domain is to place A and/or AAAA records at the zone apex. The flexibility afforded by CNAME is not available.</p>
+<p id="rfc.section.1.p.5">As a result, the only widely supported and standards-compliant way to publish a web site at a bare domain is to place address records (A and/or AAAA) at the zone apex. The flexibility afforded by CNAME is not available.</p>
 <p id="rfc.section.1.p.6">This document specifies a new RR type "ANAME", which provides similar functionality to CNAME, but only for address queries (i.e., for type A or AAAA). The basic idea is that the address records next to an ANAME record are automatically copied from and kept in sync with the ANAME target's address records. The ANAME record can be present at any DNS node, and can coexist with most other RR types, enabling it to be present at a zone apex, or any other name where the presence of other records prevents the use of a CNAME record.</p>
 <p id="rfc.section.1.p.7">Similar authoritative functionality has been implemented and deployed by a number of DNS software vendors and service providers, using names such as ALIAS, ANAME, apex CNAME, CNAME flattening, and top-level redirection. These mechanisms are proprietary, which hinders the ability of zone owners to have the same data served from multiple providers or to move from one provider to another. None of these proprietary implementations includes a mechanism for resolvers to follow the redirection chain themselves.</p>
 <h1 id="rfc.section.1.1">
@@ -687,13 +687,13 @@
 <h1 id="rfc.section.4.2">
 <a href="#rfc.section.4.2">4.2.</a> <a href="#dnssec" id="dnssec">DNSSEC</a>
 </h1>
-<p id="rfc.section.4.2.p.1">A zone containing ANAME records that will update A and AAAA records has to do so before signing the zone with DNSSEC <a href="#RFC4033" class="xref">[RFC4033]</a> <a href="#RFC4034" class="xref">[RFC4034]</a> <a href="#RFC4035" class="xref">[RFC4035]</a>.</p>
+<p id="rfc.section.4.2.p.1">A zone containing ANAME records that will update address records has to do so before signing the zone with DNSSEC <a href="#RFC4033" class="xref">[RFC4033]</a> <a href="#RFC4034" class="xref">[RFC4034]</a> <a href="#RFC4035" class="xref">[RFC4035]</a>.</p>
 <p id="rfc.section.4.2.p.2">DNSSEC signatures on sibling address records are generated in the same way as for normal (dynamic) updates.</p>
 <h1 id="rfc.section.4.3">
 <a href="#rfc.section.4.3">4.3.</a> <a href="#ttls" id="ttls">TTLs</a>
 </h1>
 <p id="rfc.section.4.3.p.1">Sibling address records are served from authoritative servers with a fixed TTL. Normally this TTL is expected to be the same as the target address records' TTL; however the exact mechanism for obtaining the target is unspecified, so cache effects, following ANAME and CNAME chains, or deliberate policies might make the sibling TTL smaller.</p>
-<p id="rfc.section.4.3.p.2">This means that when adding A or AAAA records into the zone as a result of ANAME processing, the TTL to use is at most that of the TTL of the address target records. If you use a higher value, this will stretch the TTL which is undesired.</p>
+<p id="rfc.section.4.3.p.2">This means that when adding address records into the zone as a result of ANAME processing, the TTL to use is at most that of the TTL of the address target records. If you use a higher value, this will stretch the TTL which is undesired.</p>
 <p id="rfc.section.4.3.p.3">TTL stretching is hard to avoid when implementing ANAME substitution at the primary: The target address records' TTL influences the update rate of the zone, while the sibling address records' TTL determine how long a resolver may cache the address records. Thus, the end-to-end TTL (from the authoritative servers for the target address records to end-user DNS caches) is nearing twice the target address record TTL.  There is a more extended discussion of TTL handling in {#ttls}.</p>
 <h1 id="rfc.section.5">
 <a href="#rfc.section.5">5.</a> <a href="#resolver" id="resolver">ANAME processing by resolvers</a>
