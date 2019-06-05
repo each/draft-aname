@@ -94,7 +94,7 @@ organization    = "ISC"
 .# Abstract
 
 This document defines the "ANAME" DNS RR type, to provide similar
-functionality to CNAME, but only for type A and AAAA queries. Unlike
+functionality to CNAME, but only for address queries. Unlike
 CNAME, an ANAME can coexist with other record types. The ANAME RR
 allows zone owners to make an apex domain name into an alias in a
 standards compliant manner.
@@ -127,8 +127,8 @@ resource records would be an effective solution from the DNS point of
 view, but to date, browser vendors have not accepted this approach.
 
 As a result, the only widely supported and standards-compliant way to
-publish a web site at a bare domain is to place A and/or AAAA records
-at the zone apex. The flexibility afforded by CNAME is not available.
+publish a web site at a bare domain is to place address records (A and/or
+AAAA) at the zone apex. The flexibility afforded by CNAME is not available.
 
 This document specifies a new RR type "ANAME", which provides similar
 functionality to CNAME, but only for address queries (i.e., for type A
@@ -343,7 +343,7 @@ they change.
 
 ## DNSSEC
 
-A zone containing ANAME records that will update A and AAAA records
+A zone containing ANAME records that will update address records
 has to do so before signing the zone with DNSSEC [@!RFC4033]
 [@!RFC4034] [@!RFC4035].
 
@@ -358,7 +358,7 @@ address records' TTL; however the exact mechanism for obtaining the
 target is unspecified, so cache effects, following ANAME and CNAME
 chains, or deliberate policies might make the sibling TTL smaller.
 
-This means that when adding A or AAAA records into the zone as a
+This means that when adding address records into the zone as a
 result of ANAME processing, the TTL to use is at most that of the
 TTL of the address target records. If you use a higher value,
 this will stretch the TTL which is undesired.
