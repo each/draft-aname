@@ -178,14 +178,14 @@ RRset MUST NOT contain more than one resource record.</t>
 processing (see <xref target="primary"></xref>) and are not first-class records in their
 own right. They MAY exist in zone files, but they can subsequently be
 altered by ANAME processing.</t>
-<t>ANAME records MAY freely coexist at the same owner name with other RR
+<t>An ANAME record MAY freely coexist at the same owner name with other RR
 types, except they MUST NOT coexist with CNAME or any other RR type
 that restricts the types with which it can itself coexist. That means
-ANAME records can coexist at the same owner name with A and AAAA records.
+An ANAME record can coexist at the same owner name with A and AAAA records.
 These are the sibling address records that are updated with the target
 addresses that are retrieved through the ANAME substitution
 process <xref target="subst"></xref>.</t>
-<t>Like other types, ANAME records can coexist with DNAME records at the
+<t>Like other types, An ANAME record can coexist with DNAME records at the
 same owner name; in fact, the two can be used cooperatively to
 redirect both the owner name address records (via ANAME) and everything
 under it (via DNAME).</t>
@@ -195,7 +195,10 @@ under it (via DNAME).</t>
 <section anchor="subst" title="Substituting ANAME sibling address records">
 <t>This process is used by both primary masters (see <xref target="primary"></xref>) and
 resolvers (see <xref target="resolver"></xref>), though they vary in how they apply the
-edit described in the final step.</t>
+edit described in the final step.  However, this process is not
+exclusively used by primary masters and resolvers: it may be
+executed as a bump in the wire, as part of the query lookup, or
+at any other point during query resolution.</t>
 <t>The following steps MUST be performed for each address type:</t>
 <t>
 <list style="numbers">
@@ -258,8 +261,8 @@ of zone transfers.  Or if a very large number of zones are sharing the
 same ANAME target, and that changes address, that may cause a great
 volume of zone transfers.  Guidance on dealing with ANAME in large scale
 implementations is provided <xref target="alternatives"></xref>.</t>
-<t>Secondary servers that rely on zone transfers to obtain sibling
-address records, just like the rest of the zone, and serve them in the
+<t>Secondary servers rely on zone transfers to obtain sibling address
+records, just like the rest of the zone, and serve them in the
 usual way (with <xref target="additional"></xref> Additional section processing if they
 support it). A working DNS NOTIFY <xref target="RFC1996"></xref> setup is recommended to
 avoid extra delays propagating updated sibling address records when
@@ -269,7 +272,11 @@ they change.</t>
 <section anchor="dnssec" title="DNSSEC">
 <t>A zone containing ANAME records that will update address records
 has to do so before signing the zone with DNSSEC <xref target="RFC4033"></xref>
-<xref target="RFC4034"></xref> <xref target="RFC4035"></xref>.</t>
+<xref target="RFC4034"></xref> <xref target="RFC4035"></xref>.  This means that for traditional DNSSEC signing
+the substitution of sibling address records must be done before signing
+and loading the zone into the name server.  For servers that support
+online signing, the substitution may happen as part of the name
+server process, after loading the zone.</t>
 <t>DNSSEC signatures on sibling address records are generated in the same
 way as for normal (dynamic) updates.</t>
 </section>
@@ -299,9 +306,7 @@ There is a more extended discussion of TTL handling in {#ttls}.</t>
 receive a response containing ANAME information in the additional
 section, as described in <xref target="additional"></xref>. This informs the resolver
 that it MAY resolve the ANAME target address records to get answers that
-are tailored to the resolver rather than the ANAME's primary master.
-It SHOULD include the target address records in the Additional section
-of its responses as described in <xref target="additional"></xref>.</t>
+are tailored to the resolver rather than the ANAME's primary master.</t>
 <t>In order to provide tailored answers to clients that are
 ANAME-oblivious, the resolver MAY perform sibling address record
 substitution in the following situations:</t>
@@ -347,18 +352,10 @@ the target address records itself.</t>
 </section>
 
 <section anchor="aname-queries" title="ANAME queries">
-<t>When a server receives an query for type ANAME, there are two
-possibilities:</t>
-<t>
-<list style="symbols">
-<t>The query resolved to an ANAME record; any sibling address records
-SHOULD be added to the Additional section.</t>
-<t>The query did not resolve to an ANAME record; any address records
-with the same owner name SHOULD be added to the Additional section
-of the NOERROR response.</t>
-</list>
-</t>
-<t>The sibling address records MAY be already substituted.</t>
+<t>When a server receives an query for type ANAME, regardless of whether
+the ANAME record exists on the queried domain, any sibling address
+records SHOULD be added to the Additional section.  Note that the
+sibling address records may have been substituted already.</t>
 <t>When adding address records to the Additional section, if not all
 address types are present and the zone is signed, the server SHOULD
 include a DNSSEC proof of nonexistence for the missing address types.</t>
@@ -379,28 +376,18 @@ available in the cache and the target address RDATA fields differ
 from the sibling address RRset.</t>
 </list>
 </t>
+<t>An ANAME target MAY resolve to address records via a chain of CNAME
+and/or ANAME records; any CNAME/ANAME chain MUST be included when
+adding target address records to a response's Additional section.</t>
 </section>
 
 <section anchor="aname-queries-1" title="ANAME queries">
-<t>When a resolver receives an query for type ANAME, there are three
-possibilities:</t>
-<t>
-<list style="symbols">
-<t>The query resolved to an ANAME record, and the resolver has the
-target address records; any target address records SHOULD be added
-to the Additional section.</t>
-<t>The query resolved to an ANAME record, and the resolver does not
-have the target address records; any sibling address records
-SHOULD be added to the Additional section.</t>
-<t>The query did not resolve to an ANAME record; any address records
-with the same owner name SHOULD be added to the Additional section
-of the NOERROR response.</t>
-</list>
-</t>
-<t>Just like with an authoritative server, when adding address records to
-the Additional section, if not all address types are present and the
-zone is signed, the server SHOULD include a DNSSEC proof of nonexistence
-for the missing address types.</t>
+<t>When a resolver receives an query for type ANAME, any sibling address
+records SHOULD be added to the Additional section.  Just like with an
+authoritative server, when adding address records to the Additional
+section, if not all address types are present and the zone is signed,
+the resolver SHOULD include a DNSSEC proof of nonexistence for the
+missing address types.</t>
 </section>
 </section>
 </section>
@@ -457,7 +444,9 @@ Olli Vanhoja for discussion and feedback.</t>
 <t>
 <list style="symbols">
 <t>Split up section about Additional Section processing.</t>
-<t>Revisit TTL considerations.</t>
+<t>Update Additional Section processing requirements.</t>
+<t>Clarify when ANAME resolution may happen [#43].</t>
+<t>Revisit TTL considerations [#30, #34].</t>
 </list>
 </t>
 </section>
@@ -467,7 +456,7 @@ Olli Vanhoja for discussion and feedback.</t>
 <list style="symbols">
 <t>Grammar improvements (Olli Vanhoja)</t>
 <t>Split up Implications section, clarify text on zone transfers
-and dynamic updates.</t>
+and dynamic updates [#39].</t>
 <t>Rewrite Alternative setup section and move to Appendix, add
 text on zone transfer scalibility concerns and GeoIP.</t>
 </list>
@@ -485,24 +474,24 @@ processing.</t>
 
 <back>
 <references title="Normative References">
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2136.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.4033.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1033.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.4034.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3597.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.4035.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.8499.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1035.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.8499.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3597.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2136.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1033.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.4033.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.4034.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.4035.xml"?>
 </references>
 <references title="Informative References">
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3493.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2308.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2065.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1996.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.0882.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3493.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1034.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.0973.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2065.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1034.xml"?>
 </references>
 
 <section anchor="implementation-status" title="Implementation status">

@@ -243,15 +243,15 @@ processing (see (#primary)) and are not first-class records in their
 own right. They MAY exist in zone files, but they can subsequently be
 altered by ANAME processing.
 
-ANAME records MAY freely coexist at the same owner name with other RR
+An ANAME record MAY freely coexist at the same owner name with other RR
 types, except they MUST NOT coexist with CNAME or any other RR type
 that restricts the types with which it can itself coexist. That means
-ANAME records can coexist at the same owner name with A and AAAA records.
+An ANAME record can coexist at the same owner name with A and AAAA records.
 These are the sibling address records that are updated with the target
 addresses that are retrieved through the ANAME substitution
 process (#subst).
 
-Like other types, ANAME records can coexist with DNAME records at the
+Like other types, An ANAME record can coexist with DNAME records at the
 same owner name; in fact, the two can be used cooperatively to
 redirect both the owner name address records (via ANAME) and everything
 under it (via DNAME).
@@ -261,7 +261,10 @@ under it (via DNAME).
 
 This process is used by both primary masters (see (#primary)) and
 resolvers (see (#resolver)), though they vary in how they apply the
-edit described in the final step.
+edit described in the final step.  However, this process is not
+exclusively used by primary masters and resolvers: it may be
+executed as a bump in the wire, as part of the query lookup, or
+at any other point during query resolution.
 
 The following steps MUST be performed for each address type:
 
@@ -334,8 +337,8 @@ same ANAME target, and that changes address, that may cause a great
 volume of zone transfers.  Guidance on dealing with ANAME in large scale
 implementations is provided (#alternatives).
 
-Secondary servers that rely on zone transfers to obtain sibling
-address records, just like the rest of the zone, and serve them in the
+Secondary servers rely on zone transfers to obtain sibling address
+records, just like the rest of the zone, and serve them in the
 usual way (with (#additional) Additional section processing if they
 support it). A working DNS NOTIFY [@?RFC1996] setup is recommended to
 avoid extra delays propagating updated sibling address records when
@@ -345,7 +348,11 @@ they change.
 
 A zone containing ANAME records that will update address records
 has to do so before signing the zone with DNSSEC [@!RFC4033]
-[@!RFC4034] [@!RFC4035].
+[@!RFC4034] [@!RFC4035].  This means that for traditional DNSSEC signing
+the substitution of sibling address records must be done before signing
+and loading the zone into the name server.  For servers that support
+online signing, the substitution may happen as part of the name
+server process, after loading the zone.
 
 DNSSEC signatures on sibling address records are generated in the same
 way as for normal (dynamic) updates.
@@ -379,8 +386,6 @@ receive a response containing ANAME information in the additional
 section, as described in (#additional). This informs the resolver
 that it MAY resolve the ANAME target address records to get answers that
 are tailored to the resolver rather than the ANAME's primary master.
-It SHOULD include the target address records in the Additional section
-of its responses as described in (#additional).
 
 In order to provide tailored answers to clients that are
 ANAME-oblivious, the resolver MAY perform sibling address record
@@ -427,17 +432,10 @@ the target address records itself.
 
 ### ANAME queries
 
-When a server receives an query for type ANAME, there are two
-possibilities:
-
-  * The query resolved to an ANAME record; any sibling address records
-    SHOULD be added to the Additional section.
-
-  * The query did not resolve to an ANAME record; any address records
-    with the same owner name SHOULD be added to the Additional section
-    of the NOERROR response.
-
-The sibling address records MAY be already substituted.
+When a server receives an query for type ANAME, regardless of whether
+the ANAME record exists on the queried domain, any sibling address
+records SHOULD be added to the Additional section.  Note that the
+sibling address records may have been substituted already.
 
 When adding address records to the Additional section, if not all
 address types are present and the zone is signed, the server SHOULD
@@ -457,27 +455,18 @@ record, the response's Additional section:
     available in the cache and the target address RDATA fields differ
     from the sibling address RRset.
 
+An ANAME target MAY resolve to address records via a chain of CNAME
+and/or ANAME records; any CNAME/ANAME chain MUST be included when
+adding target address records to a response's Additional section.
+
 ### ANAME queries
 
-When a resolver receives an query for type ANAME, there are three
-possibilities:
-
-  * The query resolved to an ANAME record, and the resolver has the
-    target address records; any target address records SHOULD be added
-    to the Additional section.
-
-  * The query resolved to an ANAME record, and the resolver does not
-    have the target address records; any sibling address records
-    SHOULD be added to the Additional section.
-
-  * The query did not resolve to an ANAME record; any address records
-    with the same owner name SHOULD be added to the Additional section
-    of the NOERROR response.
-
-Just like with an authoritative server, when adding address records to
-the Additional section, if not all address types are present and the
-zone is signed, the server SHOULD include a DNSSEC proof of nonexistence
-for the missing address types.
+When a resolver receives an query for type ANAME, any sibling address
+records SHOULD be added to the Additional section.  Just like with an
+authoritative server, when adding address records to the Additional
+section, if not all address types are present and the zone is signed,
+the resolver SHOULD include a DNSSEC proof of nonexistence for the
+missing address types.
 
 # IANA considerations
 
@@ -537,13 +526,15 @@ The full history of this draft and its issue tracker can be found at
 ## Version -04
 
   * Split up section about Additional Section processing.
-  * Revisit TTL considerations.
+  * Update Additional Section processing requirements.
+  * Clarify when ANAME resolution may happen [#43].
+  * Revisit TTL considerations [#30, #34].
 
 ## Version -03
 
   * Grammar improvements (Olli Vanhoja)
   * Split up Implications section, clarify text on zone transfers
-    and dynamic updates.
+    and dynamic updates [#39].
   * Rewrite Alternative setup section and move to Appendix, add
     text on zone transfer scalibility concerns and GeoIP.
 
