@@ -278,7 +278,7 @@ The following steps MUST be performed for each address type:
  1. Stop if resolution failed. (Note that NXDOMAIN and NODATA count as
     successfully resolving an empty RRset.)
 
- 1. If one ore more address records are found, replace the owner of
+ 1. If one or more address records are found, replace the owner of
     the target address records with the owner of the ANAME record.
     Set the TTL to the minimum of the ANAME TTL, the TTL of each
     intermediate record, and the TTL of the target address records.
