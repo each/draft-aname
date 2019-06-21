@@ -39,7 +39,7 @@
 <region>CA</region>
 </postal><email>matthijs@isc.org</email>
 </address></author>
-<date year="2019" month="April" day="15"></date>
+<date year="2019" month="June" day="21"></date>
 <area>Operations and Management</area><workgroup>DNS Operations</workgroup><keyword>DNS</keyword>
 <keyword>RR</keyword>
 <keyword>ANAME</keyword>
@@ -109,19 +109,14 @@ ANAME-like facilities.</t>
 ANAME's sibling address records in sync with the ANAME target.</t>
 </list>
 </t>
-<t>This definition is enough to be useful by itself. However, it can be less
-than optimal in certain situations: for instance, when the ANAME target uses
-clever tricks to provide different answers to different clients to
-improve latency or load balancing.</t>
-<t>
-<list style="symbols">
-<t>The Additional section processing rules in <xref target="additional"></xref> inform
-resolvers that an ANAME record is in play.</t>
-<t>Resolvers can use this ANAME information as described in
-<xref target="resolver"></xref> to obtain answers that are tailored to the resolver
+<t>This definition is enough to be useful by itself. However, it can be
+less than optimal in certain situations: for instance, when the
+ANAME target uses clever tricks to provide different answers to
+different clients to improve latency or load balancing.  The query
+processing rules in <xref target="queryprocessing"></xref> require to include the ANAME
+record so that resolvers can use this information (as described in
+<xref target="resolver"></xref>) to obtain answers that are tailored to the resolver
 rather than to the zone's primary master.</t>
-</list>
-</t>
 <t>Resolver support for ANAME is not necessary, since ANAME-oblivious
 resolvers can get working answers from authoritative servers. It's
 just an optimization that can be rolled out incrementally, and that
@@ -263,10 +258,9 @@ volume of zone transfers.  Guidance on dealing with ANAME in large scale
 implementations is provided <xref target="alternatives"></xref>.</t>
 <t>Secondary servers rely on zone transfers to obtain sibling address
 records, just like the rest of the zone, and serve them in the
-usual way (with <xref target="additional"></xref> Additional section processing if they
-support it). A working DNS NOTIFY <xref target="RFC1996"></xref> setup is recommended to
-avoid extra delays propagating updated sibling address records when
-they change.</t>
+usual way (see <xref target="queryprocessing"></xref>). A working DNS NOTIFY <xref target="RFC1996"></xref>
+setup is recommended to avoid extra delays propagating updated
+sibling address records when they change.</t>
 </section>
 
 <section anchor="dnssec" title="DNSSEC">
@@ -303,10 +297,11 @@ There is a more extended discussion of TTL handling in {#ttls}.</t>
 
 <section anchor="resolver" title="ANAME processing by resolvers">
 <t>When a resolver makes an address query in the usual way, it might
-receive a response containing ANAME information in the additional
-section, as described in <xref target="additional"></xref>. This informs the resolver
-that it MAY resolve the ANAME target address records to get answers that
-are tailored to the resolver rather than the ANAME's primary master.</t>
+receive a response containing ANAME information in the Answer
+section, as described in <xref target="queryprocessing"></xref>.  This informs the
+resolver that it MAY resolve the ANAME target address records to get
+answers that are tailored to the resolver rather than the ANAME's
+primary master.</t>
 <t>In order to provide tailored answers to clients that are
 ANAME-oblivious, the resolver MAY perform sibling address record
 substitution in the following situations:</t>
@@ -328,8 +323,7 @@ become bogus.)</t>
 <t>In these first two cases, the resolver MAY perform ANAME sibling
 address record substitution as described in <xref target="subst"></xref>. Any edit
 performed in the final step is applied to the Answer section of the
-response. The resolver SHOULD then perform Additional section processing
-as described in <xref target="additional"></xref>.</t>
+response.</t>
 <t>If the resolver's client is querying using an API such as
 <spanx style="verb">getaddrinfo</spanx> <xref target="RFC3493"></xref> that does not support DNSSEC validation, the
 resolver MAY perform ANAME sibling address record substitution as
@@ -340,15 +334,16 @@ DO=1, so they cannot rely on the recursive server to do ANAME
 substitution for them.)</t>
 </section>
 
-<section anchor="additional" title="Additional section processing">
+<section anchor="queryprocessing" title="Query processing">
 
 <section anchor="authoritative-servers" title="Authoritative servers">
 
 <section anchor="address-queries" title="Address queries">
 <t>When a server receives an address query for a name that has an ANAME
-record, the response's Additional section MUST contain the ANAME record.
-The ANAME record indicates to a client that it might wish to resolve
-the target address records itself.</t>
+record, the response's Answer section MUST contain the ANAME record,
+in addition to the sibling address queries.  The ANAME record
+indicates to a client that it might wish to resolve the target
+address records itself.</t>
 </section>
 
 <section anchor="aname-queries" title="ANAME queries">
@@ -365,17 +360,13 @@ include a DNSSEC proof of nonexistence for the missing address types.</t>
 <section anchor="resolvers" title="Resolvers">
 
 <section anchor="address-queries-1" title="Address queries">
-<t>When a resolver receives an address query for a name that has an ANAME
-record, the response's Additional section:</t>
-<t>
-<list style="symbols">
-<t>MUST contain the ANAME record;</t>
-<t>MAY contain the target address records that match the query
-type (or the corresponding proof of nonexistence), if they are
-available in the cache and the target address RDATA fields differ
-from the sibling address RRset.</t>
-</list>
-</t>
+<t>When a server receives an address query for a name that has an ANAME
+record, the response's Answer section MUST contain the ANAME record,
+in addition to the sibling address queries.</t>
+<t>The Additional section MAY contain the target address records that
+match the query type (or the corresponding proof of nonexistence),
+if they are available in the cache and the target address RDATA
+fields differ from the sibling address RRset.</t>
 <t>An ANAME target MAY resolve to address records via a chain of CNAME
 and/or ANAME records; any CNAME/ANAME chain MUST be included when
 adding target address records to a response's Additional section.</t>
@@ -447,6 +438,7 @@ Olli Vanhoja for discussion and feedback.</t>
 <t>Update Additional Section processing requirements.</t>
 <t>Clarify when ANAME resolution may happen [#43].</t>
 <t>Revisit TTL considerations [#30, #34].</t>
+<t>ANAME goes into the Answer section when QTYPE=A|AAAA [#62].</t>
 </list>
 </t>
 </section>
@@ -474,24 +466,24 @@ processing.</t>
 
 <back>
 <references title="Normative References">
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1035.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.8499.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3597.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2136.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1033.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.4033.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1033.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.4034.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.4035.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.8499.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3597.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2136.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1035.xml"?>
 </references>
 <references title="Informative References">
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3493.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2308.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1034.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2065.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2308.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1996.xml"?>
+<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3493.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.0882.xml"?>
 <?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.0973.xml"?>
-<?rfc include="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1034.xml"?>
 </references>
 
 <section anchor="implementation-status" title="Implementation status">
@@ -649,19 +641,6 @@ subsection.</t>
 refresh timer. More serious breakage can stretch them up to the zone
 expiry time.</t>
 </section>
-</section>
-
-<section anchor="answer-vs-additional-sections" title="Answer vs Additional sections">
-<t>[MM: Discuss what should be in the additional section: ANAME makes
-sense, but differs from CNAME logic (where the CNAME is in the answer
-section). Additional target records that match the query type in my
-opinion should go in the answer section. Additional target address
-records that do not match the query type can go in the additional
-section].</t>
-<t>[TF: from experience with DNAME I think there's a risk of interop
-problems if we put unexpected records in the answer section, so I said
-everything should go in additional. We'll expand this appendix to
-explain the rationale.]</t>
 </section>
 
 <section anchor="alternatives" title="Alternative setups">

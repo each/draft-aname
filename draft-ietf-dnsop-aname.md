@@ -5,7 +5,7 @@ workgroup       = "DNS Operations"
 area            = "Operations and Management"
 submissiontype  = "IETF"
 ipr             = "trust200902"
-date            = 2019-04-15T17:16:00Z
+date            = 2019-06-21T14:21:00Z
 keyword         = [
     "DNS",
     "RR",
@@ -163,17 +163,14 @@ requiring secondary servers or resolvers to be upgraded.
   * The zone maintenance mechanism described in (#primary) keeps the
     ANAME's sibling address records in sync with the ANAME target.
 
-This definition is enough to be useful by itself. However, it can be less
-than optimal in certain situations: for instance, when the ANAME target uses
-clever tricks to provide different answers to different clients to
-improve latency or load balancing.
-
-  * The Additional section processing rules in (#additional) inform
-    resolvers that an ANAME record is in play.
-
-  * Resolvers can use this ANAME information as described in
-    (#resolver) to obtain answers that are tailored to the resolver
-    rather than to the zone's primary master.
+This definition is enough to be useful by itself. However, it can be
+less than optimal in certain situations: for instance, when the
+ANAME target uses clever tricks to provide different answers to
+different clients to improve latency or load balancing.  The query
+processing rules in (#queryprocessing) require to include the ANAME
+record so that resolvers can use this information (as described in
+(#resolver)) to obtain answers that are tailored to the resolver
+rather than to the zone's primary master.
 
 Resolver support for ANAME is not necessary, since ANAME-oblivious
 resolvers can get working answers from authoritative servers. It's
@@ -339,10 +336,9 @@ implementations is provided (#alternatives).
 
 Secondary servers rely on zone transfers to obtain sibling address
 records, just like the rest of the zone, and serve them in the
-usual way (with (#additional) Additional section processing if they
-support it). A working DNS NOTIFY [@?RFC1996] setup is recommended to
-avoid extra delays propagating updated sibling address records when
-they change.
+usual way (see (#queryprocessing)). A working DNS NOTIFY [@?RFC1996]
+setup is recommended to avoid extra delays propagating updated
+sibling address records when they change.
 
 ## DNSSEC
 
@@ -382,10 +378,11 @@ There is a more extended discussion of TTL handling in {#ttls}.
 # ANAME processing by resolvers {#resolver}
 
 When a resolver makes an address query in the usual way, it might
-receive a response containing ANAME information in the additional
-section, as described in (#additional). This informs the resolver
-that it MAY resolve the ANAME target address records to get answers that
-are tailored to the resolver rather than the ANAME's primary master.
+receive a response containing ANAME information in the Answer
+section, as described in (#queryprocessing).  This informs the
+resolver that it MAY resolve the ANAME target address records to get
+answers that are tailored to the resolver rather than the ANAME's
+primary master.
 
 In order to provide tailored answers to clients that are
 ANAME-oblivious, the resolver MAY perform sibling address record
@@ -407,8 +404,7 @@ substitution in the following situations:
 In these first two cases, the resolver MAY perform ANAME sibling
 address record substitution as described in (#subst). Any edit
 performed in the final step is applied to the Answer section of the
-response. The resolver SHOULD then perform Additional section processing
-as described in (#additional).
+response.
 
 If the resolver's client is querying using an API such as
 `getaddrinfo` [@?RFC3493] that does not support DNSSEC validation, the
@@ -419,16 +415,17 @@ validating stub resolvers that query an upstream recursive server with
 DO=1, so they cannot rely on the recursive server to do ANAME
 substitution for them.)
 
-# Additional section processing {#additional}
+# Query processing {#queryprocessing}
 
 ## Authoritative servers
 
 ### Address queries
 
 When a server receives an address query for a name that has an ANAME
-record, the response's Additional section MUST contain the ANAME record.
-The ANAME record indicates to a client that it might wish to resolve
-the target address records itself.
+record, the response's Answer section MUST contain the ANAME record,
+in addition to the sibling address queries.  The ANAME record
+indicates to a client that it might wish to resolve the target
+address records itself.
 
 ### ANAME queries
 
@@ -445,15 +442,14 @@ include a DNSSEC proof of nonexistence for the missing address types.
 
 ### Address queries
 
-When a resolver receives an address query for a name that has an ANAME
-record, the response's Additional section:
+When a server receives an address query for a name that has an ANAME
+record, the response's Answer section MUST contain the ANAME record,
+in addition to the sibling address queries.
 
-  * MUST contain the ANAME record;
-
-  * MAY contain the target address records that match the query
-    type (or the corresponding proof of nonexistence), if they are
-    available in the cache and the target address RDATA fields differ
-    from the sibling address RRset.
+The Additional section MAY contain the target address records that
+match the query type (or the corresponding proof of nonexistence),
+if they are available in the cache and the target address RDATA
+fields differ from the sibling address RRset.
 
 An ANAME target MAY resolve to address records via a chain of CNAME
 and/or ANAME records; any CNAME/ANAME chain MUST be included when
@@ -529,6 +525,7 @@ The full history of this draft and its issue tracker can be found at
   * Update Additional Section processing requirements.
   * Clarify when ANAME resolution may happen [#43].
   * Revisit TTL considerations [#30, #34].
+  * ANAME goes into the Answer section when QTYPE=A|AAAA [#62].
 
 ## Version -03
 
@@ -725,21 +722,6 @@ subsection.
 If NOTIFY doesn't work, the TTLs can be stretched by the zone's SOA
 refresh timer. More serious breakage can stretch them up to the zone
 expiry time.
-
-
-# Answer vs Additional sections
-
-[MM: Discuss what should be in the additional section: ANAME makes
-sense, but differs from CNAME logic (where the CNAME is in the answer
-section). Additional target records that match the query type in my
-opinion should go in the answer section. Additional target address
-records that do not match the query type can go in the additional
-section].
-
-[TF: from experience with DNAME I think there's a risk of interop
-problems if we put unexpected records in the answer section, so I said
-everything should go in additional. We'll expand this appendix to
-explain the rationale.]
 
 
 # Alternative setups {#alternatives}
