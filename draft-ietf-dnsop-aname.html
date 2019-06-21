@@ -412,6 +412,9 @@
 <link href="#rfc.appendix.C.4" rel="Chapter" title="C.4 ANAME substitution inside the name server">
 <link href="#rfc.appendix.C.5" rel="Chapter" title="C.5 TTLs and zone transfers">
 <link href="#rfc.appendix.D" rel="Chapter" title="D Alternative setups">
+<link href="#rfc.appendix.D.1" rel="Chapter" title="D.1 Reducing query volume">
+<link href="#rfc.appendix.D.2" rel="Chapter" title="D.2 Zone transfer scalability">
+<link href="#rfc.appendix.D.3" rel="Chapter" title="D.3 Tailored responses">
 <link href="#rfc.authors" rel="Chapter">
 
 
@@ -575,7 +578,13 @@
 </li>
 </ul><li>Appendix D.   <a href="#rfc.appendix.D">Alternative setups</a>
 </li>
-<li><a href="#rfc.authors">Authors' Addresses</a>
+<ul><li>D.1.   <a href="#rfc.appendix.D.1">Reducing query volume</a>
+</li>
+<li>D.2.   <a href="#rfc.appendix.D.2">Zone transfer scalability</a>
+</li>
+<li>D.3.   <a href="#rfc.appendix.D.3">Tailored responses</a>
+</li>
+</ul><li><a href="#rfc.authors">Authors' Addresses</a>
 </li>
 
 
@@ -644,7 +653,7 @@
 <li>Starting at the ANAME owner, follow the chain of ANAME and/or CNAME records as far as possible to find the ultimate target.</li>
 <li>If a loop is detected, continue with an empty RRset, otherwise get the ultimate target's address records. (Ignore any sibling address records of intermediate ANAMEs.)</li>
 <li>Stop if resolution failed. (Note that NXDOMAIN and NODATA count as successfully resolving an empty RRset.)</li>
-<li>If one ore more address records are found, replace the owner of the target address records with the owner of the ANAME record.  Set the TTL to the minimum of the ANAME TTL, the TTL of each intermediate record, and the TTL of the target address records.  Drop any RRSIG records.</li>
+<li>If one or more address records are found, replace the owner of the target address records with the owner of the ANAME record.  Set the TTL to the minimum of the ANAME TTL, the TTL of each intermediate record, and the TTL of the target address records.  Drop any RRSIG records.</li>
 <li>Stop if this modified RRset is the same as the sibling RRset (ignoring any RRSIG records). The comparison MAY treat nearly-equal TTLs as the same.</li>
 <li>Delete the sibling address RRset (if any) and replace it with the modified RRset.</li>
 </ol>
@@ -679,7 +688,7 @@
 <p id="rfc.section.4.2.p.1">A zone containing ANAME records that will update address records has to do so before signing the zone with DNSSEC <a href="#RFC4033" class="xref">[RFC4033]</a> <a href="#RFC4034" class="xref">[RFC4034]</a> <a href="#RFC4035" class="xref">[RFC4035]</a>.  This means that for traditional DNSSEC signing the substitution of sibling address records must be done before signing and loading the zone into the name server.  For servers that support online signing, the substitution may happen as part of the name server process, after loading the zone.</p>
 <p id="rfc.section.4.2.p.2">DNSSEC signatures on sibling address records are generated in the same way as for normal (dynamic) updates.</p>
 <h1 id="rfc.section.4.3">
-<a href="#rfc.section.4.3">4.3.</a> <a href="#ttls" id="ttls">TTLs</a>
+<a href="#rfc.section.4.3">4.3.</a> <a href="#ttl" id="ttl">TTLs</a>
 </h1>
 <p id="rfc.section.4.3.p.1">Sibling address records are served from authoritative servers with a fixed TTL. Normally this TTL is expected to be the same as the target address records' TTL; however the exact mechanism for obtaining the target is unspecified, so cache effects, following ANAME and CNAME chains, or deliberate policies might make the sibling TTL smaller.</p>
 <p id="rfc.section.4.3.p.2">This means that when adding address records into the zone as a result of ANAME processing, the TTL to use is at most that of the TTL of the address target records. If you use a higher value, this will stretch the TTL which is undesired.</p>
@@ -740,7 +749,7 @@
 <h1 id="rfc.section.9">
 <a href="#rfc.section.9">9.</a> <a href="#acknowledgments" id="acknowledgments">Acknowledgments</a>
 </h1>
-<p id="rfc.section.9.p.1">Thanks to Mark Andrews, Ray Bellis, Stefan Buehler, Paul Ebersman, Richard Gibson, Tatuya JINMEI, Hakan Lindqvist, Mattijs Mekking, Stephen Morris, Bjorn Mott, Richard Salts, Mukund Sivaraman, Job Snijders, Jan Vcelak, Paul Vixie, Duane Wessels, and Paul Wouters, Olli Vanhoja for discussion and feedback.</p>
+<p id="rfc.section.9.p.1">Thanks to Mark Andrews, Ray Bellis, Stefan Buehler, Paul Ebersman, Richard Gibson, Tatuya JINMEI, Hakan Lindqvist, Mattijs Mekking, Stephen Morris, Bjorn Mott, Richard Salts, Mukund Sivaraman, Job Snijders, Jan Vcelak, Paul Vixie, Duane Wessels, and Paul Wouters, Olli Vanhoja, Brian Dickson for discussion and feedback.</p>
 <h1 id="rfc.section.10">
 <a href="#rfc.section.10">10.</a> <a href="#changes-since-the-last-revision" id="changes-since-the-last-revision">Changes since the last revision</a>
 </h1>
@@ -822,6 +831,11 @@
 <a>Arends, R.</a>, <a>Austein, R.</a>, <a>Larson, M.</a>, <a>Massey, D.</a> and <a>S. Rose</a>, "<a href="https://tools.ietf.org/html/rfc4035">Protocol Modifications for the DNS Security Extensions</a>", RFC 4035, DOI 10.17487/RFC4035, March 2005.</td>
 </tr>
 <tr>
+<td class="reference"><b id="RFC7871">[RFC7871]</b></td>
+<td class="top">
+<a>Contavalli, C.</a>, <a>van der Gaast, W.</a>, <a>Lawrence, D.</a> and <a>W. Kumari</a>, "<a href="https://tools.ietf.org/html/rfc7871">Client Subnet in DNS Queries</a>", RFC 7871, DOI 10.17487/RFC7871, May 2016.</td>
+</tr>
+<tr>
 <td class="reference"><b id="RFC8499">[RFC8499]</b></td>
 <td class="top">
 <a>Hoffman, P.</a>, <a>Sullivan, A.</a> and <a>K. Fujiwara</a>, "<a href="https://tools.ietf.org/html/rfc8499">DNS Terminology</a>", BCP 219, RFC 8499, DOI 10.17487/RFC8499, January 2019.</td>
@@ -886,7 +900,7 @@
 <p id="rfc.section.B.p.5">While <a href="#RFC2065" class="xref">[RFC2065]</a> relaxed the restriction by allowing coexistence of CNAME with DNSSEC records, this exception is still not applicable to other resource records. RRSIG and NSEC exist to prove the integrity of the CNAME record; they are not intended to associate arbitrary data with the domain name. DNSSEC records avoid interoperability problems by being largely invisible to security-oblivious resolvers.</p>
 <p id="rfc.section.B.p.6">Now that the DNS has negative caching, it is tempting to amend the algorithm for resolving with CNAME records to allow them to coexist with other types. Although an amended resolver will be compatible with the rest of the DNS, it will not be of much practical use because authoritative servers which rely on coexisting CNAMEs will not interoperate well with older resolvers. Practical experiments show that the problems are particularly acute when CNAME and MX try to coexist.</p>
 <h1 id="rfc.appendix.C">
-<a href="#rfc.appendix.C">Appendix C.</a> <a href="#ttls-1" id="ttls-1">On preserving TTLs</a>
+<a href="#rfc.appendix.C">Appendix C.</a> <a href="#ttls" id="ttls">On preserving TTLs</a>
 </h1>
 <p id="rfc.section.C.p.1">An ANAME's sibling address records are in an unusual situation: they are authoritative data in the owner's zone, so from that point of view the owner has the last say over what their TTL should be; on the other hand, ANAMEs are supposed to act as aliases, in which case the target should control the address record TTLs.</p>
 <p id="rfc.section.C.p.2">However there are some technical constraints that make it difficult to preserve the target address record TTLs.</p>
@@ -932,11 +946,23 @@
 <h1 id="rfc.appendix.D">
 <a href="#rfc.appendix.D">Appendix D.</a> <a href="#alternatives" id="alternatives">Alternative setups</a>
 </h1>
-<p id="rfc.section.D.p.1">If you are a large scale DNS provider, ANAME may introduce some scalability concerns.  A frequently changing ANAME target, or a ANAME target that changes its address and is used for many zones, can lead to an increased number of zone transfers.  Such DNS architectures may want to consider a zone transfer mechanism outside the DNS.</p>
-<p id="rfc.section.D.p.2">Another way to deal with zone transfer scalability is to move the ANAME processing (<a href="#subst" class="xref">Section 3</a>) inside the name server daemon. This is not a requirement for ANAME to work, but may be a better solution in large scale implementations.  These implementations usually already rely on online DNSSEC signing for similar reasons.  If ANAME processing occurs inside the name server daemon, it MUST be done before any DNSSEC online signing happens.</p>
-<p id="rfc.section.D.p.3">For example, some existing ANAME-like implementations are based on a DNS server architecture, in which a zone's published authoritative servers all perform the duties of a primary master in a distributed manner: provisioning records from a non-DNS back-end store, refreshing DNSSEC signatures, and so forth.  They don't use standard standard zone transfers, and already implement their ANAME-like processing inside the name server daemon, substituting ANAME sibling address records on demand.</p>
-<p id="rfc.section.D.p.4">Also, some DNS providers will tailor responses based on information in the client request.  Such implementations will use the source IP address or EDNS Client Subnet information and use geographical data (GeoIP) or network latency measurements to decide what the best answer is for a given query.  Such setups won't work with traditional DNSSEC and provide DNSSEC support usually through online signing.  Similar such setups should provide ANAME support through substituting ANAME sibling records on demand.</p>
-<p id="rfc.section.D.p.5">The exact mechanism for obtaining the target address records in such setups is unspecified; typically they will be resolved in the DNS in the usual way, but if an ANAME implementation has special knowledge of the target it can short-cut the substitution process, or it can use clever tricks such as client-dependant answers.</p>
+<p id="rfc.section.D.p.1">If you are a large scale DNS provider, ANAME may introduce some operational concerns.</p>
+<h1 id="rfc.appendix.D.1">
+<a href="#rfc.appendix.D.1">D.1.</a> <a href="#reducing-query-volume" id="reducing-query-volume">Reducing query volume</a>
+</h1>
+<p id="rfc.section.D.1.p.1">When doing ANAME target lookups, an authoritative server might want to use longer TTLs to reduce query volume, for ANAME values that do not change frequently.  This is the same concern a recursive resolver may be exposed to when receiving answers with short TTLs.  An authoritative server doing ANAME target lookups therefor could use the same mitigation as a recursive nameserver, that is set a configured minimum TTL usage.  This may however contribute to TTL stretching as described in <a href="#ttl" class="xref">Section 4.3</a> so the configured minimum should not be too low.</p>
+<h1 id="rfc.appendix.D.2">
+<a href="#rfc.appendix.D.2">D.2.</a> <a href="#zone-transfer-scalability" id="zone-transfer-scalability">Zone transfer scalability</a>
+</h1>
+<p id="rfc.section.D.2.p.1">A frequently changing ANAME target, or a ANAME target that changes its address and is used for many zones, can lead to an increased number of zone transfers.  Such DNS architectures may want to consider a zone transfer mechanism outside the DNS.</p>
+<p id="rfc.section.D.2.p.2">Another way to deal with zone transfer scalability is to move the ANAME processing (<a href="#subst" class="xref">Section 3</a>) inside the name server daemon. This is not a requirement for ANAME to work, but may be a better solution in large scale implementations.  These implementations usually already rely on online DNSSEC signing for similar reasons.  If ANAME processing occurs inside the name server daemon, it MUST be done before any DNSSEC online signing happens.</p>
+<p id="rfc.section.D.2.p.3">For example, some existing ANAME-like implementations are based on a DNS server architecture, in which a zone's published authoritative servers all perform the duties of a primary master in a distributed manner: provisioning records from a non-DNS back-end store, refreshing DNSSEC signatures, and so forth.  They don't use standard standard zone transfers, and already implement their ANAME-like processing inside the name server daemon, substituting ANAME sibling address records on demand.</p>
+<h1 id="rfc.appendix.D.3">
+<a href="#rfc.appendix.D.3">D.3.</a> <a href="#tailored-responses" id="tailored-responses">Tailored responses</a>
+</h1>
+<p id="rfc.section.D.3.p.1">Some DNS providers will tailor responses based on information in the client request.  Such implementations will use the source IP address or EDNS Client Subnet <a href="#RFC7871" class="xref">[RFC7871]</a> information and use geographical data (GeoIP) or network latency measurements to decide what the best answer is for a given query. Such setups won't work with traditional DNSSEC and provide DNSSEC support usually through online signing.  Similar such setups should provide ANAME support through substituting ANAME sibling records on demand.</p>
+<p id="rfc.section.D.3.p.2">Also, an authoritative server that uses the client address to tailor the response should obviously not use its own address when looking up ANAME targets, or it could direct clients to a suboptimal server (e.g. a wrong language, or regional restricted content). Instead the authoritative server should look up the ANAME targets on behalf of the client address.  It could use for example EDNS Client Subnet for this.</p>
+<p id="rfc.section.D.3.p.3">In short, the exact mechanism for obtaining the target address records in such setups is unspecified; typically they will be resolved in the DNS in the usual way, but if an ANAME implementation has special knowledge of the target it can short-cut the substitution process, or it can use clever tricks such as client-dependant answers to make the answer more optimal.</p>
 <h1 id="rfc.authors"><a href="#rfc.authors">Authors' Addresses</a></h1>
 <div class="avoidbreak">
   <address class="vcard">

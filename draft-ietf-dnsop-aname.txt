@@ -99,6 +99,9 @@ Table of Contents
      C.4.  ANAME substitution inside the name server
      C.5.  TTLs and zone transfers
    Appendix D.  Alternative setups
+     D.1.  Reducing query volume
+     D.2.  Zone transfer scalability
+     D.3.  Tailored responses
    Authors' Addresses
 
 1.  Introduction
@@ -269,7 +272,7 @@ Table of Contents
    3.  Stop if resolution failed.  (Note that NXDOMAIN and NODATA count
        as successfully resolving an empty RRset.)
 
-   4.  If one ore more address records are found, replace the owner of
+   4.  If one or more address records are found, replace the owner of
        the target address records with the owner of the ANAME record.
        Set the TTL to the minimum of the ANAME TTL, the TTL of each
        intermediate record, and the TTL of the target address records.
@@ -501,7 +504,7 @@ Table of Contents
    Richard Gibson, Tatuya JINMEI, Hakan Lindqvist, Mattijs Mekking,
    Stephen Morris, Bjorn Mott, Richard Salts, Mukund Sivaraman, Job
    Snijders, Jan Vcelak, Paul Vixie, Duane Wessels, and Paul Wouters,
-   Olli Vanhoja for discussion and feedback.
+   Olli Vanhoja, Brian Dickson for discussion and feedback.
 
 10.  Changes since the last revision
 
@@ -578,6 +581,11 @@ Table of Contents
               Rose, "Protocol Modifications for the DNS Security
               Extensions", RFC 4035, DOI 10.17487/RFC4035, March 2005,
               <https://www.rfc-editor.org/info/rfc4035>.
+
+   [RFC7871]  Contavalli, C., van der Gaast, W., Lawrence, D., and W.
+              Kumari, "Client Subnet in DNS Queries", RFC 7871,
+              DOI 10.17487/RFC7871, May 2016,
+              <https://www.rfc-editor.org/info/rfc7871>.
 
    [RFC8499]  Hoffman, P., Sullivan, A., and K. Fujiwara, "DNS
               Terminology", BCP 219, RFC 8499, DOI 10.17487/RFC8499,
@@ -796,10 +804,26 @@ C.5.  TTLs and zone transfers
 Appendix D.  Alternative setups
 
    If you are a large scale DNS provider, ANAME may introduce some
-   scalability concerns.  A frequently changing ANAME target, or a ANAME
-   target that changes its address and is used for many zones, can lead
-   to an increased number of zone transfers.  Such DNS architectures may
-   want to consider a zone transfer mechanism outside the DNS.
+   operational concerns.
+
+D.1.  Reducing query volume
+
+   When doing ANAME target lookups, an authoritative server might want
+   to use longer TTLs to reduce query volume, for ANAME values that do
+   not change frequently.  This is the same concern a recursive resolver
+   may be exposed to when receiving answers with short TTLs.  An
+   authoritative server doing ANAME target lookups therefor could use
+   the same mitigation as a recursive nameserver, that is set a
+   configured minimum TTL usage.  This may however contribute to TTL
+   stretching as described in Section 4.3 so the configured minimum
+   should not be too low.
+
+D.2.  Zone transfer scalability
+
+   A frequently changing ANAME target, or a ANAME target that changes
+   its address and is used for many zones, can lead to an increased
+   number of zone transfers.  Such DNS architectures may want to
+   consider a zone transfer mechanism outside the DNS.
 
    Another way to deal with zone transfer scalability is to move the
    ANAME processing (Section 3) inside the name server daemon.  This is
@@ -818,20 +842,31 @@ Appendix D.  Alternative setups
    processing inside the name server daemon, substituting ANAME sibling
    address records on demand.
 
-   Also, some DNS providers will tailor responses based on information
-   in the client request.  Such implementations will use the source IP
-   address or EDNS Client Subnet information and use geographical data
+D.3.  Tailored responses
+
+   Some DNS providers will tailor responses based on information in the
+   client request.  Such implementations will use the source IP address
+   or EDNS Client Subnet [RFC7871] information and use geographical data
    (GeoIP) or network latency measurements to decide what the best
    answer is for a given query.  Such setups won't work with traditional
    DNSSEC and provide DNSSEC support usually through online signing.
    Similar such setups should provide ANAME support through substituting
    ANAME sibling records on demand.
 
-   The exact mechanism for obtaining the target address records in such
-   setups is unspecified; typically they will be resolved in the DNS in
-   the usual way, but if an ANAME implementation has special knowledge
-   of the target it can short-cut the substitution process, or it can
-   use clever tricks such as client-dependant answers.
+   Also, an authoritative server that uses the client address to tailor
+   the response should obviously not use its own address when looking up
+   ANAME targets, or it could direct clients to a suboptimal server
+   (e.g. a wrong language, or regional restricted content).  Instead the
+   authoritative server should look up the ANAME targets on behalf of
+   the client address.  It could use for example EDNS Client Subnet for
+   this.
+
+   In short, the exact mechanism for obtaining the target address
+   records in such setups is unspecified; typically they will be
+   resolved in the DNS in the usual way, but if an ANAME implementation
+   has special knowledge of the target it can short-cut the substitution
+   process, or it can use clever tricks such as client-dependant answers
+   to make the answer more optimal.
 
 Authors' Addresses
 
