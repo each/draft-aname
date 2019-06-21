@@ -353,7 +353,7 @@ server process, after loading the zone.
 DNSSEC signatures on sibling address records are generated in the same
 way as for normal (dynamic) updates.
 
-## TTLs
+## TTLs {#ttl}
 
 Sibling address records are served from authoritative servers with a
 fixed TTL. Normally this TTL is expected to be the same as the target
@@ -464,6 +464,7 @@ section, if not all address types are present and the zone is signed,
 the resolver SHOULD include a DNSSEC proof of nonexistence for the
 missing address types.
 
+
 # IANA considerations
 
 IANA is requested to assign a DNS RR TYPE value for ANAME resource
@@ -509,7 +510,7 @@ Thanks to Mark Andrews, Ray Bellis, Stefan Buehler, Paul Ebersman,
 Richard Gibson, Tatuya JINMEI, Hakan Lindqvist, Mattijs Mekking,
 Stephen Morris, Bjorn Mott, Richard Salts, Mukund Sivaraman, Job
 Snijders, Jan Vcelak, Paul Vixie, Duane Wessels, and Paul Wouters,
-Olli Vanhoja for discussion and feedback.
+Olli Vanhoja, Brian Dickson for discussion and feedback.
 
 
 # Changes since the last revision
@@ -526,6 +527,8 @@ The full history of this draft and its issue tracker can be found at
   * Clarify when ANAME resolution may happen [#43].
   * Revisit TTL considerations [#30, #34].
   * ANAME goes into the Answer section when QTYPE=A|AAAA [#62].
+  * Update alternative setups section with concerns (Brian Dickson)
+    [#68].
 
 ## Version -03
 
@@ -727,11 +730,26 @@ expiry time.
 # Alternative setups {#alternatives}
 
 If you are a large scale DNS provider, ANAME may introduce some
-scalability concerns.  A frequently changing ANAME target, or a
-ANAME target that changes its address and is used for many zones,
-can lead to an increased number of zone transfers.  Such DNS
-architectures may want to consider a zone transfer mechanism
-outside the DNS.
+operational concerns.
+
+## Reducing query volume
+
+When doing ANAME target lookups, an authoritative server might want
+to use longer TTLs to reduce query volume, for ANAME values that do
+not change frequently.  This is the same concern a recursive
+resolver may be exposed to when receiving answers with short TTLs.
+An authoritative server doing ANAME target lookups therefor could
+use the same mitigation as a recursive nameserver, that is set a
+configured minimum TTL usage.  This may however contribute to TTL
+stretching as described in (#ttl) so the configured minimum should
+not be too low.
+
+## Zone transfer scalability
+
+A frequently changing ANAME target, or a ANAME target that changes
+its address and is used for many zones, can lead to an increased
+number of zone transfers.  Such DNS architectures may want to
+consider a zone transfer mechanism outside the DNS.
 
 Another way to deal with zone transfer scalability is to move the
 ANAME processing ((#subst)) inside the name server daemon. This is
@@ -750,17 +768,28 @@ standard zone transfers, and already implement their ANAME-like
 processing inside the name server daemon, substituting ANAME sibling
 address records on demand.
 
-Also, some DNS providers will tailor responses based on information
-in the client request.  Such implementations will use the source IP
-address or EDNS Client Subnet information and use geographical data
-(GeoIP) or network latency measurements to decide what the best
-answer is for a given query.  Such setups won't work with
-traditional DNSSEC and provide DNSSEC support usually through online
-signing.  Similar such setups should provide ANAME support through
+## Tailored responses
+
+Some DNS providers will tailor responses based on information in the
+client request.  Such implementations will use the source IP address
+or EDNS Client Subnet [@!RFC7871] information and use geographical
+data (GeoIP) or network latency measurements to decide what the best
+answer is for a given query. Such setups won't work with traditional
+DNSSEC and provide DNSSEC support usually through online signing.
+Similar such setups should provide ANAME support through
 substituting ANAME sibling records on demand.
 
-The exact mechanism for obtaining the target address records in such
-setups is unspecified; typically they will be resolved in the DNS in
-the usual way, but if an ANAME implementation has special knowledge
-of the target it can short-cut the substitution process, or it can
-use clever tricks such as client-dependant answers.
+Also, an authoritative server that uses the client address to tailor
+the response should obviously not use its own address when looking
+up ANAME targets, or it could direct clients to a suboptimal server
+(e.g. a wrong language, or regional restricted content). Instead the
+authoritative server should look up the ANAME targets on behalf of
+the client address.  It could use for example EDNS Client Subnet
+for this.
+
+In short, the exact mechanism for obtaining the target address
+records in such setups is unspecified; typically they will be
+resolved in the DNS in the usual way, but if an ANAME implementation
+has special knowledge of the target it can short-cut the
+substitution process, or it can use clever tricks such as
+client-dependant answers to make the answer more optimal.
