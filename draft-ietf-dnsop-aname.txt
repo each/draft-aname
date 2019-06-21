@@ -5,14 +5,14 @@
 DNS Operations                                                  T. Finch
 Internet-Draft                                   University of Cambridge
 Intended status: Standards Track                                 E. Hunt
-Expires: October 17, 2019                                            ISC
+Expires: December 23, 2019                                           ISC
                                                              P. van Dijk
                                                                 PowerDNS
                                                                  A. Eden
                                                                 DNSimple
                                                               W. Mekking
                                                                      ISC
-                                                          April 15, 2019
+                                                           June 21, 2019
 
 
                   Address-specific DNS aliases (ANAME)
@@ -41,7 +41,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on October 17, 2019.
+   This Internet-Draft will expire on December 23, 2019.
 
 Copyright Notice
 
@@ -72,7 +72,7 @@ Table of Contents
      4.2.  DNSSEC
      4.3.  TTLs
    5.  ANAME processing by resolvers
-   6.  Additional section processing
+   6.  Query processing
      6.1.  Authoritative servers
        6.1.1.  Address queries
        6.1.2.  ANAME queries
@@ -98,8 +98,7 @@ Table of Contents
      C.3.  ANAME chains
      C.4.  ANAME substitution inside the name server
      C.5.  TTLs and zone transfers
-   Appendix D.  Answer vs Additional sections
-   Appendix E.  Alternative setups
+   Appendix D.  Alternative setups
    Authors' Addresses
 
 1.  Introduction
@@ -167,14 +166,11 @@ Table of Contents
    This definition is enough to be useful by itself.  However, it can be
    less than optimal in certain situations: for instance, when the ANAME
    target uses clever tricks to provide different answers to different
-   clients to improve latency or load balancing.
-
-   o  The Additional section processing rules in Section 6 inform
-      resolvers that an ANAME record is in play.
-
-   o  Resolvers can use this ANAME information as described in Section 5
-      to obtain answers that are tailored to the resolver rather than to
-      the zone's primary master.
+   clients to improve latency or load balancing.  The query processing
+   rules in Section 6 require to include the ANAME record so that
+   resolvers can use this information (as described in Section 5) to
+   obtain answers that are tailored to the resolver rather than to the
+   zone's primary master.
 
    Resolver support for ANAME is not necessary, since ANAME-oblivious
    resolvers can get working answers from authoritative servers.  It's
@@ -317,7 +313,7 @@ Table of Contents
    due to ANAME processing, use offline DNSSEC signing, and not
    implement special ANAME processing logic when handling a DNS query.
 
-   Appendix E describes how ANAME would fit in different DNS
+   Appendix D describes how ANAME would fit in different DNS
    architectures that use online signing or tailored responses.
 
 4.1.  Zone transfers
@@ -330,14 +326,13 @@ Table of Contents
    number of zone transfers.  Or if a very large number of zones are
    sharing the same ANAME target, and that changes address, that may
    cause a great volume of zone transfers.  Guidance on dealing with
-   ANAME in large scale implementations is provided Appendix E.
+   ANAME in large scale implementations is provided Appendix D.
 
    Secondary servers rely on zone transfers to obtain sibling address
    records, just like the rest of the zone, and serve them in the usual
-   way (with Section 6 Additional section processing if they support
-   it).  A working DNS NOTIFY [RFC1996] setup is recommended to avoid
-   extra delays propagating updated sibling address records when they
-   change.
+   way (see Section 6).  A working DNS NOTIFY [RFC1996] setup is
+   recommended to avoid extra delays propagating updated sibling address
+   records when they change.
 
 4.2.  DNSSEC
 
@@ -378,7 +373,7 @@ Table of Contents
 5.  ANAME processing by resolvers
 
    When a resolver makes an address query in the usual way, it might
-   receive a response containing ANAME information in the additional
+   receive a response containing ANAME information in the Answer
    section, as described in Section 6.  This informs the resolver that
    it MAY resolve the ANAME target address records to get answers that
    are tailored to the resolver rather than the ANAME's primary master.
@@ -403,8 +398,7 @@ Table of Contents
    In these first two cases, the resolver MAY perform ANAME sibling
    address record substitution as described in Section 3.  Any edit
    performed in the final step is applied to the Answer section of the
-   response.  The resolver SHOULD then perform Additional section
-   processing as described in Section 6.
+   response.
 
    If the resolver's client is querying using an API such as
    "getaddrinfo" [RFC3493] that does not support DNSSEC validation, the
@@ -415,16 +409,17 @@ Table of Contents
    with DO=1, so they cannot rely on the recursive server to do ANAME
    substitution for them.)
 
-6.  Additional section processing
+6.  Query processing
 
 6.1.  Authoritative servers
 
 6.1.1.  Address queries
 
    When a server receives an address query for a name that has an ANAME
-   record, the response's Additional section MUST contain the ANAME
-   record.  The ANAME record indicates to a client that it might wish to
-   resolve the target address records itself.
+   record, the response's Answer section MUST contain the ANAME record,
+   in addition to the sibling address queries.  The ANAME record
+   indicates to a client that it might wish to resolve the target
+   address records itself.
 
 6.1.2.  ANAME queries
 
@@ -441,15 +436,14 @@ Table of Contents
 
 6.2.1.  Address queries
 
-   When a resolver receives an address query for a name that has an
-   ANAME record, the response's Additional section:
+   When a server receives an address query for a name that has an ANAME
+   record, the response's Answer section MUST contain the ANAME record,
+   in addition to the sibling address queries.
 
-   o  MUST contain the ANAME record;
-
-   o  MAY contain the target address records that match the query type
-      (or the corresponding proof of nonexistence), if they are
-      available in the cache and the target address RDATA fields differ
-      from the sibling address RRset.
+   The Additional section MAY contain the target address records that
+   match the query type (or the corresponding proof of nonexistence), if
+   they are available in the cache and the target address RDATA fields
+   differ from the sibling address RRset.
 
    An ANAME target MAY resolve to address records via a chain of CNAME
    and/or ANAME records; any CNAME/ANAME chain MUST be included when
@@ -525,6 +519,8 @@ Table of Contents
    o  Clarify when ANAME resolution may happen [#43].
 
    o  Revisit TTL considerations [#30, #34].
+
+   o  ANAME goes into the Answer section when QTYPE=A|AAAA [#62].
 
 10.2.  Version -03
 
@@ -797,21 +793,7 @@ C.5.  TTLs and zone transfers
    refresh timer.  More serious breakage can stretch them up to the zone
    expiry time.
 
-Appendix D.  Answer vs Additional sections
-
-   [MM: Discuss what should be in the additional section: ANAME makes
-   sense, but differs from CNAME logic (where the CNAME is in the answer
-   section).  Additional target records that match the query type in my
-   opinion should go in the answer section.  Additional target address
-   records that do not match the query type can go in the additional
-   section].
-
-   [TF: from experience with DNAME I think there's a risk of interop
-   problems if we put unexpected records in the answer section, so I
-   said everything should go in additional.  We'll expand this appendix
-   to explain the rationale.]
-
-Appendix E.  Alternative setups
+Appendix D.  Alternative setups
 
    If you are a large scale DNS provider, ANAME may introduce some
    scalability concerns.  A frequently changing ANAME target, or a ANAME
