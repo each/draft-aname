@@ -793,3 +793,27 @@ resolved in the DNS in the usual way, but if an ANAME implementation
 has special knowledge of the target it can short-cut the
 substitution process, or it can use clever tricks such as
 client-dependant answers to make the answer more optimal.
+
+# ANAME loops {#loops}
+
+The ANAME sibling address substitution algorithm in (#subst) poses a challenge
+of detecting a loop between two or more ANAME records. This is different from
+detecting a CNAME loop.
+
+A CNAME record loop can be easily detected as there is a single component in
+the recursive resolution process which keeps the complete state of each DNS
+query. This component is usually a recursive resolver. When the resolver
+encounters a CNAME, it attempts to follow the CNAME by sending an additional
+query for the name in the CNAME target to a designed authoritative server. If
+the response from the authoritative server contains another CNAME, the resolver
+compares the CNAME target with the previously encountered CNAMEs and if there
+is a match, the loop is detected and the processing of the initial query stops.
+
+Similar loops may exist for ANAME records as well and may demonstrate when
+performing ANAME sibling address substitution in an authoritative server and
+also in a resolver. If there are two ANAME records in the authority of
+different servers and pointing to each other then each server will attempt to
+resolve the ANAME target independently. There is no longer a single component
+keeping the complete processing state and as a result the loop cannot be
+detected and broken explicitly. Instead, the servers need to rely on secondary
+symptoms indicating presence of the loop such as resolution timeouts.
