@@ -372,7 +372,7 @@ rate of the zone, while the sibling address records' TTL determine how
 long a resolver may cache the address records. Thus, the end-to-end TTL
 (from the authoritative servers for the target address records to
 end-user DNS caches) is nearing twice the target address record TTL.
-There is a more extended discussion of TTL handling in {#ttls}.
+There is a more extended discussion of TTL handling in (#ttls).
 
 
 # ANAME processing by resolvers {#resolver}
