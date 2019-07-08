@@ -796,24 +796,25 @@ client-dependant answers to make the answer more optimal.
 
 # ANAME loops {#loops}
 
-The ANAME sibling address substitution algorithm in (#subst) poses a challenge
-of detecting a loop between two or more ANAME records. This is different from
-detecting a CNAME loop.
+The ANAME sibling address substitution algorithm in (#subst) poses a
+challenge of detecting a loop between two or more ANAME records. 
+Imagine this setup: two authoritative servers X and Y performing
+ANAME sibling address substition on the fly (i.e. they attempt to
+resolve the ANAME target when the client query arrives). If server
+X gets a query for FOO.TEST which is an ANAME to BAR.TEST, it will
+send a query to server Y for BAR.TEST which is an ANAME to FOO.TEST.
+Server Y will then start a new query to server X, which has no way
+to know that it is regarding the original FOO.TEST lookup.
 
-A CNAME record loop can be easily detected as there is a single component in
-the recursive resolution process which keeps the complete state of each DNS
-query. This component is usually a recursive resolver. When the resolver
-encounters a CNAME, it attempts to follow the CNAME by sending an additional
-query for the name in the CNAME target to a designed authoritative server. If
-the response from the authoritative server contains another CNAME, the resolver
-compares the CNAME target with the previously encountered CNAMEs and if there
-is a match, the loop is detected and the processing of the initial query stops.
+The only indicator of the presence of the loop in the described setup
+is the network timeout. Ideally we would recognize the loop explicitly
+based on the exchanged DNS messages.
 
-Similar loops may exist for ANAME records as well and may demonstrate when
-performing ANAME sibling address substitution in an authoritative server and
-also in a resolver. If there are two ANAME records in the authority of
-different servers and pointing to each other then each server will attempt to
-resolve the ANAME target independently. There is no longer a single component
-keeping the complete processing state and as a result the loop cannot be
-detected and broken explicitly. Instead, the servers need to rely on secondary
-symptoms indicating presence of the loop such as resolution timeouts.
+On-the-fly ANAME substitution is allowed and it's just the most
+obvious scenario where the problem can be demonstrated, but this loop
+can also be encountered in other situations.  The root cause is that
+when the server gets a query it doesn't know why and that the server
+always attempts to fully resolve the ANAME target before sending the
+response.
+
+TODO: Solve this issue [https://github.com/each/draft-aname/issues/45]
