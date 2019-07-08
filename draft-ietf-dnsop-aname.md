@@ -372,7 +372,7 @@ rate of the zone, while the sibling address records' TTL determine how
 long a resolver may cache the address records. Thus, the end-to-end TTL
 (from the authoritative servers for the target address records to
 end-user DNS caches) is nearing twice the target address record TTL.
-There is a more extended discussion of TTL handling in {#ttls}.
+There is a more extended discussion of TTL handling in (#ttls).
 
 
 # ANAME processing by resolvers {#resolver}
@@ -793,3 +793,28 @@ resolved in the DNS in the usual way, but if an ANAME implementation
 has special knowledge of the target it can short-cut the
 substitution process, or it can use clever tricks such as
 client-dependant answers to make the answer more optimal.
+
+# ANAME loops {#loops}
+
+The ANAME sibling address substitution algorithm in (#subst) poses a
+challenge of detecting a loop between two or more ANAME records. 
+Imagine this setup: two authoritative servers X and Y performing
+ANAME sibling address substition on the fly (i.e. they attempt to
+resolve the ANAME target when the client query arrives). If server
+X gets a query for FOO.TEST which is an ANAME to BAR.TEST, it will
+send a query to server Y for BAR.TEST which is an ANAME to FOO.TEST.
+Server Y will then start a new query to server X, which has no way
+to know that it is regarding the original FOO.TEST lookup.
+
+The only indicator of the presence of the loop in the described setup
+is the network timeout. Ideally we would recognize the loop explicitly
+based on the exchanged DNS messages.
+
+On-the-fly ANAME substitution is allowed and it's just the most
+obvious scenario where the problem can be demonstrated, but this loop
+can also be encountered in other situations.  The root cause is that
+when the server gets a query it doesn't know why and that the server
+always attempts to fully resolve the ANAME target before sending the
+response.
+
+TODO: Solve this issue [https://github.com/each/draft-aname/issues/45]
