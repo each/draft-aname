@@ -5,7 +5,7 @@ workgroup       = "DNS Operations"
 area            = "Operations and Management"
 submissiontype  = "IETF"
 ipr             = "trust200902"
-date            = 2019-06-21T14:21:00Z
+date            = 2019-07-08T16:42:00Z
 keyword         = [
     "DNS",
     "RR",
@@ -16,7 +16,7 @@ keyword         = [
 
 [seriesInfo]
 name            = "Internet-Draft"
-value           = "draft-ietf-dnsop-aname-03"
+value           = "draft-ietf-dnsop-aname-04"
 status          = "standard"
 
 [[author]]

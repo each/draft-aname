@@ -5,18 +5,18 @@
 DNS Operations                                                  T. Finch
 Internet-Draft                                   University of Cambridge
 Intended status: Standards Track                                 E. Hunt
-Expires: December 23, 2019                                           ISC
+Expires: January 9, 2020                                             ISC
                                                              P. van Dijk
                                                                 PowerDNS
                                                                  A. Eden
                                                                 DNSimple
                                                               W. Mekking
                                                                      ISC
-                                                           June 21, 2019
+                                                            July 8, 2019
 
 
                   Address-specific DNS aliases (ANAME)
-                       draft-ietf-dnsop-aname-03
+                       draft-ietf-dnsop-aname-04
 
 Abstract
 
@@ -41,7 +41,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on December 23, 2019.
+   This Internet-Draft will expire on January 9, 2020.
 
 Copyright Notice
 
@@ -102,6 +102,7 @@ Table of Contents
      D.1.  Reducing query volume
      D.2.  Zone transfer scalability
      D.3.  Tailored responses
+   Appendix E.  ANAME loops
    Authors' Addresses
 
 1.  Introduction
@@ -371,7 +372,7 @@ Table of Contents
    end TTL (from the authoritative servers for the target address
    records to end-user DNS caches) is nearing twice the target address
    record TTL.  There is a more extended discussion of TTL handling in
-   {#ttls}.
+   Appendix C.
 
 5.  ANAME processing by resolvers
 
@@ -525,6 +526,9 @@ Table of Contents
 
    o  ANAME goes into the Answer section when QTYPE=A|AAAA [#62].
 
+   o  Update alternative setups section with concerns (Brian Dickson)
+      [#68].
+
 10.2.  Version -03
 
    o  Grammar improvements (Olli Vanhoja)
@@ -625,6 +629,8 @@ Table of Contents
 11.3.  URIs
 
    [1] https://github.com/each/draft-aname
+
+   [2] https://github.com/each/draft-aname/issues/45
 
 Appendix A.  Implementation status
 
@@ -867,6 +873,32 @@ D.3.  Tailored responses
    has special knowledge of the target it can short-cut the substitution
    process, or it can use clever tricks such as client-dependant answers
    to make the answer more optimal.
+
+Appendix E.  ANAME loops
+
+   The ANAME sibling address substitution algorithm in Section 3 poses a
+   challenge of detecting a loop between two or more ANAME records.
+   Imagine this setup: two authoritative servers X and Y performing
+   ANAME sibling address substition on the fly (i.e. they attempt to
+   resolve the ANAME target when the client query arrives).  If server X
+   gets a query for FOO.TEST which is an ANAME to BAR.TEST, it will send
+   a query to server Y for BAR.TEST which is an ANAME to FOO.TEST.
+   Server Y will then start a new query to server X, which has no way to
+   know that it is regarding the original FOO.TEST lookup.
+
+   The only indicator of the presence of the loop in the described setup
+   is the network timeout.  Ideally we would recognize the loop
+   explicitly based on the exchanged DNS messages.
+
+   On-the-fly ANAME substitution is allowed and it's just the most
+   obvious scenario where the problem can be demonstrated, but this loop
+   can also be encountered in other situations.  The root cause is that
+   when the server gets a query it doesn't know why and that the server
+   always attempts to fully resolve the ANAME target before sending the
+   response.
+
+   TODO: Solve this issue [https://github.com/each/draft-aname/issues/45
+   [2]]
 
 Authors' Addresses
 
