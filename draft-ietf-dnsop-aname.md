@@ -529,6 +529,7 @@ The full history of this draft and its issue tracker can be found at
   * ANAME goes into the Answer section when QTYPE=A|AAAA [#62].
   * Update alternative setups section with concerns (Brian Dickson)
     [#68].
+  * Add section on ANAME loops (open issue [#45]).
 
 ## Version -03
 

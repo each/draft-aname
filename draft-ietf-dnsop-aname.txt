@@ -529,6 +529,8 @@ Table of Contents
    o  Update alternative setups section with concerns (Brian Dickson)
       [#68].
 
+   o  Add section on ANAME loops (open issue [#45]).
+
 10.2.  Version -03
 
    o  Grammar improvements (Olli Vanhoja)
